@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load static %}
+{% load html_tag %}
+{% load i18n %}
+
+{% block headerContent %}
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/home.css' %}" />
+    <script type="text/javascript" src="{% static 'assets/js/home.js' %}"></script>
+{% endblock headerContent %}
+
+{% block bodyContent %}
+<div class="wheel-start3" style='background-image: url("{% static 'images/bg7.jpg' %}");'>
+    <img src="{% static 'images/bg7.jpg' %}" alt="" class="wheel-img" style="display:none">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12 padd-lr0">
+                <div class="wheel-start3-body clearfix marg-lg-t255 marg-lg-b75 marg-sm-t190 marg-xs-b30 text-center">
+                    <div class="wheel-agency-image">
+                        <img src="{{ agence.agency_image.url }}" alt="{{ agence.agency_name }}" class="img-circle" style="width: 200px; height: 200px;">
+                    </div>
+                    <h3>{{ agence.agency_name }}</h3>
+                    <ol class="breadcrumb">
+                        <li><a href="#">{% translate "Home" %}</a></li>
+                        <li><a href="#">{% translate "Pages" %}</a></li>
+                        <li class="active">{% translate "Manage" %}</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="wheel-register-block">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 padd-r0">
+                <div class="wheel-register-sign marg-lg-t150 marg-lg-b150 marg-sm-t100 marg-sm-b100">
+                    <div class="wheel-header">
+                        <h5>{% translate "Manage your Agency" %}</h5>
+                        <h3>
+                            {% translate "Dashboard" %}
+                        </h3>
+                    </div>
+                    <div class="wheel-dashboard">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="wheel-dashboard-item">
+                                    <div class="wheel-dashboard-icon">
+                                        <img src="{% static 'images/car-icon.png' %}" alt="">
+                                    </div>
+                                    <h4>{% translate "Manage Cars" %}</h4>
+                                    <a href="" class="wheel-btn">{% translate "Go to Cars" %}</a>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="wheel-dashboard-item">
+                                    <div class="wheel-dashboard-icon">
+                                        <img src="{% static 'images/employee-icon.png' %}" alt="">
+                                    </div>
+                                    <h4>{% translate "Manage Employees" %}</h4>
+                                    <a href="" class="wheel-btn">{% translate "Go to Employees" %}</a>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="wheel-dashboard-item">
+                                    <div class="wheel-dashboard-icon">
+                                        <img src="{% static 'images/promotion-icon.png' %}" alt="">
+                                    </div>
+                                    <h4>{% translate "Manage Promotions" %}</h4>
+                                    <a href="" class="wheel-btn">{% translate "Go to Promotions" %}</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row marg-lg-t50">
+                            <div class="col-md-12">
+                                <div class="wheel-header">
+                                    <h5>{% translate "Agency Statistics" %}</h5>
+                                </div>
+                                <div class="wheel-statistics">
+                                    <div class="row">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row marg-lg-t50">
+                            <div class="col-md-12 text-center">
+                                <a href="" class="wheel-btn">{% translate "Edit Agency Details" %}</a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                                <h4>{{ agence.agency_name }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock bodyContent %}

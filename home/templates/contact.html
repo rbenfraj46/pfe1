@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% load static %}
+{% load html_tag %}
+{% load i18n %}
+{% load leaflet_tags %}
+
+
+
+
+{% block headerCSSContent %}{% leaflet_css %}
+	<style>
+	  .leaflet-container { height: 100%; }
+	</style>
+ {% endblock headerCSSContent %}
+
+{% block headerJSContent %}{% leaflet_js %}
+
+	<script>
+		var latlng = L.latLng({{ lat }}, {{ lon }});
+
+		window.addEventListener("map:init", function (event) {
+			var map = event.detail.map;
+			map.setView(latlng, 10);
+			L.marker(latlng).addTo(map);
+	  	});
+	</script>
+  </head>
+{% endblock headerJSContent %}
+
+{% block title %}{% translate "Contact US" %}{% endblock title %}
+
+{% block contact_active%}active-color{% endblock contact_active %}
+
+{% block bodyContent %}
+<div class="wheel-start3" style='background-image: url("/static/images/bg7.jpg");'>
+	<img src="{% static 'images/bg7.jpg' %}" alt="" class="wheel-img" style="display:none">
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-12 padd-lr0">
+				<div class="wheel-start3-body clearfix marg-lg-t255 marg-lg-b75 marg-sm-t190 marg-xs-b30">
+					<h3>{% translate "Get in touch" %}</h3>
+					<ol class="breadcrumb">
+						<li><a href="/">Home</a></li>
+						<li><a href="#"> pages </a></li>
+						<li class="active">Contact</li>
+					</ol>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="container">
+	<div class="row">
+		<div class="col-sm-3 col-xs-6">
+			<div class="wheel-contact-info text-center marg-lg-t150 marg-lg-b50 marg-xs-t50 marg-xs-b50">
+				<div class="wheel-contact-logo"><i class="fa fa-map-marker"></i></div>
+				<h4>{% translate "Address" %}</h4>
+				<span>121 King Street, Melbourne VIC 3000 Australia</span>
+			</div>
+		</div>
+		<div class="col-sm-3 col-xs-6">
+			<div class="wheel-contact-info text-center marg-lg-t150 marg-lg-b50 marg-xs-t50 marg-xs-b50">
+				<div class="wheel-contact-logo"><i class="fa fa-phone"></i></div>
+				<h4>{% translate "telePhone" %}</h4>
+				<a href=""><span>(+61)  3 8376 6284</span></a>
+				<a href=""><span>(+61)  3 8376 6284</span></a>
+			</div>
+		</div>
+		<div class="col-sm-3 col-xs-6">
+			<div class="wheel-contact-info text-center marg-lg-t150 marg-lg-b50 marg-xs-t50 marg-xs-b50">
+				<div class="wheel-contact-logo"><i class="fa fa-mobile"></i></div>
+				<h4>{% translate "Fax" %}</h4>
+				<a href=""><span>(+61)  3 8376 6284 </span></a>
+				<a href=""><span>(+61)  3 8376 6284 </span></a>
+			</div>
+		</div>
+		<div class="col-sm-3 col-xs-6">
+			<div class="wheel-contact-info text-center marg-lg-t150 marg-lg-b50 marg-xs-t50 marg-xs-b50">
+				<div class="wheel-contact-logo"><i class="fa fa-envelope"></i></div>
+				<h4>{% translate "Email" %}</h4>
+				<a href=""><span>info@wheelrental.com</span></a>
+				<a href=""><span>info@wheelrental.com</span></a>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- ////////////////////////////////// -->
+<div class="container">
+	<div class="row">
+		<div class="col-xs-12">
+			<div class="wheel-header text-center marg-lg-t85 marg-lg-b90  marg-md-t50">
+				<h5>{% translate "Say Hello! " %}</h5>
+				<h3>{% translate "Send Us a" %} <span>{% translate "Message" %}</span></h3>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-12 padd-lr0">
+			<div class="wheel-contact-form text-center marg-lg-b145">
+				<div class="form">
+					<form action="{% url 'contact' %}" method="post">
+						<div class="contact-input">
+							{{ form.name.errors }}
+							<input type="text" name="name" value="{{ form.name.value }}" placeholder="{% translate 'Your Name *' %}" required>
+						</div>
+						<div class="contact-input">
+							{{ form.email.errors }}
+							<input type="text" name="email" value="{{ form.email.value }}"placeholder="{% translate 'Your Email *' %}" required>
+						</div>
+						<div class="contact-input">
+							{{ form.phone.errors }}
+							<input type="text" name="phone" value="{{ form.phone.value }}" placeholder="{% translate 'Your Phone (Optional)' %}">
+						</div>
+						<div class="contact-input">
+							{{ form.subject.errors }}
+							<input type="text" name="subject" value="{{ form.subject.value }}" placeholder="{% translate 'Subject*' %}" required>
+						</div>
+						<div class="contact-textarea">
+							{{ form.message.errors }}
+							<textarea name="message" value="{{ form.message.value }}" placeholder="{% translate 'Message *' %}" required></textarea>
+						</div>
+						<button class="wheel-btn">{% translate "Submit Message" %}</button>
+						{% csrf_token %}
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- ///////////////////////////////////// -->
+<!-- <div class="container-fluid padd-lr0">
+	<div class="row">
+		<div class="col-xs-12 padd-lr0 bs4-fix-width-100">
+			<div class="wheel-map" data-lat="36.8325412" data-lng="10.3124463" data-marker="{% static 'images/marker.png' %}" data-zoom="10" data-style="style-1"></div>
+		</div>
+	</div>
+</div> -->
+
+<div class="container-fluid padd-lr0">
+	<div class="row">
+		<div class="col-xs-12 padd-lr0 bs4-fix-width-100">
+		{%  leaflet_map "main" %}
+		</div>
+	</div>
+</div>
+{% endblock bodyContent %}

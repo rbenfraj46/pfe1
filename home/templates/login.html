@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% load static %}
+{% load html_tag %}
+{% load i18n %}
+
+{% block headerCSSContent %}
+	<link rel="stylesheet" type="text/css" href="{% static 'assets/css/home.css' %}" />
+{% endblock headerCSSContent %}
+{% block headerJSContent %}
+	<script type="text/javascript" src="{% static 'assets/js/home.js' %}"></script>
+{% endblock headerJSContent %}
+{% block register_active%}active-color{% endblock register_active %}
+{% block bodyContent %}
+<div class="wheel-start3" style='background-image: url("/static/images/bg7.jpg");'>
+	<img src="{% static 'images/bg7.jpg' %}" alt="" class="wheel-img" style="display:none">
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-12 padd-lr0">
+				<div
+					class="wheel-start3-body clearfix marg-lg-t255 marg-lg-b75 marg-sm-t190 marg-xs-b30">
+					<h3>{{ action_name }}</h3>
+					<ol class="breadcrumb">
+						<li><a href="#">{% translate "Home" %}</a></li>
+						<li><a href="#">{% translate "pages" %}</a></li>
+						<li class="active">{% translate "Login" %}</li>
+					</ol>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="wheel-register-block">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-5 padd-l0">
+				<div
+					class="wheel-register-log marg-lg-t150 marg-lg-b150 marg-sm-t100 marg-sm-b100">
+					<div class="wheel-header">
+						<h5>{% translate "have an account? Log In" %}</h5>
+					</div>
+					<form id="login_form_id" action="{% url 'login' %}" method="post">
+						{% csrf_token %}
+						{% if form.captcha.errors %}
+						<div class="message_error">
+							{{ form.captcha.errors }}
+						</div>
+						{% endif %}
+						{% if form.captcha %}
+							{{ form.captcha }}
+						{% endif %}
+						<label for="userName" class="fa fa-user">
+							<input	type="text" name="username" id="userName" placeholder='{% translate "Username / Email" %}' required oninvalid="this.setCustomValidity('{% translate 'Please Enter your Username or Email' %}')" oninput="setCustomValidity('')"/>
+						</label>
+						<label for="userPass" class="fa fa-lock">
+							<input	type="password" name="password" id='userPass' placeholder='{% translate "Passsword" %}' required oninvalid="this.setCustomValidity('{% translate 'Please Enter your Password' %}')" oninput="setCustomValidity('')"/>
+						</label>
+						<button class="wheel-btn" onclick="add_next_prefix();">{% translate "Login Now" %}</button>
+						<label class="password-sing clearfix" for="input-val2">
+							<input type='checkbox' name="remember_me"id='input-val2'>
+							<span>{% translate "Keep me signed in" %}</span>
+							<a onclick="toggle_accordion('#reset_password_accordion');return false;"  href="#">{% translate "Forgot password?" %}</a>
+						</label>
+						{% if state %}
+						<div class="message_error">
+							{{ state }}
+						</div>
+						{% endif %}
+					</form>
+					<div class="wpc-accordion">
+						<div id="reset_password_accordion" class="panel-wrap{% if reset_msg %} active{% endif %}">
+							<div class="panel-content">
+								<form id="form_reset_password"action="{% url 'sendPassword' %}" method="post">
+									{% csrf_token %}
+									<h5>{% translate "Please enter your email:" %}</h5>
+									{{ form_send.errors.email }}
+									<label for="email" class="fa fa-envelope">
+										<input	type="text"
+												name="email"
+												value="{{ form_send.data.email }}"
+												placeholder='{% translate "Your Email Adddress" %}'
+												{% if form_send.errors.email %} class="input-error-text"{% endif %}
+												oninvalid="this.setCustomValidity('{% translate 'Please Enter your email' %}')"
+												oninput="setCustomValidity('')"/>
+									</label>
+									<button class="wheel-btn">{% translate "Reset Password" %}</button>
+									{% if reset_msg %}
+									<div class="message_error">
+										{{ reset_msg }}
+									</div>
+									{% endif %}
+								</form>
+							</div>
+						</div>
+					</div>
+
+					<div class="wheel-register-link">
+						<a href="#" class="wheel-btn-link wheel-bg11">{% translate "Sign in With Facebook" %}</a>
+						<a href="#" class="wheel-btn-link wheel-bg12">{% translate "Sign in With Twitter" %}</a>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-7 padd-r0">
+				<div
+					class="wheel-register-sign marg-lg-t150 marg-lg-b150 marg-sm-t100 marg-sm-b100">
+					<div class="wheel-header">
+						<h5>{% translate "Sign up Now" %}</h5>
+						<h3>
+							{% translate "Get" %} <span>{% translate "Registered" %}</span>
+						</h3>
+					</div>
+					<form id="form_registration" action="{% url 'registration' %}" method="post">
+						{% csrf_token %}
+						{{ form_reg.errors.first_name }}
+						<input type="text" name="first_name" value="{{ form_reg.data.first_name }}" placeholder="{% translate 'First Name' %}" required {% if form_reg.errors.first_name %} class="input-error-text"{% endif %}>
+
+						{{ form_reg.errors.last_name }}
+						<input type="text" name="last_name" value="{{ form_reg.data.last_name }}" placeholder="{% translate 'Last Name' %}" required {% if form_reg.errors.last_name %} class="input-error-text"{% endif %}>
+
+						{{ form_reg.errors.email }}
+						<input type="text" name="email" value="{{ form_reg.data.email }}" placeholder="{% translate 'Email' %}" required {% if form_reg.errors.email %} class="input-error-text"{% endif %}>
+
+						{{ form_reg.errors.username }}
+						<input type="text" name="username" value="{{ form_reg.data.username }}" placeholder="{% translate 'Username' %}" required {% if form_reg.errors.username %} class="input-error-text"{% endif %}>
+
+						{{ form_reg.errors.password1 }}
+						<input type="password" name="password1" value="{{ form_reg.data.password1 }}" placeholder="{% translate 'Password' %}" required {% if form_reg.errors.password1 %} class="input-error-text"{% endif %}>
+
+						{{ form_reg.errors.password2 }}
+						<input type="password" name="password2" value="{{ form_reg.data.password2 }}" placeholder="{% translate 'Confirm Password' %}" required {% if form_reg.errors.password2 %} class="input-error-text"{% endif %}>
+						<label for="accept_term">
+							{{ form_reg.errors.accept_term }}
+							<input type="checkbox" name="accept_term" id='accept_term' checked>
+							<span> {% translate "agree with the" %} </span> <a href="#">{% translate "Terms and Conditions" %}</a>
+						</label>
+						<button class="wheel-btn">{% translate "Sign Up" %}</button>
+					</form>
+					<div class="wheel-register-link">
+						<a href="#" class="wheel-btn-link wheel-bg11">{% translate "Register With Facebook" %}</a>
+						<a href="#" class="wheel-btn-link wheel-bg12">{% translate "Register With Twitter" %}</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /////////////////////////////// -->
+{% endblock bodyContent %}

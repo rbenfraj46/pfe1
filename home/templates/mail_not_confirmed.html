@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block headerContent %}
+	<link rel="stylesheet" type="text/css" href="{% static 'assets/css/home.css' %}" />
+{% endblock headerContent %}
+
+{% block title %} {% translate "Resend confirmation mail" %}{% endblock %}
+{% block bodyContent %}
+	<div class="wheel-start3" style='background-image: url("/static/images/bg7.jpg");'>
+		<img src="{% static 'images/bg7.jpg' %}" alt="" class="wheel-img" style="display:none">
+		<div class="container">
+			<div class="row">
+				<div class="col-xs-12 padd-lr0">
+					<div
+						class="wheel-start3-body clearfix marg-lg-t255 marg-lg-b75 marg-sm-t190 marg-xs-b30">
+						<h3>{% translate "Re Send confirmation mail" %}</h3>
+						<ol class="breadcrumb">
+							<li><a href="#">{% translate "Home" %}</a></li>
+							<li><a href="#">{% translate "pages" %}</a></li>
+							<li class="active">{% translate "Login" %}</li>
+						</ol>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="container padd-lr0">
+		<div class="row">
+			<div class="col-md-6 ">
+				<div class="wheel-info-img  marg-lg-t150 marg-lg-b150 marg-md-t100 marg-md-b100" style='background-image: url("{% static 'images/i7.png' %}"); height: 389px;'>
+					<img src="{% static 'images/bg7.jpg' %}" alt="" class="wheel-img" style="display: none;">
+				</div>
+			</div>
+			<div class="col-md-6 ">
+				<div class="wheel-info-text  marg-lg-t150 marg-lg-b150 marg-md-t100 marg-md-b100 marg-sm-t50 marg-sm-b50">
+					<div class="wheel-header">
+						<h5>{% translate "Welcome " %}<span>{{ user_rq.get_full_name }}</span></h5>
+						{% if user_rq %}
+						<h3>{% translate "Your Mail is " %} <span>{% translate "Unconfirmed" %}</span></h3>
+						{% else %}
+						<h3>{% translate "Your Request is " %} <span>{% translate "Ambiguious" %}</span></h3>
+						{% endif %}
+					</div>
+
+					{% if user_rq %}
+						<div class="wheel-register-log">
+						<p>{% translate "Verifying your mail:" %}</p>
+						<form id="form_change_password" method="post">
+							{% csrf_token %}
+
+							<ul>
+								<li><span>{% translate "Please check your mail inbox and hit the activation link." %}</span></li>
+								<li><span>{% translate " " %}</span></li>
+								<li><span>{% translate " " %}</span></li>
+								<li><span>{% translate " " %}</span></li>
+							</ul>
+							<p></p>
+
+							<button class="wheel-btn">{% translate "Re-Send Activation Mail" %}</button>
+						</form>
+						</div>
+					{% else %}
+						<ul>
+							<li><span>{% translate "Ambiguious Request !!"	%}</span></li>
+							<li><span>{% translate "Please hit home page."	%}</span></li>
+						</ul>
+						<a href="{% url 'index' %}" class="wheel-btn">{% translate "Home" %}</a>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}

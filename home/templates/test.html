@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load static %}
+{% load html_tag %}
+{% load i18n %}
+{% load leaflet_tags %}
+
+
+
+
+{% block headerCSSContent %}{% leaflet_css %}
+    <style>
+      .leaflet-container { height: 100%; }
+    </style>
+ {% endblock headerCSSContent %}
+
+{% block headerJSContent %}{% leaflet_js %}
+
+    <script>
+      var dataurl = '{% url "data" %}';
+
+      window.addEventListener("map:init", function (event) {
+        var map = event.detail.map;
+        // Download GeoJSON data with Ajax
+        fetch(dataurl)
+          .then(function(resp) {
+            return resp.json();
+          })
+          .then(function(data) {
+            L.geoJson(data, {
+              onEachFeature: function onEachFeature(feature, layer) {
+                var props = feature.properties;
+                var content = `<h3>${props.name}</h3>`;
+                layer.bindPopup(content);
+            }}).addTo(map);
+          });
+      });
+    </script>
+  </head>
+{% endblock headerJSContent %}
+
+
+
+{% block title %}{% translate "Test Page" %}{% endblock title %}
+
+{% block bodyContent %}
+<div class="wheel-start3" style='background-image: url("{% static 'images/bg7.jpg' %}");'>
+	<img src="{% static 'images/bg7.jpg' %}" alt="" class="wheel-img" style="display:none">
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-12 padd-lr0">
+				<div class="wheel-start3-body clearfix marg-lg-t255 marg-lg-b75 marg-sm-t190 marg-xs-b30">
+					<h3>{% translate "Get in touch" %}</h3>
+					<ol class="breadcrumb">
+						<li><a href="/">Home</a></li>
+						<li><a href="#"> pages </a></li>
+						<li class="active">Contact</li>
+					</ol>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="container-fluid padd-lr0">
+	<div class="row">
+		<div class="col-xs-12 padd-lr0 bs4-fix-width-100">
+    	{% leaflet_map "main" %}
+    	</div>
+	</div>
+</div>
+{% endblock bodyContent %}

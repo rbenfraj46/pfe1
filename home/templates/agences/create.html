@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% load static %}
+{% load html_tag %}
+{% load i18n %}
+{% load leaflet_tags %}
+
+
+{% block headerCSSContent %}{% leaflet_css %}
+	<style>
+	  .leaflet-container { height: 100%; width: 100%;}
+	  /*img.leaflet-tile.leaflet-tile-loaded {transform:none !important; height: 300px !important; width: 300px !important;}*/
+
+	</style>
+ {% endblock headerCSSContent %}
+
+{% block headerJSContent %}{% leaflet_js %}
+
+	<script>
+		var lon = {{ lon }};
+		var lat = {{ lat }};
+		var latlng = L.latLng(lat, lon);
+		var map, marker=null;
+
+		function onMapClick(e) {
+			if(marker){
+				map.removeLayer(marker);
+			}
+			marker = new L.marker(e.latlng).addTo(map);
+			$('#geolat').val(e.latlng.lat);
+			$('#geolong').val(e.latlng.lng);
+		}
+
+
+		window.addEventListener("map:init", function (event) {
+			map = event.detail.map;;
+
+			map.on('click', onMapClick);
+			//L.marker(latlng).addTo(map);
+	  	});
+		$('#GeoModal').on('show.bs.modal', function(){
+			  setTimeout(function() {
+				if ($('#city').val() != ""){
+					lat = city_data[$('#city').val()]['position'][1];
+					lon = city_data[$('#city').val()]['position'][0];
+				}
+				if ($('#geolat').val()) {
+					lat = $('#geolat').val();
+				}
+				if ($('#geolong').val()){
+					lon = $('#geolong').val();
+				}
+				latlng = L.latLng(lat, lon);
+				map.setView(latlng, 12);
+			    map.invalidateSize();
+			  }, 200);
+			 });
+	</script>
+  </head>
+{% endblock headerJSContent %}
+
+
+{% block bodyContent %}
+<!-- //////////////////////////////// -->
+<div class="wheel-start3">
+	<img src="{% static 'images/bg7.jpg' %}" alt="" class="wheel-img">
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-12 padd-lr0">
+				<div class="wheel-start3-body clearfix marg-lg-t255 marg-lg-b75 marg-sm-t190 marg-xs-b30">
+					<h3>Register your agency</h3>
+					<ol class="breadcrumb">
+						<li><a href="#">Home</a></li>
+						<li><a href="#"> pages </a></li>
+						<li class="active">Checkout</li>
+					</ol>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /////////////////////////////////// -->
+<div class="container">
+<form id="form_registration" action="{% url 'agences_register' %}" method="post" enctype="multipart/form-data">
+	<div class="row">
+		<div class="col-md-6 padd-lr0">
+			<div class="wheel-billing">
+				<div class="wheel-header marg-lg-t140 marg-lg-b50 marg-sm-t100">
+					<h5>Register your agency</h5>
+				</div>
+
+					{% csrf_token %}
+					<label class="question top_question" for="RESULT_TextField-1">{% translate 'Company Details :&nbsp;' %}<b class="icon_required" style="color:#F00">*</b></label>
+					{{ form_reg.errors.agency_name }}
+					<input type="text" required name="agency_name" value="{{ form_reg.data.agency_name }}" placeholder="{% translate 'Company Name' %}" required {% if form_reg.errors.agency_name %} class="input-error-text"{% endif %}>
+					{{ form_reg.errors.tax_number }}
+					<input type="text" required name="tax_number" value="{{ form_reg.data.tax_number }}" placeholder="{% translate 'TAX Number' %}" required {% if form_reg.errors.tax_number %} class="input-error-text"{% endif %}>
+					<div class="">
+						<input type="file" name="logo"
+							placeholder="{% translate 'Company Logo (Optional)' %}" size="25"
+							class="file_upload" accept=".jpg,.jpeg,.gif,.png"> <br>
+						<div class="file_upload_files"></div>
+						<div class="file_upload_info"></div>
+					</div>
+
+					<input type="text" name ="commercial_name" placeholder="{% translate 'Commercial Name (Optional)' %}">
+					{{ form_reg.errors.adress_agency }}
+					<input type="text" required name="adress_agency" value="{{ form_reg.data.adress_agency }}" placeholder="{% translate 'Buisness Adress' %}" required {% if form_reg.errors.adress_agency %} class="input-error-text"{% endif %}>
+
+					<div class="city-row">
+						<div class="city-element-width">
+							{{ form_reg.errors.governorate }}
+							<select class="selectpicker " required name="governorate" onChange="get_delegations(this.options[this.selectedIndex].value, '#delegation', '{% translate 'Delegation' %}')">
+								<option value="">{% translate "State / County" %}</option>
+								{% for state in states %}
+								<option value="{{ state.id }}">{{ state.name }}</option>
+								{% endfor %}
+							</select>
+						</div>
+						<div class="city-element-width">
+							{{ form_reg.errors.delegation }}
+							<select class="selectpicker" required id="delegation" name="delegation" onChange="get_cities(this.options[this.selectedIndex].value, '#city', '{% translate 'City' %}')" disabled>
+								<option value="">{% translate "Delegation" %}</option>
+							</select>
+						</div>
+						<div class="city-element-width">
+							{{ form_reg.errors.city }}
+							<select class="selectpicker" required id="city" name="city" onChange="onCityChange(this.options[this.selectedIndex].value);" disabled>
+								<option value="">{% translate "City" %}</option>
+							</select>
+						</div>
+					</div>
+					<div class="zipcode-row">
+					{{ form_reg.errors.zipcode }}
+					<input type="text" required name="zipcode" id="zipcode" placeholder="ZIP / Postcode" class="wheel-half-width pull-left zipcode" >
+					<div class="map-marker-logo wheel-half-width pull-right marg-r0" data-bs-toggle="modal" data-bs-target="#GeoModal"><i class="fa fa-map-marker"></i></div>
+					</div>
+					<input type="hidden" value="" name="lon" id="geolong">
+					<input type="hidden" value="" name="lat" id="geolat">
+					<label class="question top_question" for="RESULT_TextField-1">{% translate 'Contact Details :&nbsp;' %}<b class="icon_required" style="color:#F00">*</b></label>
+					<div class="zipcode-row">
+					<input type="text" required name="ceo_name" placeholder="{% translate 'CEO Name...' %}" class="wheel-half-width pull-left ">
+					<input type="text" required name="ceo_phone_number" placeholder="{% translate 'CEO Phone number' %}" class="wheel-half-width pull-right marg-r0">
+					</div>
+					{{ form_reg.errors.email }}
+					<input type="text" required name="email" placeholder="Email Address ">
+					{{ form_reg.errors.phone_number }}
+					<input type="text" required name="phone_number" value="{{ form_reg.data.phone_number }}" placeholder="{% translate 'Agence Phone number' %}" required {% if form_reg.errors.phone_number %} class="input-error-text"{% endif %}>
+
+
+			</div>
+		</div>
+		<div class="col-md-6 padd-lr0">
+			<div class="wheel-order marg-lg-t150 marg-lg-b150 marg-sm-b100 marg-sm-t100">
+				<div class="wheel-search-form clearfix">
+					<input type="text" placeholder="Referal Code">
+					<button class="">Apply</button>
+				</div>
+				<div class="wheel-order-price marg-lg-t30 marg-lg-b30">
+					<textarea placeholder="Image here "></textarea>
+				</div>
+				<div class="wheel-payment marg-lg-t60 marg-lg-b30">
+					<div class="wheel-header ">
+						<h5>Confirm that</h5>
+					</div>
+					<!-- <form action="#"> -->
+						<input type="radio" id='r1' name='payment'>
+						<label for="r1"><i></i>
+						<span>Regle 1</span>
+						</label>
+						<p>Sed non mauris vitae erat consequat auctor eu in elit. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Mauris in erat justo. Nullam ac urna eu felis dapibus condimentum sit  </p>
+						<input type="radio" id='r2' name='payment'>
+						<label for="r2"><i></i>
+						<span>Regle 2</span>
+						</label>
+						<input type="radio" id='r3' name='payment'>
+						<label for="r3"><i></i>
+						<span>Regle 3</span>
+						</label>
+						{{ form_reg.errors.accept_term }}
+						<label for="input-val10" class="wheel-agree">
+						<input type="checkbox" name="accept_term" id='input-val10'>
+						<span>I agree with the</span>
+						<a href=""> Terms and Conditions</a>
+						</label>
+						<button>Confirm registration</button>
+					<!-- </form> -->
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+</div>
+
+<div class="modal fade" id="GeoModal" tabindex="-1" aria-labelledby="GeoModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">{% translate 'Set Your Location '%}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+       {%  leaflet_map "main" %}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" >{% translate 'Cancel'%}</button>
+        <button type="button" class="btn btn-primary" onclick="setLocationMap(marker);">{% translate 'Done'%}</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /////////////////////////////// -->
+{% endblock bodyContent %}

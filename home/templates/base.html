@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+{% load i18n %}
+{% load static %}
+{% load html_tag %}
+{% translate "Tunisian Rent Car" as title %}
+{% translate "The first tunisian rent car website" as description %}
+{% get_available_languages as LANGUAGES %}
+{% get_current_language as current_language %}
+{% get_language_info_list for LANGUAGES as languages %}
+
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="MELLITI Alaeddine">
+		<meta name="description" content="{% block description %}{{ description }}{% endblock description %}">
+		<meta name="keywords" content="{% block keywords %}{% translate 'tunisia, tunisian, car, rent, rental' %}{% endblock keywords %}">
+		<title>{% block title %}{{ title }}{% endblock title %}</title>
+		<link rel="shortcut icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+		<script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
+
+		<!-- sixth block end -->
+		<!-- reset css -->
+		<link rel="stylesheet" type="text/css" href="{% static 'assets/css/css_reset.css' %}">
+		<!-- bootstrap -->
+		{%if debug %}
+			<link rel="stylesheet" type="text/css" href="{% static 'assets/css/bootstrap.css' %}">
+			<link rel="stylesheet" type="text/css" href="{% static 'assets/css/bootstrap-select.css' %}">
+			<link rel="stylesheet" type="text/css" href="{% static 'assets/css/toastr.css' %}">
+			<!-- <link rel="stylesheet" type="text/css" href="{% static 'assets/css/swiper-bundle.css' %}"> -->
+		{% else %}
+		 	<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">	-->
+			<link rel="stylesheet" type="text/css" href="{% static 'assets/css/bootstrap.min.css' %}">
+			<link rel="stylesheet" type="text/css" href="{% static 'assets/css/jquery.datetimepicker.min.css' %}">
+			<link rel="stylesheet" type="text/css" href="{% static 'assets/css/bootstrap-select.min.css' %}">
+			<!-- <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css"> -->
+			<link rel="stylesheet" type="text/css" href="{% static 'assets/css/toastr.min.css' %}">
+			<!-- <link rel="stylesheet" type="text/css" href="{% static 'assets/css/swiper-bundle.min.css' %}">  -->
+		{% endif %}
+
+		<link rel="stylesheet" type="text/css" href="{% static 'assets/css/jquery.datetimepicker.min.css' %}">
+		<!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/i18n/defaults-*.min.js"></script> -->
+		<!-- preload -->
+		<link rel="stylesheet" type="text/css" href="{% static 'assets/css/loaders.min.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'assets/css/index.css' %}">
+		<!--[if lt IE 9]>
+		<script src="{% static 'assets/js/html5shiv.min.js' %}"></script>
+		<script src="{% static 'assets/js/respond.min.js' %}"></script>
+		<![endif]-->
+		{% block headerContent %}{% endblock headerContent %}
+		{% block headerCSSContent %}{% endblock headerCSSContent %}
+	</head>
+	<body class="{% block classBody %}{% endblock classBody %}">
+		<!-- MAIN -->
+		<div class="load-wrap">
+			<div class="wheel-load">
+				<img src="{% static 'images/loader.gif' %}" alt="" class="image">
+			</div>
+		</div>
+		<div class="wheel-menu-wrap ">
+			<div class="container-fluid wheel-bg1 fix-top-bar">
+				<div class="row">
+					<div class="col-sm-3">
+						<div class="wheel-logo">
+							<a href="/"><img src="{% static 'images/logo.png' %}" alt=""></a>
+						</div>
+					</div>
+					<div class="col-sm-9 col-xs-12 padd-lr0 bs4-fix-height-50">
+						<div class="wheel-top-menu clearfix">
+							<div class="wheel-top-menu-info">
+								<div class="top-menu-item"><a href="callto:+21652220140"><i class="fa fa-phone"></i><span>(+216) 52 220 140</span></a></div>
+								<div class="top-menu-item"><a href="mailto:melliti.aladin@gmail.com"><i class="fa fa-envelope"></i><span>melliti.aladin@gmail.com</span></a></div>
+							</div>
+							<div class="wheel-top-menu-log">
+								<div class="top-menu-item dropdown wheel-user-ico">
+										<button class="btn btn-secondary dropdown-toggle" type="button"  id="dropdown_login_btn" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+										{% if user.is_authenticated %}
+											{{ user.get_full_name }}
+										{% else %}
+											{% translate "Account" %}
+										{% endif %}
+										<span class="caret"></span>
+										</button>
+										<ul class="dropdown-menu" aria-labelledby="dropdown_login_btn">
+											{% if user.is_authenticated %}
+												<li><a class="dropdown-item" href="{% url 'login' %}">{% translate "Profile" %}</a></li>
+												<li><a class="dropdown-item" href="{% url 'password_change' %}">{% translate "Change Password" %}</a></li>
+												<li><a class="dropdown-item" href="{% url 'logout' %}">{% translate "Log Out" %}</a></li>
+											{% else %}
+												<li><a class="dropdown-item" href="{% url 'login' %}">{% translate "Login" %}</a></li>
+												<li><a class="dropdown-item" href="{% url 'registration' %}">{% translate "Register" %}</a></li>
+											{% endif %}
+										</ul>
+								</div>
+
+ 								<div class="top-menu-item dropdown wheel-lang-ico">
+										<button class="btn btn-secondary dropdown-toggle" type="button" aria-haspopup="true" data-bs-toggle="dropdown" aria-expanded="false">
+										{{ current_language|title }}
+										<span class="caret"></span>
+										</button>
+											<ul class="dropdown-menu">
+												{% for language in languages %}
+													<li><a class="dropdown-item" href="#" onclick="change_language('{{ language.code }}')">{{ language.name_local }} ({{ language.code }})</a></li>
+												{% endfor %}
+											</ul>
+										<form id="language_form_id" action="{% url 'set_language' %}" method="post">
+											{% csrf_token %}
+											<input id="language_form_id_next" name="next" type="hidden" value="">
+											<input id="language_form_id_language" name="language" type="hidden" value="">
+										</form>
+								</div>
+
+								<div class="top-menu-item dropdown">
+										<button class="btn btn-secondary dropdown-toggle" type="button"  data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+										{{ devise.name }}
+										<span class="caret"></span>
+										</button>
+										<ul class="dropdown-menu">
+											{% for devise_item in devises %}
+												<li><a class="dropdown-item" href="#" onclick="change_devise('{{ devise_item.name }}')">{{ devise_item.name }}</a></li>
+											{% endfor %}
+										</ul>
+										<form id="devise_form_id" action="{% url 'set_devise' %}" method="post">
+											{% csrf_token %}
+											<input id="devise_id" name="devise" type="hidden" value="">
+											<input id="next_devise_id" name="next" type="hidden" value="">
+										</form>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-sm-9 ms-auto">
+						<div class="wheel-navigation fix-top-mg">
+							<nav id="dl-menu">
+								<!-- class="dl-menu" -->
+								<ul class="main-menu dl-menu">
+									<li class="menu-item   current-menu-parent menu-item-has-children {% block index_active%}{% endblock index_active %}">
+										<a href="{% url 'index' %}">Home</a>
+										<ul class="sub-menu dl-submenu">
+											<li class="menu-item current-menu-item">
+												<a href="/">Home page 01</a>
+											</li>
+											<li class="menu-item current-menu-item">
+												<a href="index2.html">Home page 02</a>
+											</li>
+										</ul>
+									</li>
+									<li class="menu-item current-menu-parent menu-item-has-children  ">
+										<a href="#"> Agences </a>
+										<!--class=" dl-submenu "-->
+										<ul class="sub-menu dl-submenu">
+											<li class="menu-item current-menu-item">
+												<a href="car-list-grid.html">Car Listing - Grid View</a>
+											</li>
+											<li class="menu-item current-menu-item">
+												<a href="car-list-3col2.html">Car Listing - List View</a>
+											</li>
+											<li class="menu-item current-menu-item">
+												<a href="car-listing-details.html">car listing details</a>
+											</li>
+										</ul>
+									</li>
+									<li class="menu-item   ">
+										<a href="reservation1.html">Reservation</a>
+									</li>
+									<li class="menu-item menu-item-has-children">
+										<a href="#">Page</a>
+										<ul class="sub-menu">
+											{% if not user.is_authenticated %}
+											<li class="menu-item {% block register_active%}{% endblock register_active %}"><a href="{% url 'login' %}">Register</a></li>
+											{% endif %}
+											<li class="menu-item "><a href="checkout.html">Ceckout</a></li>
+											<li class="menu-item "><a href="about.html">About</a></li>
+											<li class="menu-item "><a href="shopping.html">shopping cart</a></li>
+											<li class="menu-item menu-item-has-children">
+												<a href="#">Level 2</a>
+												<ul class="sub-menu">
+													<li class="menu-item"><a href="#">Level 3</a></li>
+													<li class="menu-item"><a href="#">Level 3</a></li>
+													<li class="menu-item"><a href="#">Level 3</a></li>
+												</ul>
+											</li>
+										</ul>
+									</li>
+									<li class="menu-item {% block contact_active%}{% endblock contact_active %}">
+										<a href="{% url 'contact' %}">{% translate "Contact" %}</a>
+									</li>
+
+								</ul>
+								<div class="nav-menu-icon"><i></i></div>
+							</nav>
+							{% if user.is_authenticated %}
+								{% if user.agences_set.exists %}
+									{% with agence=user.agences_set.first %}
+										{% if agence.is_active %}
+											<a href="{% url 'manage_agence' %}" class="wheel-cheader-but">{% translate "Manage your Agency" %}</a>
+										{% else %}
+											<a href="{% url 'pending_agence' %}" class="wheel-cheader-but">{% translate "Pending Approval" %}</a>
+										{% endif %}
+									{% endwith %}
+								{% else %}
+									<a href="{% url 'agences_register' %}" class="wheel-cheader-but">{% translate "Register your Agency" %}</a>
+								{% endif %}
+							{% endif %}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		{% block bodyContent%}{% endblock bodyContent %}
+		{%if user and not user.has_newsletter_subscription %}
+		<div class="wheel-subscribe wheel-bg2">
+			<div class="container ">
+				<div class="row">
+					<div class="col-md-6 padd-lr0">
+						<div class="wheel-header">
+							<h5>Newsletter Signup </h5>
+							<h3>Subscribe & get up to<span> 20% </span> Off</h3>
+						</div>
+					</div>
+					<div class="col-md-6 padd-lr0">
+						<form action="{% url 'newsletter' %}" method="POST">
+							<input type="text" placeholder="Your Email Adddress" name="email" value="{{ user.email }}" disabled>
+							{% csrf_token %}
+							<button class="wheel-btn">Subscribe</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+		{% endif %}
+		<!-- FOOTER -->
+		<!-- ///////////////// -->
+		<footer class="wheel-footer">
+			<img src="{% static 'images/bg4.jpg' %}" alt="" class="wheel-img">
+			<div class="container">
+				<div class="row">
+					<div class="col-md-3  col-sm-6  padd-lr0">
+						<div class="wheel-address">
+							<div class="wheel-footer-logo"><a href=""><img src="{% static 'images/logo2.png' %}" alt=""></a></div>
+							<ul>
+								<li><span><i class="fa fa-map-marker"></i>121 King Street, Melbourne <br>
+									VIC 3000, Australia  </span>
+								</li>
+								<li><a href=""><span><i class="fa fa-phone"></i> +61 3 8376 6284</span></a></li>
+								<li><a href=""><span><i class="fa fa-envelope"></i>contact@wheel-rental.com</span></a></li>
+							</ul>
+							<div class="wheel-soc">
+								<a href="" class="fa fa-twitter"></a>
+								<a href="" class="fa fa-facebook"></a>
+								<a href="" class="fa fa-linkedin"></a>
+								<a href="" class="fa fa-instagram"></a>
+								<a href="" class="fa fa-share-alt"></a>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-3 col-sm-6  padd-lr0">
+						<div class="wheel-footer-item">
+							<h3>Useful Links</h3>
+							<ul>
+								<li><a href="" class="">About us</a></li>
+								<li><a href="" class="">Customer Service</a></li>
+								<li><a href="{% url 'contact' %}" class="">Contact Us</a></li>
+								<li><a href="" class="">Safety Recall</a></li>
+								<li><a href="" class="">Privacy policy</a></li>
+								<li><a href="" class="">Site Map</a></li>
+								<li><a href="" class="">Terms & condition</a></li>
+							</ul>
+						</div>
+					</div>
+					<div class="col-md-2 col-sm-6  padd-lr0">
+						<div class="wheel-footer-item ">
+							<h3>Vehicles</h3>
+							<ul>
+								<li><a href="" class="">Exotic Cars</a></li>
+								<li><a href="" class="">SUVs</a></li>
+								<li><a href="" class="">Trucks</a></li>
+								<li><a href="" class="">Mini Vans</a></li>
+								<li><a href="" class="">Moving Trucks</a></li>
+								<li><a href="" class="">Vans</a></li>
+								<li><a href="" class="">RVs</a></li>
+							</ul>
+						</div>
+					</div>
+					<div class="col-md-4 col-sm-6 padd-lr0">
+						<div class="wheel-footer-gallery">
+							<h3>Photo Gallery</h3>
+							<div class="  clearfix">
+								<div class="wheel-footer-galery-item"><a href=""><img src="{% static 'images/i11.jpg' %}" alt=""></a></div>
+								<div class="wheel-footer-galery-item"><a href=""><img src="{% static 'images/i12.jpg' %}" alt=""></a></div>
+								<div class="wheel-footer-galery-item"><a href=""><img src="{% static 'images/i13.jpg' %}" alt=""></a></div>
+								<div class="wheel-footer-galery-item"><a href=""><img src="{% static 'images/i14.jpg' %}" alt=""></a></div>
+								<div class="wheel-footer-galery-item"><a href=""><img src="{% static 'images/i15.jpg' %}" alt=""></a></div>
+								<div class="wheel-footer-galery-item"><a href=""><img src="{% static 'images/i16.jpg' %}" alt=""></a></div>
+								<div class="wheel-footer-galery-item"><a href=""><img src="{% static 'images/i17.jpg' %}" alt=""></a></div>
+								<div class="wheel-footer-galery-item"><a href=""><img src="{% static 'images/i18.jpg' %}" alt=""></a></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</footer>
+		<div class="wheel-footer-info wheel-bg6">
+			<div class="container">
+				<div class="row">
+					<div class="col-lg-8 col-sm-6  padd-lr0"><span>&#169; WHEEL 2016 | Designed with Love By bigpsfan</span></div>
+					<div class="col-lg-4 col-sm-6 padd-lr0">
+						<ul>
+							<li><a href="">Home</a></li>
+							<li><a href=""> Pages</a></li>
+							<li><a href=""> Listings</a></li>
+							<li><a href=""> Reservation</a></li>
+							<li><a href="">Location</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+	<!-- Scripts project -->
+		{%if debug %}
+			<script type="text/javascript" src="{% static 'assets/js/jquery-3.6.0.js' %}"></script>
+			<script type="text/javascript" src="{% static 'assets/js/popper.js' %}"></script>
+			<script type="text/javascript" src="{% static 'assets/js/bootstrap.js' %}"></script>
+			<script type="text/javascript" src="{% static 'assets/js/bootstrap-select.js' %}"></script>
+			<script type="text/javascript" src="{% static 'assets/js/toastr.min.js' %}"></script>
+			<!-- <script type="text/javascript" src="{% static 'assets/js/swiper-bundle.js' %}"></script> -->
+		{% else %}
+			<!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script> -->
+			<script type="text/javascript" src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
+			<!-- <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script> -->
+			<script type="text/javascript" src="{% static 'assets/js/popper.min.js' %}"></script>
+			<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script> -->
+			<script type="text/javascript" src="{% static 'assets/js/bootstrap.min.js' %}"></script>
+			<script type="text/javascript" src="{% static 'assets/js/bootstrap-select.min.js' %}"></script>
+			<!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"></script> -->
+			<script type="text/javascript" src="{% static 'assets/js/toastr.min.js' %}"></script>
+			<!-- <script type="text/javascript" src="{% static 'assets/js/swiper-bundle.min.js' %}"></script> -->
+		{% endif %}
+
+		<!-- count -->
+		<script type="text/javascript" src="{% static 'assets/js/jquery.countTo.js' %}"></script>
+		<!-- google maps -->
+		<!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBt5tJTim4lOO3ojbGARhPd1Z3O3CnE-C8" type="text/javascript"></script> -->
+		<!-- swiper -->
+		<script type="text/javascript" src="{% static 'assets/js/idangerous.swiper.min.js' %}"></script>
+
+		<script type="text/javascript" src="{% static 'assets/js/equalHeightsPlugin.js' %}"></script>
+		<script type="text/javascript" src="{% static 'assets/js/jquery.datetimepicker.full.min.js' %}"></script>
+		<!-- Latest compiled and minified JavaScript -->
+		<script type="text/javascript" src="{% static 'assets/js/index.js' %}"></script>
+		<script type="text/javascript" src="{% static 'assets/js/common.js' %}"></script>
+		<script type="text/javascript" src="{% static 'assets/js/utils.js' %}"></script>
+		<!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/i18n/defaults-*.min.js"></script> -->
+
+		<!-- Messages -->
+		{% if messages %}
+			{% for message in messages %}
+				{% if message.tags == 'success'%}
+					<script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', "{% translate 'Success' %}", {timeOut: 10000, closeButton: true});</script>
+				 {% elif message.tags == 'info' %}
+					<script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', "{% translate 'Info' %}", {timeOut: 10000, closeButton: true});</script>
+				{% elif message.tags == 'warning' %}
+					<script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', "{% translate 'Warning' %}", {timeOut: 10000, closeButton: true});</script>
+				{% elif message.tags == 'error' %}
+					<script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', "{% translate 'Error' %}", {timeOut: 10000, closeButton: true});</script>
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+		<!-- End Messages -->
+	{% block headerJSContent %}{% endblock headerJSContent %}
+	</body>
+</html>

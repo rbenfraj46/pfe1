@@ -1,0 +1,89 @@
+.captcha-refresh{
+	margin-bottom: 8px;
+	margin-left: 8px;
+	width: 30px;
+	height: 30px;
+}
+
+.captcha-audio{
+	margin-bottom: 8px;
+	margin-left: 8px;
+	/* width: 30px; */
+	height: 30px;
+}
+
+.message_error{
+	width: 100%;
+	font-size: larger;
+	border: 1px solid;
+	margin: 10px 0px;
+	padding: 15px 10px 15px 50px;
+	background-repeat: no-repeat;
+	background-position: 10px center;
+	color: #D8000C;
+	background-color: #FFBABA;
+	background-image: url('/static/images/error.png');
+}
+  
+  .bootstrap-select .dropdown-toggle:focus {
+	outline: none; }
+
+#form_registration ul.errorlist{
+	color: #D8000C;
+	font-size: larger;
+	/*width: 42%;*/
+	margin-bottom: 0;
+}
+
+#form_reset_password ul.errorlist{
+	color: #D8000C;
+	font-size: larger;
+	/*width: 42%;*/
+	margin-bottom: 0;
+}
+
+#form_reset_password label > input {
+	border: 2px solid #f5f0f1;
+}
+
+#form_registration ul.errorlist.right-error-msg {
+	/*color : green;*/
+}
+
+.input-error-text {
+	border-radius: .25rem;
+	border: 2px solid #ff7043 !important;
+}
+
+
+@media only screen and (max-width: 768px){
+	img.captcha {
+		width: 60%;
+		height: 40px;
+		padding-bottom: 5px;
+	}
+	.captcha-audio {
+		padding-right: 8px;
+	}
+	#form_change_password {
+		text-align: left;
+	}
+}
+@media (min-width: 768px){
+	img.captcha {
+		width: 80%;
+		height: 40px;
+		margin-bottom: 8px;
+		margin-left: 4px;
+	}
+	.captcha-refresh {
+		margin-left: 4px;
+	}
+	.wheel-register-sign input:nth-child(2n) {
+		margin-right: 2%;
+	}
+	.wheel-register-sign input {
+		width: 48%;
+	}
+	
+}

@@ -1,0 +1,476 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-01-22 23:02+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: carrent/settings.py:156
+msgid "English"
+msgstr ""
+
+#: carrent/settings.py:157
+msgid "French"
+msgstr ""
+
+#: carrent/settings.py:158
+msgid "Arabic"
+msgstr ""
+
+#: home/forms/login_forms.py:20 home/forms/registration_forms.py:19
+#: home/templates/login.html:118
+msgid "Email"
+msgstr ""
+
+#: home/forms/login_forms.py:25 home/forms/registration_forms.py:26
+msgid "The field "
+msgstr ""
+
+#: home/forms/login_forms.py:25 home/forms/registration_forms.py:26
+msgid " is required"
+msgstr ""
+
+#: home/forms/registration_forms.py:17 home/templates/login.html:121
+msgid "Username"
+msgstr ""
+
+#: home/forms/registration_forms.py:18
+msgid "Accept Terms"
+msgstr ""
+
+#: home/forms/registration_forms.py:20 home/templates/login.html:112
+msgid "First Name"
+msgstr ""
+
+#: home/forms/registration_forms.py:21 home/templates/login.html:115
+msgid "Last Name"
+msgstr ""
+
+#: home/forms/registration_forms.py:48
+msgid "This email is already in use."
+msgstr ""
+
+#: home/mail_util.py:24
+msgid "Activate your account."
+msgstr ""
+
+#: home/mail_util.py:37
+msgid "Password Reset Requested"
+msgstr ""
+
+#: home/models.py:8
+msgid "email address"
+msgstr ""
+
+#: home/templates/base.html:5
+msgid "Tunisian Rent Car"
+msgstr ""
+
+#: home/templates/base.html:6
+msgid "The first tunisian rent car website"
+msgstr ""
+
+#: home/templates/base.html:16
+msgid "tunisia, tunisian, car, rent, rental"
+msgstr ""
+
+#: home/templates/base.html:92
+msgid "Account"
+msgstr ""
+
+#: home/templates/base.html:98
+msgid "Profile"
+msgstr ""
+
+#: home/templates/base.html:99 home/templates/change_password.html:71
+msgid "Change Password"
+msgstr ""
+
+#: home/templates/base.html:100
+msgid "Log Out"
+msgstr ""
+
+#: home/templates/base.html:102 home/templates/change_password.html:22
+#: home/templates/login.html:23 home/templates/mail_not_confirmed.html:22
+#: home/templates/password_reset_confirm.html:22
+#: home/views/connection_views.py:48 home/views/connection_views.py:103
+#: home/views/connection_views.py:127 home/views/registration.py:50
+msgid "Login"
+msgstr ""
+
+#: home/templates/base.html:103 home/views/registration.py:33
+msgid "Register"
+msgstr ""
+
+#: home/templates/base.html:111
+msgid "Eng"
+msgstr ""
+
+#: home/templates/base.html:115
+msgid "Brazil"
+msgstr ""
+
+#: home/templates/base.html:116
+msgid "France"
+msgstr ""
+
+#: home/templates/base.html:117
+msgid "Germany"
+msgstr ""
+
+#: home/templates/base.html:118
+msgid "India"
+msgstr ""
+
+#: home/templates/base.html:119
+msgid "Japan"
+msgstr ""
+
+#: home/templates/base.html:120
+msgid "Serbia"
+msgstr ""
+
+#: home/templates/change_password.html:9 home/templates/change_password.html:18
+msgid "Change your password"
+msgstr ""
+
+#: home/templates/change_password.html:20 home/templates/login.html:21
+#: home/templates/mail_not_confirmed.html:20
+#: home/templates/mail_not_confirmed.html:69
+#: home/templates/password_reset_confirm.html:20
+#: home/templates/password_reset_confirm.html:72
+msgid "Home"
+msgstr ""
+
+#: home/templates/change_password.html:21 home/templates/login.html:22
+#: home/templates/mail_not_confirmed.html:21
+#: home/templates/password_reset_confirm.html:21
+msgid "pages"
+msgstr ""
+
+#: home/templates/change_password.html:39
+#: home/templates/mail_not_confirmed.html:39
+#: home/templates/password_reset_confirm.html:39
+msgid "Welcome "
+msgstr ""
+
+#: home/templates/change_password.html:40
+msgid "Change your"
+msgstr ""
+
+#: home/templates/change_password.html:40
+#: home/templates/password_reset_confirm.html:40
+msgid "password"
+msgstr ""
+
+#: home/templates/change_password.html:46
+msgid "Please enter your old password, for security’s sake:"
+msgstr ""
+
+#: home/templates/change_password.html:49
+msgid "Old Password"
+msgstr ""
+
+#: home/templates/change_password.html:49
+msgid "Please Enter your Old Password"
+msgstr ""
+
+#: home/templates/change_password.html:52
+#: home/templates/password_reset_confirm.html:45
+msgid "Please enter your new password twice:"
+msgstr ""
+
+#: home/templates/change_password.html:54
+#: home/templates/password_reset_confirm.html:50
+msgid "Your password can’t be too similar to your other personal information."
+msgstr ""
+
+#: home/templates/change_password.html:55
+#: home/templates/password_reset_confirm.html:51
+msgid "Your password must contain at least 8 characters."
+msgstr ""
+
+#: home/templates/change_password.html:56
+#: home/templates/password_reset_confirm.html:52
+msgid "Your password can’t be a commonly used password."
+msgstr ""
+
+#: home/templates/change_password.html:57
+#: home/templates/password_reset_confirm.html:53
+msgid "Your password can’t be entirely numeric."
+msgstr ""
+
+#: home/templates/change_password.html:63
+#: home/templates/password_reset_confirm.html:59
+msgid "New Passsword"
+msgstr ""
+
+#: home/templates/change_password.html:63
+#: home/templates/password_reset_confirm.html:59
+msgid "Please Enter New Password"
+msgstr ""
+
+#: home/templates/change_password.html:68 home/templates/login.html:127
+#: home/templates/password_reset_confirm.html:64
+msgid "Confirm Password"
+msgstr ""
+
+#: home/templates/change_password.html:68
+#: home/templates/password_reset_confirm.html:64
+msgid "Please confirm the Password"
+msgstr ""
+
+#: home/templates/email_template.html:2
+msgid "Hi,"
+msgstr ""
+
+#: home/templates/email_template.html:3
+msgid "Please click on the link to confirm your registration,"
+msgstr ""
+
+#: home/templates/login.html:37
+msgid "have an account? Log In"
+msgstr ""
+
+#: home/templates/login.html:50
+msgid "Username / Email"
+msgstr ""
+
+#: home/templates/login.html:50
+msgid "Please Enter your Username or Email"
+msgstr ""
+
+#: home/templates/login.html:53
+msgid "Passsword"
+msgstr ""
+
+#: home/templates/login.html:53
+msgid "Please Enter your Password"
+msgstr ""
+
+#: home/templates/login.html:55
+msgid "Login Now"
+msgstr ""
+
+#: home/templates/login.html:58
+msgid "Keep me signed in"
+msgstr ""
+
+#: home/templates/login.html:59
+msgid "Forgot password?"
+msgstr ""
+
+#: home/templates/login.html:72
+msgid "Please enter your email:"
+msgstr ""
+
+#: home/templates/login.html:78
+msgid "Your Email Adddress"
+msgstr ""
+
+#: home/templates/login.html:80
+msgid "Please Enter your email"
+msgstr ""
+
+#: home/templates/login.html:83 home/templates/password_reset_confirm.html:67
+msgid "Reset Password"
+msgstr ""
+
+#: home/templates/login.html:95
+msgid "Sign in With Facebook"
+msgstr ""
+
+#: home/templates/login.html:96
+msgid "Sign in With Twitter"
+msgstr ""
+
+#: home/templates/login.html:104
+msgid "Sign up Now"
+msgstr ""
+
+#: home/templates/login.html:106
+msgid "Get"
+msgstr ""
+
+#: home/templates/login.html:106
+msgid "Registered"
+msgstr ""
+
+#: home/templates/login.html:124
+msgid "Password"
+msgstr ""
+
+#: home/templates/login.html:131
+msgid "agree with the"
+msgstr ""
+
+#: home/templates/login.html:131
+msgid "Terms and Conditions"
+msgstr ""
+
+#: home/templates/login.html:133
+msgid "Sign Up"
+msgstr ""
+
+#: home/templates/login.html:136
+msgid "Register With Facebook"
+msgstr ""
+
+#: home/templates/login.html:137
+msgid "Register With Twitter"
+msgstr ""
+
+#: home/templates/mail_not_confirmed.html:9
+msgid "Resend confirmation mail"
+msgstr ""
+
+#: home/templates/mail_not_confirmed.html:18
+msgid "Re Send confirmation mail"
+msgstr ""
+
+#: home/templates/mail_not_confirmed.html:41
+msgid "Your Mail is "
+msgstr ""
+
+#: home/templates/mail_not_confirmed.html:41
+msgid "Unconfirmed"
+msgstr ""
+
+#: home/templates/mail_not_confirmed.html:43
+msgid "Your Request is "
+msgstr ""
+
+#: home/templates/mail_not_confirmed.html:43
+msgid "Ambiguious"
+msgstr ""
+
+#: home/templates/mail_not_confirmed.html:49
+msgid "Verifying your mail:"
+msgstr ""
+
+#: home/templates/mail_not_confirmed.html:54
+msgid "Please check your mail inbox and hit the activation link."
+msgstr ""
+
+#: home/templates/mail_not_confirmed.html:55
+#: home/templates/mail_not_confirmed.html:56
+#: home/templates/mail_not_confirmed.html:57
+msgid " "
+msgstr ""
+
+#: home/templates/mail_not_confirmed.html:61
+msgid "Re-Send Activation Mail"
+msgstr ""
+
+#: home/templates/mail_not_confirmed.html:66
+msgid "Ambiguious Request !!"
+msgstr ""
+
+#: home/templates/mail_not_confirmed.html:67
+msgid "Please hit home page."
+msgstr ""
+
+#: home/templates/password_reset_confirm.html:9
+#: home/templates/password_reset_confirm.html:18
+msgid "Reset your password"
+msgstr ""
+
+#: home/templates/password_reset_confirm.html:40
+msgid "Reset your"
+msgstr ""
+
+#: home/templates/password_reset_confirm.html:71
+msgid ""
+"The password reset link was invalid, possibly because it has already been "
+"used. Please request a new password reset."
+msgstr ""
+
+#: home/templates/password_reset_email.html:2
+msgid "Hello,"
+msgstr ""
+
+#: home/templates/password_reset_email.html:3
+msgid ""
+"We received a request to reset the password for your account for this email "
+"address. To initiate the password reset process for your account, click the "
+"link below."
+msgstr ""
+
+#: home/templates/password_reset_email.html:4
+msgid ""
+"This link can only be used once. If you need to reset your password again, "
+"please visit "
+msgstr ""
+
+#: home/templates/password_reset_email.html:5
+msgid " and request another reset."
+msgstr ""
+
+#: home/templates/password_reset_email.html:6
+msgid "If you did not make this request, you can simply ignore this email."
+msgstr ""
+
+#: home/templates/password_reset_email.html:7
+msgid "Sincerely,"
+msgstr ""
+
+#: home/templates/password_reset_email.html:8
+msgid "TunCar Team"
+msgstr ""
+
+#: home/views/connection_views.py:79
+msgid "Your account is deactivated. Please contact support!!"
+msgstr ""
+
+#: home/views/connection_views.py:96
+msgid "You must fill the captcha."
+msgstr ""
+
+#: home/views/connection_views.py:99
+msgid "Invalid Credentials."
+msgstr ""
+
+#: home/views/connection_views.py:118
+msgid ""
+"We have emailed you instructions for setting your password. You should "
+"receive the email shortly!"
+msgstr ""
+
+#: home/views/connection_views.py:122
+msgid "No user with this email !!"
+msgstr ""
+
+#: home/views/connection_views.py:133
+msgid "Password changed successfully."
+msgstr ""
+
+#: home/views/connection_views.py:165
+msgid "Please check your mail box and hit the mail verification."
+msgstr ""
+
+#: home/views/registration.py:47
+msgid ""
+"User created Successfully. Please check your mail box and hit the mail "
+"verification."
+msgstr ""
+
+#: home/views/registration.py:64
+msgid "Your mail address is successfully activated."
+msgstr ""
+
+#: home/views/registration.py:67
+msgid "This link is dead. Try to generate another link."
+msgstr ""

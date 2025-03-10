@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load static %}
+{% load html_tag %}
+{% load i18n %}
+
+{% block headerContent %}
+	<link rel="stylesheet" type="text/css" href="{% static 'assets/css/home.css' %}" />
+	<script type="text/javascript" src="{% static 'assets/js/home.js' %}"></script>
+{% endblock headerContent %}
+
+{% block bodyContent %}
+<div class="wheel-start3" style='background-image: url("/static/images/bg7.jpg");'>
+	<img src="{% static 'images/bg7.jpg' %}" alt="" class="wheel-img" style="display:none">
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-12 padd-lr0">
+				<div
+					class="wheel-start3-body clearfix marg-lg-t255 marg-lg-b75 marg-sm-t190 marg-xs-b30">
+					<h3>{{ action_name }}</h3>
+					<ol class="breadcrumb">
+						<li><a href="#">{% translate "Home" %}</a></li>
+						<li><a href="#">{% translate "pages" %}</a></li>
+						<li class="active">{% translate "Login" %}</li>
+					</ol>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="wheel-register-block">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12 padd-r0">
+				<div
+					class="wheel-register-sign marg-lg-t150 marg-lg-b150 marg-sm-t100 marg-sm-b100">
+					<div class="wheel-header">
+						<h5>{% translate "Sign up Now" %}</h5>
+						<h3>
+							{% translate "Get" %} <span>{% translate "Registered" %}</span>
+						</h3>
+					</div>
+					<form id="form_registration" action="{% url 'registration' %}" method="post">
+						{% csrf_token %}
+
+						{{ agence_reg.errors.nom_agence }}
+						<input type="text" name="nom_agence" value="{{ agence_reg.data.nom_agence }}" placeholder="{% translate 'nom_agence' %}" required {% if agence_reg.errors.nom_agence %} class="input-error-text"{% endif %}>
+
+						{{ agence_reg.errors.nom_responsable }}
+						<input type="text" name="nom_responsable" value="{{ agence_reg.data.nom_responsable }}" placeholder="{% translate 'nom_responsable' %}" required {% if agence_reg.errors.nom_responsable %} class="input-error-text"{% endif %}>
+
+						{{ agence_reg.errors.mf_agence }}
+						<input type="text" name="mf_agence" value="{{ agence_reg.data.mf_agence }}" placeholder="{% translate 'mf_agence' %}" required {% if agence_reg.errors.mf_agence %} class="input-error-text"{% endif %}>
+
+						{{ agence_reg.errors.adresse_agence }}
+						<input type="text" name="adresse_agence" value="{{ agence_reg.data.adresse_agence }}" placeholder="{% translate 'adresse_agence' %}" required {% if agence_reg.errors.adresse_agence %} class="input-error-text"{% endif %}>
+
+						{{ agence_reg.errors.contact }}
+						<input type="text" name="contact" value="{{ agence_reg.data.contact }}" placeholder="{% translate 'contact' %}" required {% if agence_reg.errors.contact %} class="input-error-text"{% endif %}>
+
+						{{ agence_reg.errors.member }}
+						<input type="text" name="member" value="{{ agence_reg.data.member }}" placeholder="{% translate 'member' %}" required {% if agence_reg.errors.member %} class="input-error-text"{% endif %}>
+
+						{{ agence_reg.errors.member_role }}
+						<input type="text" name="member_role" value="{{ agence_reg.data.member_role }}" placeholder="{% translate 'member_role' %}" required {% if agence_reg.errors.member_role %} class="input-error-text"{% endif %}>
+
+						<button class="wheel-btn">{% translate "Sign Up" %}</button>
+					</form>
+					<div class="wheel-register-link">
+						<a href="#" class="wheel-btn-link wheel-bg11">{% translate "Register With Facebook" %}</a>
+						<a href="#" class="wheel-btn-link wheel-bg12">{% translate "Register With Twitter" %}</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+
+<!-- /////////////////////////////// -->
+{% endblock bodyContent %}
