@@ -44,10 +44,11 @@ class RegisterView(LoginRequiredMixin, IndexView):
         return context
 
     def post(self, request, *args, **kwargs):
-        form = AgencesForm(request.POST)
+        form = AgencesForm(request.POST ,request.FILES)
         if form.is_valid():
             agence = form.save(commit=False)
             agence.creator = self.request.user
+            agence.logo = request.FILES.get('logo')
             agence.save()
             messages.success(request, _('Agence created Successfully. Please check your mail box and hit the mail verification.'))
             return redirect(reverse('index'))
@@ -57,10 +58,18 @@ class RegisterView(LoginRequiredMixin, IndexView):
 class ManageAgenceView(LoginRequiredMixin, TemplateView):
     template_name = 'agences/manage.html'
 
-    def dispatch(self, request, *args, **kwargs):
-        if not request.user.agences_set.filter(is_active=True).exists():
-            return redirect('pending_agence')
-        return super().dispatch(request, *args, **kwargs)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Retrieve the agency of the logged-in user
+        agence = self.request.user.agences_set.filter(is_active=True).first()
+        
+        if not agence:
+            return redirect('pending_agence')  
+
+        context['agence'] = agence 
+        return context
+
 
 class PendingAgenceView(LoginRequiredMixin, TemplateView):
     template_name = 'agences/pending.html'

@@ -5,7 +5,9 @@
 
 {% block headerContent %}
     <link rel="stylesheet" type="text/css" href="{% static 'assets/css/home.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/manage.css' %}" />
     <script type="text/javascript" src="{% static 'assets/js/home.js' %}"></script>
+
 {% endblock headerContent %}
 
 {% block bodyContent %}
@@ -13,13 +15,14 @@
     <img src="{% static 'images/bg7.jpg' %}" alt="" class="wheel-img" style="display:none">
     <div class="container">
         <div class="row">
-            <div class="col-xs-12 padd-lr0">
+            <div class="col-12 padd-lr0">
                 <div class="wheel-start3-body clearfix marg-lg-t255 marg-lg-b75 marg-sm-t190 marg-xs-b30 text-center">
-                    <div class="wheel-agency-image">
-                        <img src="{{ agence.agency_image.url }}" alt="{{ agence.agency_name }}" class="img-circle" style="width: 200px; height: 200px;">
+                    <!-- Agency Image with Circle -->
+                    <div class="wheel-agency-image mb-3 fade-in">
+                        <img src="{{ agence.logo.url }}" alt="{{ agence.agency_name }}" class="img-fluid rounded-circle" style="width: 200px; height: 200px; object-fit: cover;">
                     </div>
-                    <h3>{{ agence.agency_name }}</h3>
-                    <ol class="breadcrumb">
+                    <h3 class="text-white fade-text">{{ agence.agency_name }}</h3>
+                    <ol class="breadcrumb justify-content-center fade-text">
                         <li><a href="#">{% translate "Home" %}</a></li>
                         <li><a href="#">{% translate "Pages" %}</a></li>
                         <li class="active">{% translate "Manage" %}</li>
@@ -29,66 +32,68 @@
         </div>
     </div>
 </div>
-<div class="wheel-register-block">
+
+<div class="wheel-register-block bg-light py-5">
     <div class="container">
         <div class="row">
             <div class="col-md-12 padd-r0">
                 <div class="wheel-register-sign marg-lg-t150 marg-lg-b150 marg-sm-t100 marg-sm-b100">
                     <div class="wheel-header">
-                        <h5>{% translate "Manage your Agency" %}</h5>
-                        <h3>
+                        <h5 class="fade-text">{% translate "Manage your Agency" %}</h5>
+                        <h3 class="font-weight-bold text-primary fade-text">
                             {% translate "Dashboard" %}
                         </h3>
                     </div>
                     <div class="wheel-dashboard">
                         <div class="row">
-                            <div class="col-md-4">
-                                <div class="wheel-dashboard-item">
-                                    <div class="wheel-dashboard-icon">
-                                        <img src="{% static 'images/car-icon.png' %}" alt="">
+                            <!-- Manage Cars Section -->
+                            <div class="col-md-4 mb-4">
+                                <div class="wheel-dashboard-item bg-white p-3 rounded shadow dashboard-item fade-in">
+                                    <div class="wheel-dashboard-icon text-center mb-3">
+                                        <img src="{% static 'images/car_manage.png' %}" alt="" class="wheel-dashboard-icon img">
                                     </div>
                                     <h4>{% translate "Manage Cars" %}</h4>
-                                    <a href="" class="wheel-btn">{% translate "Go to Cars" %}</a>
+                                    <a href="#" class="btn btn-primary">{% translate "Go to Cars" %}</a>
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <div class="wheel-dashboard-item">
-                                    <div class="wheel-dashboard-icon">
-                                        <img src="{% static 'images/employee-icon.png' %}" alt="">
+                            <!-- Manage Employees Section -->
+                            <div class="col-md-4 mb-4">
+                                <div class="wheel-dashboard-item bg-white p-3 rounded shadow dashboard-item fade-in">
+                                    <div class="wheel-dashboard-icon text-center mb-3">
+                                        <img src="{% static 'images/employ1.png' %}" alt="" class="wheel-dashboard-icon img">
                                     </div>
                                     <h4>{% translate "Manage Employees" %}</h4>
-                                    <a href="" class="wheel-btn">{% translate "Go to Employees" %}</a>
+                                    <a href="#" class="btn btn-primary">{% translate "Go to Employees" %}</a>
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <div class="wheel-dashboard-item">
-                                    <div class="wheel-dashboard-icon">
-                                        <img src="{% static 'images/promotion-icon.png' %}" alt="">
+                            <!-- Manage Promotions Section -->
+                            <div class="col-md-4 mb-4">
+                                <div class="wheel-dashboard-item bg-white p-3 rounded shadow dashboard-item fade-in">
+                                    <div class="wheel-dashboard-icon text-center mb-3">
+                                        <img src="{% static 'images/edit1.png' %}" alt="" class="wheel-dashboard-icon img">
                                     </div>
-                                    <h4>{% translate "Manage Promotions" %}</h4>
-                                    <a href="" class="wheel-btn">{% translate "Go to Promotions" %}</a>
+                                    <h4>{% translate "Edit Agency Details" %}</h4>
+                                    <a href="#" class="btn btn-primary">{% translate "Go to Edit Details" %}</a>
                                 </div>
                             </div>
                         </div>
+
                         <div class="row marg-lg-t50">
                             <div class="col-md-12">
                                 <div class="wheel-header">
-                                    <h5>{% translate "Agency Statistics" %}</h5>
+                                    <h5 class="fade-text">{% translate "Agency Statistics" %}</h5>
                                 </div>
                                 <div class="wheel-statistics">
                                     <div class="row">
+                                        <!-- Add statistics content here if needed -->
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="row marg-lg-t50">
-                            <div class="col-md-12 text-center">
-                                <a href="" class="wheel-btn">{% translate "Edit Agency Details" %}</a>
-                            </div>
-                        </div>
+
                         <div class="row">
                             <div class="col-md-12 text-center">
-                                <h4>{{ agence.agency_name }}</h4>
+                                <h4 class="text-dark font-weight-bold fade-text">{{ agence.agency_name }}</h4>
                             </div>
                         </div>
                     </div>
@@ -97,4 +102,5 @@
         </div>
     </div>
 </div>
+
 {% endblock bodyContent %}

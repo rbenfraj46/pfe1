@@ -1,0 +1,73 @@
+
+.fade-in {
+    opacity: 0;
+    animation: fadeIn 1.5s forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+
+.dashboard-item:hover {
+    transform: scale(1.05);
+    transition: transform 0.3s ease-in-out;
+}
+
+
+.btn-primary:hover, .btn-secondary:hover {
+    background-color: #004085;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+
+.fade-text {
+    animation: fadeInText 2s ease-in-out;
+}
+
+@keyframes fadeInText {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+.wheel-dashboard-icon img {
+    width: 300px;
+    height: 200px;
+    object-fit: contain;
+}
+
+.wheel-agency-image img {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+
+.wheel-dashboard-item {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.wheel-dashboard-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+
+.text-center {
+    text-align: center;
+}
+
+.marg-lg-t50 {
+    margin-top: 50px;
+}

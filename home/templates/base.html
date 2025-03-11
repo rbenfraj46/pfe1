@@ -146,17 +146,26 @@
 										</ul>
 									</li>
 									<li class="menu-item current-menu-parent menu-item-has-children  ">
-										<a href="#"> Agences </a>
+										<a href="#"> agencies </a>
 										<!--class=" dl-submenu "-->
 										<ul class="sub-menu dl-submenu">
 											<li class="menu-item current-menu-item">
-												<a href="car-list-grid.html">Car Listing - Grid View</a>
+												<a href="car-list-grid.html">List of agencies</a>
 											</li>
 											<li class="menu-item current-menu-item">
-												<a href="car-list-3col2.html">Car Listing - List View</a>
-											</li>
-											<li class="menu-item current-menu-item">
-												<a href="car-listing-details.html">car listing details</a>
+												{% if user.is_authenticated %}
+								{% if user.agences_set.exists %}
+									{% with agence=user.agences_set.first %}
+										{% if agence.is_active %}
+											<a href="{% url 'manage_agence' %}" class="">{% translate "Manage your Agency" %}</a>
+										{% else %}
+											<a href="{% url 'pending_agence' %}" class="">{% translate "Pending Approval" %}</a>
+										{% endif %}
+									{% endwith %}
+								{% else %}
+									<a href="{% url 'agences_register' %}" class="">{% translate "Register your Agency" %}</a>
+								{% endif %}
+							{% endif %}
 											</li>
 										</ul>
 									</li>
@@ -189,19 +198,8 @@
 								</ul>
 								<div class="nav-menu-icon"><i></i></div>
 							</nav>
-							{% if user.is_authenticated %}
-								{% if user.agences_set.exists %}
-									{% with agence=user.agences_set.first %}
-										{% if agence.is_active %}
-											<a href="{% url 'manage_agence' %}" class="wheel-cheader-but">{% translate "Manage your Agency" %}</a>
-										{% else %}
-											<a href="{% url 'pending_agence' %}" class="wheel-cheader-but">{% translate "Pending Approval" %}</a>
-										{% endif %}
-									{% endwith %}
-								{% else %}
-									<a href="{% url 'agences_register' %}" class="wheel-cheader-but">{% translate "Register your Agency" %}</a>
-								{% endif %}
-							{% endif %}
+							<a href="" class="wheel-cheader-but">{% translate "Promotion" %}</a>
+							
 						</div>
 					</div>
 				</div>

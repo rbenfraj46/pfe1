@@ -43,6 +43,7 @@ try:
 except Exception as exp:
     logger.error("Exception occured!!\n %s" % str(exp))
 
+
 if settings.DEBUG:
     import debug_toolbar
     urlpatterns = [
