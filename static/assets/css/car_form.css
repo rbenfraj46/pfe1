@@ -1,0 +1,77 @@
+.car-form-container {
+    margin-top: 170px;
+    margin-bottom: 2rem;
+    max-width: 800px;
+}
+
+.car-form .form-group {
+    margin-bottom: 1rem;
+}
+
+.car-form .form-label {
+    font-weight: 500;
+    color: #495057;
+}
+
+.car-form .card {
+    border-radius: 10px;
+    border: none;
+}
+
+.car-form .card-header {
+    border-radius: 10px 10px 0 0;
+    padding: 1.5rem;
+}
+
+.car-form .card-header h3 {
+    font-size: 1.5rem;
+    margin: 0;
+}
+
+.car-form .form-control,
+.car-form .form-select {
+    border-radius: 5px;
+    padding: 0.75rem;
+    border: 1px solid #ced4da;
+}
+
+.car-form .form-control:focus,
+.car-form .form-select:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+.car-form .input-group-text {
+    background-color: #f8f9fa;
+}
+
+.car-form .btn-primary {
+    padding: 0.75rem;
+    font-weight: 500;
+}
+
+.car-form .form-switch {
+    padding-left: 2.5rem;
+}
+
+.car-form .shadow {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Ajustement de la marge supérieure pour éviter le chevauchement avec la barre de navigation */
+.container {
+    margin-top: 180px;
+}
+
+/* Styles personnalisés pour les éléments de formulaire */
+.form-control:focus,
+.form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Style pour le bouton au survol */
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}

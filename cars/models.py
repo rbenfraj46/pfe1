@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 class Brand(models.Model):
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=255, null=True, blank=True)
-    img_hash = models.CharField(max_length=32, null=True, blank=True)
+    img_hash = models.CharField(max_length=64, null=True, blank=True)
     img_extension = models.CharField(max_length=10, null=True, blank=True)
     is_active = models.BooleanField(verbose_name=_("Is Active"), default=True)
     order_key = models.IntegerField(null=True, blank=True)
@@ -44,7 +44,7 @@ class Transmission(models.Model):
 class CarModel(models.Model):
     name = models.CharField(max_length=255, verbose_name=_("Model Name"))
     description = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("Model Description"))
-    img_hash = models.CharField(max_length=32, null=True, blank=True)
+    img_hash = models.CharField(max_length=64, null=True, blank=True)
     img_extension = models.CharField(max_length=10, null=True, blank=True)
     is_active = models.BooleanField(verbose_name=_("Is Active"), default=True)
     brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, verbose_name=_("Brand"), null=True)
@@ -87,3 +87,23 @@ class CarModel(models.Model):
 
     class Meta:
         db_table = "car_model"
+
+class AgencyCar(models.Model):
+    agence = models.ForeignKey('home.Agences', on_delete=models.SET_NULL, null=True)  # Référence à l'agence
+    brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True)
+    car_model = models.ForeignKey(CarModel, on_delete=models.SET_NULL, null=True)
+    gear_type = models.ForeignKey(GearType, on_delete=models.SET_NULL, verbose_name=_("Gear Type"), null=True)  # Add gear_type field
+
+    image = models.ImageField(upload_to='cars', null=True, blank=True)
+    fuel_policy = models.CharField(max_length=255)
+    security_deposit = models.DecimalField(max_digits=10, decimal_places=2)
+    minimum_license_age = models.IntegerField()
+    price_per_day = models.DecimalField(max_digits=10, decimal_places=2)
+    is_active = models.BooleanField(default=False)
+    available = models.BooleanField(default=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.image and self.car_model:
+            pass
+        super().save(*args, **kwargs)

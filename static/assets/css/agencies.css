@@ -1,0 +1,58 @@
+.agency-container {
+    margin-top: 150px; /* marges supérieures augmentées */
+}
+
+.agency-card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background: linear-gradient(135deg, #ffffff, #f8f9fa);
+    padding: 20px; /* espacement interne amélioré */
+}
+
+.agency-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.agency-img {
+    height: 200px; /* taille fixe */
+    width: 100%;
+    object-fit: cover;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    margin-bottom: 15px;
+}
+
+/* Améliorations typographiques */
+.card-title {
+    font-weight: bold;
+    color: #007bff;
+}
+.card-text {
+    font-size: 14px;
+    color: #555;
+}
+
+/* Boutons personnalisés */
+.btn-primary {
+    background-color: #ff7043;
+    border-color: #ff7043;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 14px;
+}
+
+.btn-warning {
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 14px;
+}
+
+/* Adaptations responsive */
+@media (max-width: 768px) {
+    .agency-card {
+        margin-bottom: 20px;
+    }
+}

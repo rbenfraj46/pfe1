@@ -10,6 +10,7 @@ from home.views import registration
 from home.views import agences
 from home.views import contact
 from home.views import ajax_views
+from home.views.agences import CarModelsJsonView
 
 from home.models import State
 
@@ -37,5 +38,7 @@ urlpatterns = [
     re_path(r'^cities$', ajax_views.CitiesJsonView.as_view(), name='cities'),
     path('agences/manage/', agences.ManageAgenceView.as_view(), name='manage_agence'),
     path('agences/pending/', agences.PendingAgenceView.as_view(), name='pending_agence'),
-
+    path('agences/user/', agences.UserAgenciesView.as_view(), name='user_agencies'),
+    path('agences/car/add/', agences.RegisterCarView.as_view(), name='car_add'),
+    path('car-models-json/', CarModelsJsonView.as_view(), name='car_models_json'),
 ]

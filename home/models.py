@@ -3,6 +3,8 @@ from django.contrib.gis.db import models as gis_models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 
+from cars.models import GearType  
+
 RIGHTS_NAME = {
     'agence': 'AGENCE',
     }
@@ -172,10 +174,10 @@ class MailSubscription(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name=_("User"), null=True)
     subscription_date = models.DateTimeField(auto_now=True, verbose_name=_("Subscripted At"))
     is_active = models.BooleanField(verbose_name=_("Is Active"), default=True)
-    # unsubscription date
     unsubscription_date = models.DateTimeField(blank=True, null=True, verbose_name=_("UnSubscripted At"))
     promo_value = models.FloatField(default=0, verbose_name=_("Promotion price"))
     is_promo_used = models.BooleanField(verbose_name=_("Is Promotion Used"), default=False)
 
     class Meta :
         db_table= 'mail_subscription'
+

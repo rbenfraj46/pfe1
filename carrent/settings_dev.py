@@ -18,7 +18,7 @@ if DEBUG:
             'NAME': 'carrental',
             'USER': 'myuser',
             'PASSWORD': '12345',
-            'HOST': 'localhost',  
+            'HOST': 'postgresql',  
             'PORT': '5432',
         }
     } 

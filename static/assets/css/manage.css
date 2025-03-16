@@ -1,7 +1,7 @@
 
 .fade-in {
     opacity: 0;
-    animation: fadeIn 1.5s forwards;
+    animation: fadeIn 0.3s forwards;
 }
 
 @keyframes fadeIn {
@@ -16,19 +16,19 @@
 
 .dashboard-item:hover {
     transform: scale(1.05);
-    transition: transform 0.3s ease-in-out;
+    transition: transform 0.2s ease-in-out;
 }
 
 
 .btn-primary:hover, .btn-secondary:hover {
     background-color: #004085;
     color: white;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 
 .fade-text {
-    animation: fadeInText 2s ease-in-out;
+    animation: fadeInText 1s ease-in-out;
 }
 
 @keyframes fadeInText {

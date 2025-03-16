@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+{% load static %}
+{% load html_tag %}
+{% load i18n %}
+
+{% block headerContent %}
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/home.css' %}">
+    <style>
+        #car-form-wrapper .container {
+            margin-top: 170px;
+            margin-bottom: 2rem;
+            max-width: 800px;
+        }
+
+        #car-form-wrapper .card {
+            border-radius: 10px;
+            border: none;
+        }
+
+        #car-form-wrapper .card-header {
+            border-radius: 10px 10px 0 0;
+            padding: 1.5rem;
+            background-color: #ff7043 !important;
+        }
+
+        #car-form-wrapper .form-label {
+            font-weight: 500;
+            color: #495057;
+        }
+
+        #car-form-wrapper .form-control,
+        #car-form-wrapper .form-select {
+            border-radius: 5px;
+            padding: 0.75rem;
+            border: 1px solid #ced4da;
+        }
+
+        #car-form-wrapper .form-control:focus,
+        #car-form-wrapper .form-select:focus {
+            border-color: #ff7043;
+            box-shadow: 0 0 0 0.2rem rgba(255, 112, 67, 0.25);
+        }
+
+        #car-form-wrapper .btn-primary {
+            padding: 0.75rem;
+            font-weight: 500;
+            background-color: #ff7043;
+            border-color: #ff7043;
+        }
+
+        #car-form-wrapper .btn-primary:hover {
+            background-color: #f4511e;
+            border-color: #f4511e;
+        }
+
+        #car-form-wrapper .form-check-input:checked {
+            background-color: #ff7043;
+            border-color: #ff7043;
+        }
+
+        #car-form-wrapper .input-group-text {
+            background-color: #ff7043;
+            color: white;
+            border-color: #ff7043;
+        }
+    </style>
+{% endblock headerContent %}
+
+{% block bodyContent %}
+<div id="car-form-wrapper">
+    <div class="container">
+        <div class="card shadow">
+            <div class="card-header bg-primary py-3">
+                <h3 class="text-white m-0 fw-bold">{% translate "Add a New Car" %}</h3>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" enctype="multipart/form-data" class="car-form">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="brand" class="form-label">{% translate "Brand" %}</label>
+                                <select name="brand" id="brand" class="form-select" required>
+                                    <option value="">{% translate "Select a brand" %}</option>
+                                    {% for b in brands %}
+                                        <option value="{{ b.id }}">{{ b.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="car_model" class="form-label">{% translate "Model" %}</label>
+                                <select name="car_model" id="car_model" class="form-select" required>
+                                    <option value="">{% translate "Select a model" %}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="image" class="form-label">{% translate "Image" %}</label>
+                                <input type="file" name="image" id="image" class="form-control" accept="image/*">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="fuel_policy" class="form-label">{% translate "Fuel Policy" %}</label>
+                                <input type="text" name="fuel_policy" id="fuel_policy" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="security_deposit" class="form-label">{% translate "Security Deposit (TND)" %}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" step="0.01" name="security_deposit" id="security_deposit" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="minimum_license_age" class="form-label">{% translate "Minimum License Age (YEARS)" %}</label>
+                                <input type="number" name="minimum_license_age" id="minimum_license_age" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="price_per_day" class="form-label">{% translate "Price per Day (TND)" %}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" step="0.01" name="price_per_day" id="price_per_day" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="gear_type" class="form-label">{% translate "Gear Type" %}</label>
+                                <select name="gear_type" id="gear_type" class="form-select" required>
+                                    <option value="">{% translate "Select a gear type" %}</option>
+                                    {% for gt in gear_types %}
+                                        <option value="{{ gt.id }}">{{ gt.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mt-3">
+                        <div class="form-check form-switch">
+                            <input type="checkbox" name="available" id="available" class="form-check-input" checked>
+                            <label class="form-check-label" for="available">{% translate "Available" %}</label>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">{% translate "Submit" %}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#brand').change(function() {
+            var brandId = $(this).val();
+            $.ajax({
+                url: '{% url "car_models_json" %}',
+                data: {
+                    'brand_id': brandId
+                },
+                success: function(data) {
+                    var carModelSelect = $('#car_model');
+                    carModelSelect.empty();
+                    carModelSelect.append('<option value="">Select a model</option>');
+                    $.each(data, function(index, item) {
+                        carModelSelect.append('<option value="' + item.id + '">' + item.name + '</option>');
+                    });
+                }
+            });
+        });
+    });
+</script>
+{% endblock bodyContent %}

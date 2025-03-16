@@ -1,16 +1,4 @@
-# -*- coding: utf-8 -*-
-#################################################
-#
-# Copyright (c) 2021  LOTUS INFO
-#
-# Date: 2022/01/02
-#
-# Author: melliti.aladin@gmail.com
-#         Alaeddine MELLITI
-#
-# This copyright notice should not be removed
-#
-#################################################
+
 
 
 import os
@@ -44,13 +32,15 @@ install_requires = [
     'requests==2.27.1',
     'django-leaflet==0.28.2',
     'django-geojson==3.2.1',
-    'jsonfield==3.1.0'
+    'jsonfield==3.1.0',
+    'django-extensions==3.1.5',
+    'django-debug-toolbar==3.2.4',
 ]
 
 dev_requires = [
     'flake8==4.0.1',
-    'django-extensions',
-    'django-debug-toolbar',
+    'django-extensions==3.1.5',
+    'django-debug-toolbar==3.2.4',
     'pycodestyle==2.8.0',
     'pyflakes==2.4.0',
     'pylint==2.5.3',
@@ -119,6 +109,7 @@ setup(
         # Replace these appropriately if you are stuck on Python 2.
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.12.1',
         'Programming Language :: Python :: 3.4',
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',

@@ -4,10 +4,9 @@ from cars.models import Brand
 from cars.models import GearType
 from cars.models import CarModel
 from cars.models import Transmission
-
+from cars.models import AgencyCar   
 from cars.forms import CarModelAdminForm
 from cars.forms import BrandAdminForm
-# Register your models here.
 
 
 class BrandAdmin(admin.ModelAdmin):
@@ -34,6 +33,12 @@ class CarAdmin(admin.ModelAdmin):
     model = CarModel
     list_display = [f.name for f in CarModel._meta.fields]
 admin.site.register(CarModel, CarAdmin)
+
+
+class AgencyCarAdmin(admin.ModelAdmin):
+    list_display = [f.name for f in AgencyCar._meta.fields]
+
+admin.site.register(AgencyCar, AgencyCarAdmin)
 
 
 

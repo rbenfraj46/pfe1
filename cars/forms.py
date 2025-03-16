@@ -50,7 +50,6 @@ def get_image_link(instance):
         brand = ''
 
     path = settings.MEDIA_URL + settings.CAR_DOWNLOAD_FOLDER + brand
-    #path = path + "/%s.%s" % (instance.img_hash, instance.img_extension)
     path = path + "/%s" % instance.img_hash
 
     return path.replace('//', '/')
