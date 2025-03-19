@@ -23,7 +23,9 @@
                     <div class="card-body">
                         <h5 class="card-title">{{ agence.agency_name }}</h5>
                         <p class="card-text">{{ agence.adress_agency }}</p>
-                        {% if agence.is_active %}
+                        {% if not agence.is_mail_verified %}
+                            <a href="{% url 'mail_not_confirmed_agency' %}" class="btn btn-warning">{% translate "Confirm Email" %}</a>
+                        {% elif agence.is_active %}
                             <a href="{% url 'manage_agence' %}" class="btn btn-primary">{% translate "Manage" %}</a>
                         {% else %}
                             <a href="{% url 'pending_agence' %}" class="btn btn-warning">{% translate "Pending Approval" %}</a>

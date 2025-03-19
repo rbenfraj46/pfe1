@@ -1,0 +1,9 @@
+{% load i18n %}
+{% translate "Hi," as hi %}
+{% translate "Please click on the link to confirm your agency registration," as confirmation_text %}
+
+{% autoescape off %}
+{{ hi }} {{ agence.agency_name }}
+{{ confirmation_text }}
+{{ scheme }}://{{ domain }}{% url 'activate_agency' uidb64=uid token=token %}
+{% endautoescape %}

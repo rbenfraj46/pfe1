@@ -11,6 +11,11 @@ from home.views import agences
 from home.views import contact
 from home.views import ajax_views
 from home.views.agences import CarModelsJsonView
+from home.views.agences import activate_agency
+from home.views.agences import MailNotConfirmedAgencyView
+from home.views.agences import AgencyCarsListView
+from home.views.agences import UpdateCarView
+from home.views.agences import DeleteCarView
 
 from home.models import State
 
@@ -41,4 +46,9 @@ urlpatterns = [
     path('agences/user/', agences.UserAgenciesView.as_view(), name='user_agencies'),
     path('agences/car/add/', agences.RegisterCarView.as_view(), name='car_add'),
     path('car-models-json/', CarModelsJsonView.as_view(), name='car_models_json'),
+    path('activate_agency/<uidb64>/<token>/', activate_agency, name='activate_agency'),
+    path('mailNotConfirmedAgency.php', MailNotConfirmedAgencyView.as_view(), name='mail_not_confirmed_agency'),
+    path('agency-cars/', AgencyCarsListView.as_view(), name='agency_cars_list'),
+    path('agences/car/update/<int:pk>/', UpdateCarView.as_view(), name='car_update'),
+    path('agences/car/delete/<int:pk>/', DeleteCarView.as_view(), name='car_delete'),
 ]
