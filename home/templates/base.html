@@ -140,9 +140,6 @@
 											<li class="menu-item current-menu-item">
 												<a href="/">Home page</a>
 											</li>
-											<li class="menu-item current-menu-item">
-												<a href="index2.html">Home page 02</a>
-											</li>
 										</ul>
 									</li>
 									<li class="menu-item current-menu-parent menu-item-has-children  ">
@@ -168,23 +165,7 @@
 										<a href="reservation1.html">Reservation</a>
 									</li>
 									<li class="menu-item menu-item-has-children">
-										<a href="#">Page</a>
-										<ul class="sub-menu">
-											{% if not user.is_authenticated %}
-											<li class="menu-item {% block register_active%}{% endblock register_active %}"><a href="{% url 'login' %}">Register</a></li>
-											{% endif %}
-											<li class="menu-item "><a href="checkout.html">Ceckout</a></li>
-											<li class="menu-item "><a href="about.html">About</a></li>
-											<li class="menu-item "><a href="shopping.html">shopping cart</a></li>
-											<li class="menu-item menu-item-has-children">
-												<a href="#">Level 2</a>
-												<ul class="sub-menu">
-													<li class="menu-item"><a href="#">Level 3</a></li>
-													<li class="menu-item"><a href="#">Level 3</a></li>
-													<li class="menu-item"><a href="#">Level 3</a></li>
-												</ul>
-											</li>
-										</ul>
+										<a href="about.html">About</a>
 									</li>
 									<li class="menu-item {% block contact_active%}{% endblock contact_active %}">
 										<a href="{% url 'contact' %}">{% translate "Contact" %}</a>
