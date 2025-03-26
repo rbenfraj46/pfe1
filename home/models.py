@@ -4,6 +4,9 @@ from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 
 from cars.models import GearType  
+from datetime import datetime
+from django.core.exceptions import ValidationError
+from django.utils.timezone import now
 
 RIGHTS_NAME = {
     'agence': 'AGENCE',
@@ -180,4 +183,3 @@ class MailSubscription(models.Model):
 
     class Meta :
         db_table= 'mail_subscription'
-

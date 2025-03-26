@@ -53,7 +53,7 @@
                                         <img src="{% static 'images/car_manage.png' %}" alt="" class="wheel-dashboard-icon img">
                                     </div>
                                     <h4>{% translate "Manage Cars" %}</h4>
-                                    <a href="{% url 'agency_cars_list' %}" class="btn btn-primary">{% translate "Go to Cars" %}</a>
+                                    <a href="{% url 'agency_cars_list' agence.id %}" class="btn btn-primary">{% translate "Go to Cars" %}</a>
                                 </div>
                             </div>
                             <!-- Manage Employees Section -->
@@ -66,7 +66,6 @@
                                     <a href="#" class="btn btn-primary">{% translate "Go to Employees" %}</a>
                                 </div>
                             </div>
-                            <!-- Manage Promotions Section -->
                             <div class="col-md-4 mb-4">
                                 <div class="wheel-dashboard-item bg-white p-3 rounded shadow dashboard-item fade-in">
                                     <div class="wheel-dashboard-icon text-center mb-3">

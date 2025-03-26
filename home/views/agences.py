@@ -20,16 +20,16 @@ from home.models import RIGHTS_TYPE, RIGHTS_NAME
 from home.models import Agences
 
 from home.views.index import IndexView
-from cars.models import AgencyCar, Brand, CarModel, GearType  # import des modèles de voitures
+from cars.models import AgencyCar, Brand, CarModel, GearType 
 from home.tokens import account_activation_token
 from home.mail_util import send_mail_verification_agency
+from cars.models import CarUnavailability
 
 def has_agence(user):
     if RightsAccess.objects.filter(user=user, name=RIGHTS_NAME['agence']).first():
         return True
     return False
 
-# Create your views here.
 class AgencesView(LoginRequiredMixin, IndexView):
     template_name =  "agences_list.html"
 
@@ -70,16 +70,10 @@ class ManageAgenceView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
-        # Retrieve the agency of the logged-in user
-        agence = self.request.user.agences_set.filter(is_active=True).first()
-        
-        if not agence:
-            return redirect('pending_agence')  
-
-        context['agence'] = agence 
+        agency_id = self.kwargs.get('agency_id')
+        agence = get_object_or_404(self.request.user.agences_set, id=agency_id, is_active=True)
+        context['agence'] = agence
         return context
-
 
 class PendingAgenceView(LoginRequiredMixin, TemplateView):
     template_name = 'agences/pending.html'
@@ -93,18 +87,23 @@ class UserAgenciesView(LoginRequiredMixin, TemplateView):
         return context
 
 class RegisterCarView(View):
-    template_name = "agences/car_form.html"
+    template_name = "car/car_form.html"
 
     def get(self, request, *args, **kwargs):
+        agency_id = self.kwargs.get('agency_id')
+        agence = get_object_or_404(Agences, id=agency_id, creator=request.user, is_active=True)
         context = {
             'brands': Brand.objects.filter(is_active=True),
-            'car_models': [],  # Initial empty list for car models
-            'gear_types': GearType.objects.filter(is_active=True),  # Add gear_types to context
+            'car_models': [],  
+            'gear_types': GearType.objects.filter(is_active=True),
+            'selected_agency': agence,
         }
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
-        # Récupérer les données du formulaire
+        agency_id = self.kwargs.get('agency_id')
+        agence = get_object_or_404(Agences, id=agency_id, creator=request.user, is_active=True)
+
         brand_id = request.POST.get('brand')
         model_id = request.POST.get('car_model')
         fuel_policy = request.POST.get('fuel_policy')
@@ -116,24 +115,36 @@ class RegisterCarView(View):
         gear_type_id = request.POST.get('gear_type')
 
         agency_car = AgencyCar()
-        agency_car.agence = request.user.agences_set.filter(is_active=True).first()
+        agency_car.agence = agence
         agency_car.brand = Brand.objects.filter(id=brand_id).first()
         agency_car.car_model = CarModel.objects.filter(id=model_id).first()
         agency_car.fuel_policy = fuel_policy
         agency_car.security_deposit = security_deposit
         agency_car.minimum_license_age = minimum_license_age
         agency_car.price_per_day = price_per_day
-        agency_car.is_active = False  # Affectation automatique à False
+        agency_car.is_active = False  
         agency_car.available = available
         agency_car.gear_type = GearType.objects.filter(id=gear_type_id).first()
         if image:
             agency_car.image = image
 
         agency_car.save()
-        return redirect('agency_cars_list')
+        
+        start_dates = request.POST.getlist('unavailability_periods[start][]')
+        end_dates = request.POST.getlist('unavailability_periods[end][]')
+        
+        for start_date, end_date in zip(start_dates, end_dates):
+            if start_date and end_date: 
+                CarUnavailability.objects.create(
+                    car=agency_car,
+                    start_date=start_date,
+                    end_date=end_date
+                )
+
+        return redirect('agency_cars_list', agency_id=agency_id)
 
 class UpdateCarView(View):
-    template_name = "agences/update_car_form.html"
+    template_name = "car/update_car_form.html"
 
     def get(self, request, *args, **kwargs):
         car_id = kwargs.get('pk')
@@ -160,7 +171,23 @@ class UpdateCarView(View):
         if request.FILES.get('image'):
             car.image = request.FILES.get('image')
         car.save()
-        return redirect('agency_cars_list')
+        
+        # Supprimer les périodes existantes
+        car.unavailability_periods.all().delete()
+        
+        # Ajouter les nouvelles périodes
+        start_dates = request.POST.getlist('unavailability_periods[start][]')
+        end_dates = request.POST.getlist('unavailability_periods[end][]')
+        
+        for start_date, end_date in zip(start_dates, end_dates):
+            if start_date and end_date:  # Vérifier que les deux dates sont fournies
+                CarUnavailability.objects.create(
+                    car=car,
+                    start_date=start_date,
+                    end_date=end_date
+                )
+
+        return redirect('agency_cars_list', agency_id=car.agence.id)
 
 class CarModelsJsonView(View):
     def get(self, request, *args, **kwargs):
@@ -207,23 +234,18 @@ class DeleteCarView(View):
         return JsonResponse({'success': True})
 
 class AgencyCarsListView(LoginRequiredMixin, ListView):
-    template_name = 'agences/agency_cars_list.html'
+    template_name = 'car/agency_cars_list.html'
     context_object_name = 'agency_cars'
     paginate_by = 10
 
     def get_queryset(self):
-        queryset = AgencyCar.objects.filter(agence__creator=self.request.user, is_active=True)
-        brand = self.request.GET.get('brand')
-        gear_type = self.request.GET.get('gear_type')
-        if brand:
-            queryset = queryset.filter(brand__name__icontains=brand)
-        if gear_type:
-            queryset = queryset.filter(gear_type__name__icontains=gear_type)
-        return queryset
+        agency_id = self.kwargs.get('agency_id')
+        return AgencyCar.objects.filter(agence_id=agency_id, agence__creator=self.request.user, is_active=True)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['add_car_url'] = reverse_lazy('register_car')
         context['brands'] = Brand.objects.filter(is_active=True)
         context['gear_types'] = GearType.objects.filter(is_active=True)
+        context['selected_agency'] = get_object_or_404(Agences, id=self.kwargs.get('agency_id'))
         return context

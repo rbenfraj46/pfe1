@@ -16,6 +16,9 @@ from home.views.agences import MailNotConfirmedAgencyView
 from home.views.agences import AgencyCarsListView
 from home.views.agences import UpdateCarView
 from home.views.agences import DeleteCarView
+from .views.car import update_car
+from home.views.car import CarModelRequestView
+from home.views.car import CarModelRequestHistoryView
 
 from home.models import State
 
@@ -41,14 +44,17 @@ urlpatterns = [
     re_path(r'^data.geojson$', GeoJSONLayerView.as_view(model=State, properties=['name']), name='data'),
     re_path(r'^delegations$', ajax_views.DelegationsJsonView.as_view(), name='delegations'),
     re_path(r'^cities$', ajax_views.CitiesJsonView.as_view(), name='cities'),
-    path('agences/manage/', agences.ManageAgenceView.as_view(), name='manage_agence'),
+    path('agences/manage/<int:agency_id>/', agences.ManageAgenceView.as_view(), name='manage_agence'),
     path('agences/pending/', agences.PendingAgenceView.as_view(), name='pending_agence'),
     path('agences/user/', agences.UserAgenciesView.as_view(), name='user_agencies'),
-    path('agences/car/add/', agences.RegisterCarView.as_view(), name='car_add'),
+    path('agences/car/add/<int:agency_id>/', agences.RegisterCarView.as_view(), name='car_add'),
     path('car-models-json/', CarModelsJsonView.as_view(), name='car_models_json'),
     path('activate_agency/<uidb64>/<token>/', activate_agency, name='activate_agency'),
     path('mailNotConfirmedAgency.php', MailNotConfirmedAgencyView.as_view(), name='mail_not_confirmed_agency'),
-    path('agency-cars/', AgencyCarsListView.as_view(), name='agency_cars_list'),
+    path('agency-cars/<int:agency_id>/', AgencyCarsListView.as_view(), name='agency_cars_list'),
     path('agences/car/update/<int:pk>/', UpdateCarView.as_view(), name='car_update'),
     path('agences/car/delete/<int:pk>/', DeleteCarView.as_view(), name='car_delete'),
+    path('car/update/<int:car_id>/', update_car, name='car_update'),
+    path('car-model/request/', CarModelRequestView.as_view(), name='request_car_model'),
+    path('car-model/requests/history/', CarModelRequestHistoryView.as_view(), name='car_model_requests_history'),
 ]

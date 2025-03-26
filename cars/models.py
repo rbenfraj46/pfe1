@@ -1,5 +1,9 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ValidationError
+from django.utils import timezone
+from datetime import datetime
+from django.conf import settings
 
 
 class Brand(models.Model):
@@ -107,3 +111,74 @@ class AgencyCar(models.Model):
         if not self.image and self.car_model:
             pass
         super().save(*args, **kwargs)
+
+class CarUnavailability(models.Model):
+    car = models.ForeignKey(AgencyCar, on_delete=models.CASCADE, related_name="unavailability_periods")
+    start_date = models.DateField(verbose_name=_("Start Date"))
+    end_date = models.DateField(verbose_name=_("End Date"))
+
+    class Meta:
+        db_table = "car_unavailability"
+        verbose_name = _("Car Unavailability")
+        verbose_name_plural = _("Car Unavailability")
+
+    def __str__(self):
+        return f"{self.car} unavailable from {self.start_date} to {self.end_date}"
+
+    def clean(self):
+        # Convert string dates to datetime.date objects if needed
+        if isinstance(self.start_date, str):
+            try:
+                self.start_date = datetime.strptime(self.start_date, '%Y-%m-%d').date()
+            except ValueError:
+                raise ValidationError(_('Invalid start date format'))
+
+        if isinstance(self.end_date, str):
+            try:
+                self.end_date = datetime.strptime(self.end_date, '%Y-%m-%d').date()
+            except ValueError:
+                raise ValidationError(_('Invalid end date format'))
+
+        current_date = timezone.now().date()
+        
+        if self.start_date < current_date:
+            raise ValidationError(_('Start date cannot be in the past'))
+        
+        if self.end_date <= self.start_date:
+            raise ValidationError(_('End date must be after start date'))
+        
+        overlapping = CarUnavailability.objects.filter(
+            car=self.car,
+            start_date__lte=self.end_date,
+            end_date__gte=self.start_date
+        ).exclude(pk=self.pk)
+        
+        if overlapping.exists():
+            raise ValidationError(_('This period overlaps with an existing unavailability period'))
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+class CarModelRequest(models.Model):
+    STATUS_CHOICES = (
+        ('pending', _('Pending')),
+        ('approved', _('Approved')),
+        ('rejected', _('Rejected')),
+    )
+    
+    brand_name = models.CharField(max_length=255)
+    model_name = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    requested_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    
+    class Meta:
+        db_table = "car_model_request"
+        verbose_name = _("Car Model Request")
+        verbose_name_plural = _("Car Model Requests")
+
+    def __str__(self):
+        return f"{self.brand_name} - {self.model_name}"

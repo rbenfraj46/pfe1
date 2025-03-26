@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block bodyContent %}
+<div class="container" style="margin-top: 180px; margin-bottom: 40px;">
+    <div class="card">
+        <div class="card-header">
+            <h3>{% translate "Request New Car Model" %}</h3>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="brand_name" class="form-label">{% translate "Brand Name" %}</label>
+                    <input type="text" name="brand_name" id="brand_name" class="form-control" 
+                           required placeholder="{% translate 'Enter brand name' %}"
+                           list="existing-brands">
+                    <datalist id="existing-brands">
+                        {% for brand in brands %}
+                            <option value="{{ brand.name }}">
+                        {% endfor %}
+                    </datalist>
+                    <small class="text-muted">
+                        {% translate "You can enter an existing brand or request a new one" %}
+                    </small>
+                </div>
+                <div class="mb-3">
+                    <label for="name" class="form-label">{% translate "Model Name" %}</label>
+                    <input type="text" name="name" id="name" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">{% translate "Description" %}</label>
+                    <textarea name="description" id="description" class="form-control" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">{% translate "Submit Request" %}</button>
+                <a href="{% url 'agency_cars_list' request.GET.agency_id %}" class="btn btn-secondary">{% translate "Cancel" %}</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

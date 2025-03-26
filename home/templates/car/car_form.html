@@ -71,7 +71,7 @@
     <div class="container">
         <div class="card shadow">
             <div class="card-header bg-primary py-3">
-                <h3 class="text-white m-0 fw-bold">{% translate "Update Car" %}</h3>
+                <h3 class="text-white m-0 fw-bold">{% if car %}{% translate "Update Car" %}{% else %}{% translate "Add a New Car" %}{% endif %}</h3>
             </div>
             <div class="card-body p-4">
                 <form method="post" enctype="multipart/form-data" class="car-form">
@@ -117,7 +117,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="fuel_policy" class="form-label">{% translate "Fuel Policy" %}</label>
-                                <input type="text" name="fuel_policy" id="fuel_policy" class="form-control" value="{{ car.fuel_policy }}" required>
+                                <input type="text" name="fuel_policy" id="fuel_policy" class="form-control" value="{% if car %}{{ car.fuel_policy }}{% endif %}" required>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -125,7 +125,7 @@
                                 <label for="security_deposit" class="form-label">{% translate "Security Deposit (TND)" %}</label>
                                 <div class="input-group">
                                     <span class="input-group-text">$</span>
-                                    <input type="number" step="0.01" name="security_deposit" id="security_deposit" class="form-control" value="{{ car.security_deposit }}" required>
+                                    <input type="number" step="0.01" name="security_deposit" id="security_deposit" class="form-control" value="{% if car %}{{ car.security_deposit }}{% endif %}" required>
                                 </div>
                             </div>
                         </div>
@@ -135,7 +135,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="minimum_license_age" class="form-label">{% translate "Minimum License Age (YEARS)" %}</label>
-                                <input type="number" name="minimum_license_age" id="minimum_license_age" class="form-control" value="{{ car.minimum_license_age }}" required>
+                                <input type="number" name="minimum_license_age" id="minimum_license_age" class="form-control" value="{% if car %}{{ car.minimum_license_age }}{% endif %}" required>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -143,7 +143,7 @@
                                 <label for="price_per_day" class="form-label">{% translate "Price per Day (TND)" %}</label>
                                 <div class="input-group">
                                     <span class="input-group-text">$</span>
-                                    <input type="number" step="0.01" name="price_per_day" id="price_per_day" class="form-control" value="{{ car.price_per_day }}" required>
+                                    <input type="number" step="0.01" name="price_per_day" id="price_per_day" class="form-control" value="{% if car %}{{ car.price_per_day }}{% endif %}" required>
                                 </div>
                             </div>
                         </div>
@@ -159,6 +159,26 @@
                                         <option value="{{ gt.id }}" {% if car and car.gear_type.id == gt.id %}selected{% endif %}>{{ gt.name }}</option>
                                     {% endfor %}
                                 </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="unavailability_periods" class="form-label">{% translate "Unavailability Periods" %}</label>
+                                <div id="unavailability-periods-wrapper">
+                                    {% if car %}
+                                        {% for period in car.unavailability_periods.all %}
+                                        <div class="input-group mb-2">
+                                            <input type="date" name="unavailability_periods[start][]" class="form-control" value="{{ period.start_date }}">
+                                            <input type="date" name="unavailability_periods[end][]" class="form-control" value="{{ period.end_date }}">
+                                            <button type="button" class="btn btn-danger remove-period">{% translate "Remove" %}</button>
+                                        </div>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                                <button type="button" id="add-period" class="btn btn-secondary mt-2">{% translate "Add Period" %}</button>
                             </div>
                         </div>
                     </div>
@@ -198,6 +218,26 @@
                     });
                 }
             });
+        });
+    });
+
+    document.getElementById('add-period').addEventListener('click', function () {
+        const wrapper = document.getElementById('unavailability-periods-wrapper');
+        const newPeriod = document.createElement('div');
+        newPeriod.classList.add('input-group', 'mb-2');
+        newPeriod.innerHTML = `
+            <input type="date" name="unavailability_periods[start][]" class="form-control" placeholder="{% translate 'Start Date' %}">
+            <input type="date" name="unavailability_periods[end][]" class="form-control" placeholder="{% translate 'End Date' %}">
+            <button type="button" class="btn btn-danger remove-period">{% translate "Remove" %}</button>
+        `;
+        wrapper.appendChild(newPeriod);
+        newPeriod.querySelector('.remove-period').addEventListener('click', function () {
+            newPeriod.remove();
+        });
+    });
+    document.querySelectorAll('.remove-period').forEach(button => {
+        button.addEventListener('click', function () {
+            button.parentElement.remove();
         });
     });
 </script>

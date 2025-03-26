@@ -3,6 +3,17 @@ from carrent.settings import *
 DEBUG = True
 
 
+ALLOWED_HOSTS = [
+    '127.0.0.1', 
+    'localhost', 
+    'scaling-bassoon-7vrgj675g96wcwp97-8000.app.github.dev'
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://scaling-bassoon-7vrgj675g96wcwp97-8000.app.github.dev",
+    "http://127.0.0.1:8000",
+    "http://localhost:8000"
+]
 if DEBUG:
     INSTALLED_APPS += [
         'debug_toolbar',
@@ -43,16 +54,6 @@ if DEBUG:
         'debug_toolbar.panels.redirects.RedirectsPanel',
         'debug_toolbar.panels.profiling.ProfilingPanel',
     ]
-    # DATABASES = {
-    #     'default': {
-    #         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-    #         'NAME': 'tracking',
-    #         'USER': 'tracking',
-    #         'PASSWORD': 'tracking',
-    #         'HOST': '127.0.0.1',
-    #         'PORT': '5432',
-    #     }
-    # }
     TEMPLATE_DEBUG = DEBUG
     ALLOWED_HOSTS += ['*']
     RAVEN_CONFIG = { 'dsn': ''}

@@ -6,7 +6,11 @@
     <h2>{% translate "Agency Cars" %}</h2>
     <div class="row mb-3">
         <div class="col-md-6">
-            <a href="{% url 'car_add' %}" class="btn btn-success">{% translate "Add Car" %}</a>
+            <div class="btn-group">
+                <a href="{% url 'car_add' selected_agency.id %}" class="btn btn-success">{% translate "Add Car" %}</a>
+                <a href="{% url 'request_car_model' %}?agency_id={{ selected_agency.id }}" class="btn btn-secondary">{% translate "Request New Car Model" %}</a>
+                <a href="{% url 'car_model_requests_history' %}?agency_id={{ selected_agency.id }}" class="btn btn-info">{% translate "View Requests History" %}</a>
+            </div>
         </div>
         <div class="col-md-6">
             <form method="GET" action="">
