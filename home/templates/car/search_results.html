@@ -5,406 +5,7 @@
 {% block headerContent %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.6.3/nouislider.min.css">
-<style>
-    .main-container {
-        margin-top: 200px;
-        background: #f8f9fa;
-        min-height: 100vh;
-        padding: 30px 0;
-    }
-
-    .card-car {
-        background: white;
-        border: none;
-        border-radius: 20px;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-        transition: all 0.3s ease;
-        margin-bottom: 30px;
-        overflow: hidden;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .card-car:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 12px 25px rgba(0,0,0,0.1);
-    }
-
-    .car-img-container {
-        position: relative;
-        overflow: hidden;
-        height: 100%;
-        width: 100%;
-    }
-
-    .car-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.5s ease;
-    }
-
-    .card-car:hover .car-img {
-        transform: scale(1.05);
-    }
-
-    .car-info {
-        padding: 20px;
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .car-title {
-        font-size: 1.3em;
-        font-weight: 600;
-        color: #2c3e50;
-        margin-bottom: 15px;
-    }
-
-    .features-list {
-        list-style: none;
-        padding: 0;
-        margin-bottom: 20px;
-        flex-grow: 1;
-    }
-
-    .features-list li {
-        display: flex;
-        align-items: center;
-        margin-bottom: 12px;
-        color: #596777;
-    }
-
-    .features-list i {
-        width: 25px;
-        color: #ff7043;
-        margin-right: 10px;
-    }
-
-    .price-tag {
-        font-size: 1.5em;
-        color: #ff7043;
-        font-weight: 700;
-        margin-bottom: 20px;
-        display: flex;
-        align-items: baseline;
-    }
-
-    .price-tag small {
-        font-size: 0.6em;
-        margin-left: 5px;
-        color: #999;
-    }
-
-    .filters-section {
-        background: white;
-        border-radius: 20px;
-        padding: 25px;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-        position: sticky;
-        top: 220px;
-    }
-
-    .filter-header {
-        margin-bottom: 25px;
-        padding-bottom: 15px;
-        border-bottom: 2px solid #f0f0f0;
-    }
-
-    .filter-header h4 {
-        color: #2c3e50;
-        font-weight: 600;
-        margin: 0;
-    }
-
-    .filter-group {
-        margin-bottom: 25px;
-    }
-
-    .filter-label {
-        font-weight: 500;
-        color: #2c3e50;
-        margin-bottom: 15px;
-        display: block;
-    }
-
-    .noUi-connect {
-        background: #ff7043;
-    }
-
-    .noUi-handle {
-        border-radius: 50%;
-        background: #ff7043;
-        box-shadow: none;
-        border: 2px solid white;
-        cursor: pointer;
-    }
-
-    .price-inputs {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
-        margin-top: 15px;
-    }
-
-    .price-input {
-        background: #f8f9fa;
-        border: 1px solid #e9ecef;
-        border-radius: 10px;
-        padding: 8px;
-        text-align: center;
-        color: #2c3e50;
-    }
-
-    .sort-section {
-        background: white;
-        padding: 20px;
-        border-radius: 20px;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-        margin-bottom: 30px;
-    }
-
-    .sort-select {
-        background: #f8f9fa;
-        border: 1px solid #e9ecef;
-        border-radius: 10px;
-        padding: 10px 15px;
-        color: #2c3e50;
-        min-width: 200px;
-    }
-
-    .results-count {
-        color: #2c3e50;
-        font-weight: 600;
-    }
-
-    .search-dates {
-        color: #596777;
-        font-size: 0.9em;
-    }
-
-    .rent-now-btn {
-        background: #ff7043;
-        border: none;
-        padding: 12px;
-        border-radius: 10px;
-        color: white;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .rent-now-btn:hover {
-        background: #f4511e;
-        transform: translateY(-2px);
-        color: white;
-    }
-
-    .comparison-checkbox {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        z-index: 2;
-    }
-
-    #compareBar {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: rgba(255, 255, 255, 0.98);
-        padding: 20px;
-        box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
-        transform: translateY(100%);
-        transition: transform 0.3s ease;
-        z-index: 1000;
-    }
-
-    #compareBar.visible {
-        transform: translateY(0);
-    }
-
-    .compare-btn {
-        background: #2c3e50;
-        border: none;
-        padding: 10px 25px;
-        border-radius: 10px;
-        color: white;
-        font-weight: 500;
-        transition: all 0.3s ease;
-    }
-
-    .compare-btn:hover {
-        background: #34495e;
-        transform: translateY(-2px);
-    }
-
-    @media (max-width: 768px) {
-        .filters-section {
-            position: relative;
-            top: 0;
-            margin-bottom: 30px;
-        }
-        
-        .main-container {
-            margin-top: 100px;
-        }
-    }
-
-    .car-img-wrapper {
-        position: relative;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        border-radius: 20px 20px 0 0;
-    }
-
-    .car-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.5s ease;
-    }
-
-    .car-badge {
-        position: absolute;
-        top: 15px;
-        left: 15px;
-        background: rgba(255, 255, 255, 0.9);
-        padding: 5px 10px;
-        border-radius: 15px;
-        font-size: 0.8em;
-        color: #2c3e50;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-
-    .car-specs {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-        margin: 15px 0;
-    }
-
-    .spec-item {
-        display: flex;
-        align-items: center;
-        font-size: 0.9em;
-        color: #596777;
-    }
-
-    .spec-item i {
-        margin-right: 5px;
-        color: #ff7043;
-        width: 20px;
-        text-align: center;
-    }
-
-    .pagination-container {
-        margin-top: 40px;
-        margin-bottom: 60px;
-    }
-
-    .pagination {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 5px;
-    }
-
-    .page-item {
-        margin: 0 2px;
-    }
-
-    .page-link {
-        padding: 10px 15px;
-        border-radius: 50%;
-        color: #2c3e50;
-        background: white;
-        border: 1px solid #e9ecef;
-        transition: all 0.3s ease;
-    }
-
-    .page-link:hover {
-        background: #ff7043;
-        color: white;
-        border-color: #ff7043;
-    }
-
-    .page-item.active .page-link {
-        background: #ff7043;
-        border-color: #ff7043;
-        color: white;
-    }
-
-    .page-item.disabled .page-link {
-        background: #f8f9fa;
-        color: #6c757d;
-        border-color: #e9ecef;
-    }
-
-    .car-actions {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: 20px;
-    }
-
-    .distance-badge {
-        background: #e9ecef;
-        padding: 5px 10px;
-        border-radius: 15px;
-        font-size: 0.8em;
-        color: #596777;
-    }
-
-    .price-slider-container {
-        padding: 10px 20px 30px 20px;
-    }
-
-    .price-range-display {
-        text-align: center;
-        font-size: 1.1em;
-        margin-top: 10px;
-        color: #ff7043;
-    }
-
-    .slider {
-        -webkit-appearance: none;
-        width: 100%;
-        height: 8px;
-        border-radius: 5px;
-        background: #d3d3d3;
-        outline: none;
-        opacity: 0.7;
-        -webkit-transition: .2s;
-        transition: opacity .2s;
-    }
-
-    .slider:hover {
-        opacity: 1;
-    }
-
-    .slider::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        background: #ff7043;
-        cursor: pointer;
-    }
-
-    .slider::-moz-range-thumb {
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        background: #ff7043;
-        cursor: pointer;
-    }
-</style>
+<link rel="stylesheet" href="{% static 'assets/css/car-search-res.css' %}" />
 {% endblock %}
 
 {% block bodyContent %}
@@ -412,7 +13,7 @@
     <div class="container mt-5">
         <div class="row">
             <!-- Filters Sidebar -->
-            <div class="col-md-3">
+            <div class="col-lg-3 col-md-4">
                 <form method="GET" action="{% url 'car_search_filter' %}" id="filterForm">
                     <!-- Preserve search parameters -->
                     <input type="hidden" name="latitude" value="{{ search_params.latitude }}">
@@ -427,7 +28,7 @@
                         </div>
                         
                         <div class="filter-group">
-                            <div class="filter-label">{% translate "Price Range" %}</div>
+                            <label class="filter-label">{% translate "Price Range" %}</label>
                             <div class="price-slider-container">
                                 <input type="range" 
                                        class="slider" 
@@ -444,7 +45,7 @@
                         </div>
 
                         <div class="filter-group">
-                            <label>{% translate "Brand" %}</label>
+                            <label class="filter-label">{% translate "Brand" %}</label>
                             <select class="form-control brand-select" name="brand">
                                 <option value="">{% translate "All Brands" %}</option>
                                 {% for brand in brands %}
@@ -456,44 +57,46 @@
                         </div>
 
                         <div class="filter-group">
-                            <label>{% translate "Gear Type" %}</label>
-                            {% for gear_type in gear_types %}
-                            <div class="form-check gear-type-option">
-                                <input class="form-check-input" type="checkbox" name="gear_types" 
-                                    value="{{ gear_type.id }}" id="gear_{{ gear_type.id }}"
-                                    {% if gear_type.id in filters.gear_types %}checked{% endif %}>
-                                <label class="form-check-label" for="gear_{{ gear_type.id }}">
-                                    {{ gear_type.name }}
-                                </label>
+                            <label class="filter-label">{% translate "Gear Type" %}</label>
+                            <div class="gear-type-options">
+                                {% for gear_type in gear_types %}
+                                <div class="form-check gear-type-option">
+                                    <input class="form-check-input" type="checkbox" name="gear_types" 
+                                        value="{{ gear_type.id }}" id="gear_{{ gear_type.id }}"
+                                        {% if gear_type.id in filters.gear_types %}checked{% endif %}>
+                                    <label class="form-check-label" for="gear_{{ gear_type.id }}">
+                                        {{ gear_type.name }}
+                                    </label>
+                                </div>
+                                {% endfor %}
                             </div>
-                            {% endfor %}
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100 apply-filters-btn">
-                            {% translate "Apply Filters" %}
+                        <button type="submit" class="btn apply-filters-btn w-100">
+                            <i class="fas fa-filter"></i> {% translate "Apply Filters" %}
                         </button>
                     </div>
                 </form>
             </div>
 
             <!-- Results Section -->
-            <div class="col-md-9">
+            <div class="col-lg-9 col-md-8">
                 <div class="sort-section">
-                    <div class="row">
-                        <div class="col">
-                            <h2>{% translate "Available Cars" %} ({{ cars|length }})</h2>
-                            <p>{% translate "From" %} {{ search_params.start_date }} {% translate "to" %} {{ search_params.end_date }}</p>
+                    <div class="row align-items-center">
+                        <div class="col-md-7">
+                            <h2>{% translate "Available Cars" %} <span class="badge badge-primary">{{ cars|length }}</span></h2>
+                            <p class="search-dates"><i class="far fa-calendar-alt"></i> {% translate "From" %} {{ search_params.start_date }} {% translate "to" %} {{ search_params.end_date }}</p>
                         </div>
-                        <div class="col-auto">
+                        <div class="col-md-5 text-md-right">
                             <select class="form-control sort-select" onChange="updateSort(this.value)">
                                 <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>
-                                    {% translate "Price: Low to High" %}
+                                    <i class="fas fa-sort-amount-down-alt"></i> {% translate "Price: Low to High" %}
                                 </option>
                                 <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>
-                                    {% translate "Price: High to Low" %}
+                                    <i class="fas fa-sort-amount-up"></i> {% translate "Price: High to Low" %}
                                 </option>
                                 <option value="distance" {% if sort == 'distance' %}selected{% endif %}>
-                                    {% translate "Distance" %}
+                                    <i class="fas fa-map-marker-alt"></i> {% translate "Distance" %}
                                 </option>
                             </select>
                         </div>
@@ -503,12 +106,18 @@
                 <!-- Results Grid -->
                 <div class="row" id="carsList">
                     {% for car in cars %}
-                    <div class="col-md-4">
+                    <div class="col-lg-4 col-md-6">
                         <div class="card card-car">
                             {% if comparison_enabled %}
-                            <input type="checkbox" class="comparison-checkbox" 
-                                data-car-id="{{ car.id }}" 
-                                onchange="handleComparisonChange(this)">
+                            <div class="form-check comparison-container">
+                                <input type="checkbox" class="form-check-input comparison-checkbox" 
+                                    id="compare_{{ car.id }}"
+                                    data-car-id="{{ car.id }}" 
+                                    onchange="handleComparisonChange(this)">
+                                <label class="form-check-label" for="compare_{{ car.id }}">
+                                    <span class="sr-only">{% translate "Compare" %}</span>
+                                </label>
+                            </div>
                             {% endif %}
                             
                             <div class="car-img-wrapper">
@@ -544,7 +153,7 @@
                                         <i class="fas fa-map-marker-alt"></i> {{ car.distance.km|floatformat:1 }} km
                                     </div>
                                 </div>
-                                <a href="{% url 'rental_request' car.id %}" class="btn btn-primary btn-block rent-now-btn mt-3">
+                                <a href="{% url 'rental_request' car.id %}" class="btn btn-block rent-now-btn">
                                     <i class="fas fa-key"></i> {% translate "Rent Now" %}
                                 </a>
                             </div>
@@ -554,23 +163,25 @@
                     <div class="col-12">
                         <div class="alert alert-info">
                             <i class="fas fa-info-circle"></i> {% translate "No cars available for the selected criteria" %}
+                            <p class="mt-2 mb-0">{% translate "Try adjusting your filters or search dates to see more results." %}</p>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
 
                 <!-- Pagination -->
+                {% if cars.paginator.num_pages > 1 %}
                 <div class="pagination-container">
                     <nav aria-label="Page navigation">
                         <ul class="pagination">
                             {% if cars.has_previous %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?page=1{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">
+                                    <a class="page-link" href="?page=1{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.price %}&price={{ request.GET.price }}{% endif %}" aria-label="First">
                                         <i class="fas fa-angle-double-left"></i>
                                     </a>
                                 </li>
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ cars.previous_page_number }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">
+                                    <a class="page-link" href="?page={{ cars.previous_page_number }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.price %}&price={{ request.GET.price }}{% endif %}" aria-label="Previous">
                                         <i class="fas fa-angle-left"></i>
                                     </a>
                                 </li>
@@ -583,19 +194,19 @@
                                     </li>
                                 {% elif num > cars.number|add:'-3' and num < cars.number|add:'3' %}
                                     <li class="page-item">
-                                        <a class="page-link" href="?page={{ num }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">{{ num }}</a>
+                                        <a class="page-link" href="?page={{ num }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.price %}&price={{ request.GET.price }}{% endif %}">{{ num }}</a>
                                     </li>
                                 {% endif %}
                             {% endfor %}
 
                             {% if cars.has_next %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ cars.next_page_number }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">
+                                    <a class="page-link" href="?page={{ cars.next_page_number }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.price %}&price={{ request.GET.price }}{% endif %}" aria-label="Next">
                                         <i class="fas fa-angle-right"></i>
                                     </a>
                                 </li>
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ cars.paginator.num_pages }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">
+                                    <a class="page-link" href="?page={{ cars.paginator.num_pages }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.price %}&price={{ request.GET.price }}{% endif %}" aria-label="Last">
                                         <i class="fas fa-angle-double-right"></i>
                                     </a>
                                 </li>
@@ -603,18 +214,21 @@
                         </ul>
                     </nav>
                 </div>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
 
+<!-- Comparison Bar -->
 <div id="compareBar" class="text-center">
     <div class="container">
-        <div class="row">
+        <div class="row align-items-center">
             <div class="col">
+                <i class="fas fa-balance-scale mr-2"></i>
                 <span id="selectedCount">0</span> {% translate "cars selected" %}
-                <button class="btn btn-primary ml-3 compare-btn" onclick="compareSelected()">
-                    {% translate "Compare Cars" %}
+                <button class="btn compare-btn" onclick="compareSelected()">
+                    <i class="fas fa-exchange-alt mr-1"></i> {% translate "Compare Cars" %}
                 </button>
             </div>
         </div>
@@ -679,43 +293,84 @@ document.addEventListener('DOMContentLoaded', function() {
         priceDisplay.textContent = this.value;
     });
     
+    // Add animation to car cards
+    const carCards = document.querySelectorAll('.card-car');
+    carCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+    });
+    
+    // Make sure form doesn't submit on every slider change
+    // Only submit when slider is released
     priceSlider.addEventListener('change', function() {
         document.getElementById('filterForm').submit();
     });
-
-    const priceSlider = document.getElementById('price-slider');
-    const minPrice = {{ price_range.min_price|default:0 }};
-    const maxPrice = {{ price_range.max_price|default:1000 }};
     
-    noUiSlider.create(priceSlider, {
-        start: [
-            {{ filters.min_price|default:price_range.min_price }},
-            {{ filters.max_price|default:price_range.max_price }}
-        ],
-        connect: true,
-        range: {
-            'min': minPrice,
-            'max': maxPrice
-        },
-        step: 1
-    });
-    
-    const minPriceInput = document.getElementById('min-price');
-    const maxPriceInput = document.getElementById('max-price');
-    
-    priceSlider.noUiSlider.on('update', function(values, handle) {
-        const value = parseInt(values[handle]);
-        if (handle === 0) {
-            minPriceInput.value = value;
-        } else {
-            maxPriceInput.value = value;
+    // Initialize noUiSlider if present
+    if (document.getElementById('price-slider')) {
+        const priceSliderElement = document.getElementById('price-slider');
+        const minPrice = {{ price_range.min_price|default:0 }};
+        const maxPrice = {{ price_range.max_price|default:1000 }};
+        
+        noUiSlider.create(priceSliderElement, {
+            start: [
+                {{ filters.min_price|default:price_range.min_price }},
+                {{ filters.max_price|default:price_range.max_price }}
+            ],
+            connect: true,
+            range: {
+                'min': minPrice,
+                'max': maxPrice
+            },
+            step: 1,
+            format: {
+                to: function (value) {
+                    return Math.round(value);
+                },
+                from: function (value) {
+                    return Math.round(value);
+                }
+            }
+        });
+        
+        const minPriceInput = document.getElementById('min-price');
+        const maxPriceInput = document.getElementById('max-price');
+        
+        if (minPriceInput && maxPriceInput) {
+            priceSliderElement.noUiSlider.on('update', function(values, handle) {
+                const value = parseInt(values[handle]);
+                if (handle === 0) {
+                    minPriceInput.value = value;
+                } else {
+                    maxPriceInput.value = value;
+                }
+            });
+            
+            // Update form when slider changes
+            priceSliderElement.noUiSlider.on('change', function() {
+                document.getElementById('filterForm').submit();
+            });
         }
-    });
+    }
     
-    // Met à jour le formulaire quand le slider change
-    priceSlider.noUiSlider.on('change', function() {
-        document.getElementById('filterForm').submit();
-    });
+    // Toggle filters on mobile
+    const filterHeaderBtn = document.querySelector('.filter-header');
+    if (filterHeaderBtn) {
+        filterHeaderBtn.addEventListener('click', function() {
+            const filterGroups = document.querySelectorAll('.filter-group');
+            const applyBtn = document.querySelector('.apply-filters-btn');
+            
+            // Check if we're on mobile
+            if (window.innerWidth < 768) {
+                filterGroups.forEach(group => {
+                    group.classList.toggle('d-none');
+                });
+                
+                if (applyBtn) {
+                    applyBtn.classList.toggle('d-none');
+                }
+            }
+        });
+    }
 });
 </script>
 {% endblock %}

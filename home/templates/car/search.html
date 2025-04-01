@@ -8,21 +8,34 @@
 {% endblock %}
 
 {% block bodyContent %}
-<div class="container search-container">
+<!-- Hero Section -->
+<div class="jumbotron hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title">{% translate "Find Your Perfect Ride" %}</h1>
+            <p class="hero-subtitle">{% translate "Discover the freedom of exploring Tunisia with our premium car rental service" %}</p>
+            <a href="#search-form" class="btn btn-primary btn-lg">{% translate "Rent Now" %}</a>
+        </div>
+    </div>
+</div>
+
+<!-- Car Search Section -->
+<div class="container search-container" id="search-form">
     <div class="row">
         <div class="col-md-12">
             <div class="search-form">
+                <h2 class="text-center mb-4">{% translate "Search Available Cars" %}</h2>
                 <form action="{% url 'car_search_results' %}" method="GET">
                     <div class="row">
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label for="start_date">{% translate "Start Date" %}</label>
+                                <label for="start_date">{% translate "Pick-up Date" %}</label>
                                 <input type="date" id="start_date" name="start_date" class="form-control" required>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label for="end_date">{% translate "End Date" %}</label>
+                                <label for="end_date">{% translate "Return Date" %}</label>
                                 <input type="date" id="end_date" name="end_date" class="form-control" required>
                             </div>
                         </div>
@@ -40,6 +53,7 @@
                     </div>
                     <div class="row mt-3">
                         <div class="col-md-12">
+                            <h5 class="mb-3">{% translate "Select your location on the map" %}</h5>
                             <div id="map"></div>
                             <input type="hidden" name="latitude" id="latitude">
                             <input type="hidden" name="longitude" id="longitude">
@@ -47,10 +61,146 @@
                     </div>
                     <div class="row">
                         <div class="col-md-12">
-                            <button type="submit" class="btn btn-primary w-100">{% translate "Search Cars" %}</button>
+                            <button type="submit" class="btn btn-primary btn-lg w-100">{% translate "Search Cars" %}</button>
                         </div>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="features-section">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-md-12">
+                <h2>{% translate "Why Choose Us" %}</h2>
+                <p class="lead">{% translate "Discover the advantages of our premium car rental service" %}</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <h3 class="feature-title">{% translate "Best Price Guarantee" %}</h3>
+                    <p>{% translate "We offer the most competitive rates in the market with no hidden fees" %}</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-car"></i>
+                    </div>
+                    <h3 class="feature-title">{% translate "Wide Range of Vehicles" %}</h3>
+                    <p>{% translate "From economy to luxury, we have the perfect car to suit your needs" %}</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h3 class="feature-title">{% translate "24/7 Customer Support" %}</h3>
+                    <p>{% translate "Our dedicated team is always ready to assist you anytime, anywhere" %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Car Categories Section -->
+<div class="car-categories">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-md-12">
+                <h2>{% translate "Explore Our Car Categories" %}</h2>
+                <p class="lead">{% translate "Find the perfect vehicle for your journey" %}</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="category-card">
+                    <img src="/api/placeholder/400/300" alt="Economy Cars" class="category-image">
+                    <div class="category-overlay">
+                        <h3 class="category-title">{% translate "Economy" %}</h3>
+                        <p>{% translate "Affordable and fuel-efficient" %}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="category-card">
+                    <img src="/api/placeholder/400/300" alt="SUVs" class="category-image">
+                    <div class="category-overlay">
+                        <h3 class="category-title">{% translate "SUVs" %}</h3>
+                        <p>{% translate "Perfect for adventures and family trips" %}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="category-card">
+                    <img src="/api/placeholder/400/300" alt="Luxury Cars" class="category-image">
+                    <div class="category-overlay">
+                        <h3 class="category-title">{% translate "Luxury" %}</h3>
+                        <p>{% translate "Premium vehicles for a special experience" %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Testimonials Section -->
+<div class="testimonials">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-md-12">
+                <h2>{% translate "What Our Customers Say" %}</h2>
+                <p class="lead">{% translate "Read about experiences from our satisfied clients" %}</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div class="quote-icon">
+                        <i class="fas fa-quote-right"></i>
+                    </div>
+                    <p class="testimonial-text">{% translate "The service was excellent! The car was in perfect condition and the booking process was simple and fast." %}</p>
+                    <p class="testimonial-author">— Ahmed, Tunis</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div class="quote-icon">
+                        <i class="fas fa-quote-right"></i>
+                    </div>
+                    <p class="testimonial-text">{% translate "I love how easy it was to find a car near my location. The map feature is really helpful!" %}</p>
+                    <p class="testimonial-author">— Sophie, Sousse</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div class="quote-icon">
+                        <i class="fas fa-quote-right"></i>
+                    </div>
+                    <p class="testimonial-text">{% translate "Great prices and even better customer service. I'll definitely rent with them again." %}</p>
+                    <p class="testimonial-author">— Karim, Hammamet</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+<div class="cta-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <h2 class="cta-title">{% translate "Ready to Start Your Journey?" %}</h2>
+                <p class="lead mb-4">{% translate "Join thousands of satisfied customers and experience Tunisia like never before" %}</p>
+                <a href="#search-form" class="btn btn-light btn-lg">{% translate "Rent Your Car Now" %}</a>
             </div>
         </div>
     </div>
@@ -64,6 +214,14 @@
     let selectedLocation = null;
 
     document.addEventListener('DOMContentLoaded', function() {
+        // Set default dates (today and tomorrow)
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        
+        document.getElementById('start_date').valueAsDate = today;
+        document.getElementById('end_date').valueAsDate = tomorrow;
+        
         // Initialize map
         map = L.map('map').setView([34.0, 9.0], 7);  // Center on Tunisia
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
@@ -109,6 +267,17 @@
                 radius: radiusInKm * 1000 
             }).addTo(map);
         }
+        
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
     });
 </script>
 {% endblock %}
