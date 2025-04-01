@@ -130,6 +130,7 @@ class Agences(models.Model):
     update_date = models.DateField(auto_now=True)
     is_mail_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
+    is_auto = models.BooleanField(default=False, verbose_name=_('Auto Activate Cars'))
     zipcode = models.CharField(max_length=150, verbose_name=_('CEO Name'), null=True)
     logo = models.ImageField(upload_to="logo",null=True, blank=True)
 

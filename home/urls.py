@@ -3,7 +3,7 @@ from django.urls import path
 from django.urls import re_path
 from django.contrib.auth import views as auth_views
 from djgeojson.views import GeoJSONLayerView
-
+from django.views.generic import TemplateView 
 from home.views import index, ajax_views
 from home.views import connection_views
 from home.views import registration
@@ -19,6 +19,10 @@ from home.views.agences import DeleteCarView
 from .views.car import update_car
 from home.views.car import CarModelRequestView
 from home.views.car import CarModelRequestHistoryView
+from home.views.car import CarSearchView
+from home.views.car import CarSearchResultsView
+from home.views.car import CarSearchFilterView
+from home.views.car import CarRentalRequestView
 
 from home.models import State
 
@@ -57,4 +61,9 @@ urlpatterns = [
     path('car/update/<int:car_id>/', update_car, name='car_update'),
     path('car-model/request/', CarModelRequestView.as_view(), name='request_car_model'),
     path('car-model/requests/history/', CarModelRequestHistoryView.as_view(), name='car_model_requests_history'),
+    path('terms-and-conditions/', TemplateView.as_view(template_name="terms_and_conditions.html"), name='terms_and_conditions'),
+    path('cars/<int:car_id>/rent/', CarRentalRequestView.as_view(), name='rental_request'),
+    path('cars/search/', CarSearchView.as_view(), name='car_search'),
+    path('cars/search/results/', CarSearchResultsView.as_view(), name='car_search_results'),
+    path('cars/search/filter/', CarSearchFilterView.as_view(), name='car_search_filter'),
 ]

@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block headerContent %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<style>
+    #map {
+        height: 400px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+    }
+    .search-container {
+        margin-top: 200px;
+        margin-bottom: 40px;
+    }
+    .search-form {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .results-container {
+        margin-top: 20px;
+    }
+    .car-card {
+        margin-bottom: 15px;
+        transition: transform 0.2s;
+    }
+    .car-card:hover {
+        transform: translateY(-5px);
+    }
+    .radius-control {
+        margin-bottom: 15px;
+    }
+    .radius-value {
+        font-weight: bold;
+        color: #ff7043;
+    }
+    .radius-slider {
+        width: 100%;
+        margin-top: 10px;
+    }
+    .radius-display {
+        text-align: center;
+        font-size: 1.1em;
+        margin-top: 5px;
+        color: #ff7043;
+    }
+    .slider {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 8px;
+        border-radius: 5px;
+        background: #d3d3d3;
+        outline: none;
+        opacity: 0.7;
+        -webkit-transition: .2s;
+        transition: opacity .2s;
+    }
+    .slider:hover {
+        opacity: 1;
+    }
+    .slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #ff7043;
+        cursor: pointer;
+    }
+    .slider::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #ff7043;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block bodyContent %}
+<div class="container search-container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="search-form">
+                <form action="{% url 'car_search_results' %}" method="GET">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="start_date">{% translate "Start Date" %}</label>
+                                <input type="date" id="start_date" name="start_date" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="end_date">{% translate "End Date" %}</label>
+                                <input type="date" id="end_date" name="end_date" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="radius">{% translate "Search Radius" %}</label>
+                                <input type="range" id="radius" name="radius" 
+                                       class="slider radius-slider" 
+                                       value="10" min="1" max="100" step="1">
+                                <div class="radius-display">
+                                    <span id="radiusValue">10</span> {% translate "km" %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <div id="map"></div>
+                            <input type="hidden" name="latitude" id="latitude">
+                            <input type="hidden" name="longitude" id="longitude">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button type="submit" class="btn btn-primary w-100">{% translate "Search Cars" %}</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script>
+    let map;
+    let marker;
+    let circle;
+    let selectedLocation = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize map
+        map = L.map('map').setView([34.0, 9.0], 7);  // Center on Tunisia
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        // Add radius control input listener
+        const radiusInput = document.getElementById('radius');
+        const radiusDisplay = document.getElementById('radiusValue');
+        
+        radiusInput.addEventListener('input', function() {
+            radiusDisplay.textContent = this.value;
+            updateCircle();
+        });
+
+        map.on('click', function(e) {
+            selectedLocation = e.latlng;
+            document.getElementById('latitude').value = e.latlng.lat;
+            document.getElementById('longitude').value = e.latlng.lng;
+            
+            // Update marker
+            if (marker) {
+                map.removeLayer(marker);
+            }
+            marker = L.marker(e.latlng).addTo(map);
+            
+            // Update circle
+            updateCircle();
+            
+            // Fit bounds to show entire circle
+            if (circle) {
+                map.fitBounds(circle.getBounds());
+            }
+        });
+
+        function updateCircle() {
+            if (!selectedLocation) return;
+            
+            // Remove existing circle
+            if (circle) {
+                map.removeLayer(circle);
+            }
+            
+            // Create new circle with current radius
+            const radiusInKm = parseFloat(radiusInput.value);
+            circle = L.circle(selectedLocation, {
+                color: '#ff7043',
+                fillColor: '#ff7043',
+                fillOpacity: 0.2,
+                radius: radiusInKm * 1000 // Convert km to meters
+            }).addTo(map);
+        }
+    });
+</script>
+{% endblock %}

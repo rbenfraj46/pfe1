@@ -122,7 +122,7 @@ class RegisterCarView(View):
         agency_car.security_deposit = security_deposit
         agency_car.minimum_license_age = minimum_license_age
         agency_car.price_per_day = price_per_day
-        agency_car.is_active = False  
+        agency_car.is_active = agence.is_auto 
         agency_car.available = available
         agency_car.gear_type = GearType.objects.filter(id=gear_type_id).first()
         if image:

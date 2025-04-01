@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block headerCSSContent %}
+<style>
+    .wheel-content {
+        padding: 30px;
+        background: #fff;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        border-radius: 4px;
+        margin-bottom: 50px;
+    }
+    .terms-section {
+        margin-bottom: 30px;
+        padding: 20px;
+        border-left: 4px solid #fdb819;
+        background: #f9f9f9;
+    }
+    .terms-section h6 {
+        color: #333;
+        font-size: 18px;
+        margin-bottom: 15px;
+        font-weight: 600;
+    }
+    .terms-section p {
+        color: #666;
+        line-height: 1.6;
+    }
+</style>
+{% endblock headerCSSContent %}
+
+{% block bodyContent %}
+<div class="wheel-start3">
+    <img src="{% static 'images/bg7.jpg' %}" alt="" class="wheel-img">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12 padd-lr0">
+                <div class="wheel-start3-body clearfix marg-lg-t255 marg-lg-b75 marg-sm-t190 marg-xs-b30">
+                    <h3>{% translate 'Terms and Conditions' %}</h3>
+                    <ol class="breadcrumb">
+                        <li><a href="{% url 'index' %}">{% translate 'Home' %}</a></li>
+                        <li class="active">{% translate 'Terms and Conditions' %}</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="wheel-billing">
+                <div class="wheel-header marg-lg-t140 marg-lg-b50 marg-sm-t100">
+                    <h5>{% translate 'Please read the following terms and conditions carefully:' %}</h5>
+                </div>
+                <div class="wheel-content">
+                    <div class="terms-section">
+                        <h6>{% translate 'Compliance with Laws' %}</h6>
+                        <p>{% translate 'You must ensure that your agency complies with all local laws and regulations, including but not limited to:' %}</p>
+                        <ul>
+                            <li>{% translate 'Business registration requirements' %}</li>
+                            <li>{% translate 'Tax obligations' %}</li>
+                            <li>{% translate 'Insurance requirements' %}</li>
+                            <li>{% translate 'Vehicle safety standards' %}</li>
+                        </ul>
+                    </div>
+
+                    <div class="terms-section">
+                        <h6>{% translate 'Information Accuracy' %}</h6>
+                        <p>{% translate 'Your agency must provide accurate and truthful information during registration, including:' %}</p>
+                        <ul>
+                            <li>{% translate 'Company details' %}</li>
+                            <li>{% translate 'Contact information' %}</li>
+                            <li>{% translate 'Vehicle specifications' %}</li>
+                            <li>{% translate 'Rental terms' %}</li>
+                        </ul>
+                    </div>
+
+                    <div class="terms-section">
+                        <h6>{% translate 'Code of Conduct' %}</h6>
+                        <p>{% translate 'Your agency agrees to adhere to the platform\'s code of conduct and ethical guidelines:' %}</p>
+                        <ul>
+                            <li>{% translate 'Fair pricing practices' %}</li>
+                            <li>{% translate 'Professional customer service' %}</li>
+                            <li>{% translate 'Transparent booking policies' %}</li>
+                            <li>{% translate 'Timely responses to inquiries' %}</li>
+                        </ul>
+                    </div>
+
+                    <div class="terms-section">
+                        <h6>{% translate 'Data Protection' %}</h6>
+                        <p>{% translate 'Your agency must comply with data protection regulations and ensure customer privacy.' %}</p>
+                    </div>
+
+                    <div class="terms-section">
+                        <h6>{% translate 'Service Quality' %}</h6>
+                        <p>{% translate 'Maintain high standards of service quality and vehicle maintenance.' %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock bodyContent %}

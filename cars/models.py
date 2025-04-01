@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from datetime import datetime
 from django.conf import settings
+from django.contrib.gis.db import models as gis_models
 
 
 class Brand(models.Model):
@@ -106,10 +107,17 @@ class AgencyCar(models.Model):
     is_active = models.BooleanField(default=True)
     available = models.BooleanField(default=True)
     created = models.DateTimeField(auto_now_add=True)
+    
+    def is_available(self, start_date, end_date):
+        overlapping = self.unavailability_periods.filter(
+            start_date__lte=end_date,
+            end_date__gte=start_date
+        ).exists()
+        return not overlapping
 
     def save(self, *args, **kwargs):
-        if not self.image and self.car_model:
-            pass
+        if not self.image and self.car_model and self.car_model.img_hash and self.car_model.img_extension:
+            self.image = f"media/{self.car_model.img_hash}.{self.car_model.img_extension}"
         super().save(*args, **kwargs)
 
 class CarUnavailability(models.Model):
@@ -126,7 +134,6 @@ class CarUnavailability(models.Model):
         return f"{self.car} unavailable from {self.start_date} to {self.end_date}"
 
     def clean(self):
-        # Convert string dates to datetime.date objects if needed
         if isinstance(self.start_date, str):
             try:
                 self.start_date = datetime.strptime(self.start_date, '%Y-%m-%d').date()
