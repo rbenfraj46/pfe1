@@ -1,0 +1,26 @@
+.price-slider-container {
+    padding: 20px 10px;
+}
+
+#price-slider {
+    height: 6px;
+    margin-bottom: 20px;
+}
+
+.price-range-display {
+    text-align: center;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.noUi-connect {
+    background: #007bff;
+}
+
+.noUi-handle {
+    background: #fff;
+    border: 1px solid #007bff;
+    border-radius: 50%;
+    box-shadow: none;
+    cursor: pointer;
+}

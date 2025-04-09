@@ -184,3 +184,22 @@ class MailSubscription(models.Model):
 
     class Meta :
         db_table= 'mail_subscription'
+
+
+class AgencyPermission(models.Model):
+    PERMISSION_CHOICES = [
+        ('view', _('View Cars')),
+        ('add', _('Add Cars')),
+        ('edit', _('Edit Cars')),
+        ('delete', _('Delete Cars')),
+    ]
+
+    agency = models.ForeignKey(Agences, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    permission = models.CharField(max_length=20, choices=PERMISSION_CHOICES)
+    granted_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='granted_permissions')
+    granted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'agency_permission'
+        unique_together = ('agency', 'user', 'permission')

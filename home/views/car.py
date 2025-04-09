@@ -1,276 +1,45 @@
-from django.db import transaction
-from datetime import datetime
-from cars.models import AgencyCar, CarUnavailability, Brand, CarModel, GearType
-from django.shortcuts import get_object_or_404, render, redirect
-from django.urls import reverse
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from django.views.generic import CreateView, ListView
-from django.core.mail import send_mail
-from django.conf import settings
-from django.utils.translation import gettext as _
-from cars.models import CarModelRequest
 from django.views import View
+from django.views.generic import ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.gis.geos import Point
-from django.contrib.gis.measure import D
+from django.core.exceptions import PermissionDenied
+from django.utils.translation import gettext as _
 from django.http import JsonResponse
-from django.core.serializers import serialize
-import json
 import logging
-from django.db.models import Q, Min, Max
+
+from cars.models import (
+    AgencyCar, 
+    CarUnavailability, 
+    Brand, 
+    CarModel, 
+    GearType,
+    CarModelRequest
+)
 from home.models import Agences
-from django.contrib.gis.db.models.functions import Distance
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from home.views.agences import has_agency_permission
 
 logger = logging.getLogger(__name__)
 
-@transaction.atomic
-def update_car(request, car_id):
-    car = get_object_or_404(AgencyCar, id=car_id)
-    
-    if request.method == 'GET':
+class CarManagementMixin:
+    """Mixin pour la gestion commune des voitures"""
+    def get_car_form_context(self, agency=None, car=None):
         context = {
-            'car': car,
             'brands': Brand.objects.filter(is_active=True),
-            'car_models': CarModel.objects.filter(is_active=True),
-            'gear_types': GearType.objects.filter(is_active=True)
+            'gear_types': GearType.objects.filter(is_active=True),
         }
-        return render(request, 'car/update_car_form.html', context)
         
-    elif request.method == 'POST':
-        try:
-            car.brand_id = request.POST.get('brand')
-            car.car_model_id = request.POST.get('car_model')
-            car.gear_type_id = request.POST.get('gear_type')
-            car.security_deposit = request.POST.get('security_deposit')
-            car.price_per_day = request.POST.get('price_per_day')
-            car.fuel_policy = request.POST.get('fuel_policy')
-            car.minimum_license_age = request.POST.get('minimum_license_age')
-            car.available = request.POST.get('available') == 'on'
+        if car and car.brand:
+            context['car_models'] = CarModel.objects.filter(brand=car.brand)
+        else:
+            context['car_models'] = []
             
-            if request.FILES.get('image'):
-                car.image = request.FILES['image']
-                
-            car.save()
+        if agency:
+            context['selected_agency'] = agency
+        if car:
+            context['car'] = car
             
-            unavailability_periods_start = request.POST.getlist('unavailability_periods[start][]')
-            unavailability_periods_end = request.POST.getlist('unavailability_periods[end][]')
-
-            car.unavailability_periods.all().delete()
-
-            for start, end in zip(unavailability_periods_start, unavailability_periods_end):
-                if start and end:
-                    start_date = datetime.strptime(start, '%Y-%m-%d').date()
-                    end_date = datetime.strptime(end, '%Y-%m-%d').date()
-                    CarUnavailability.objects.create(
-                        car=car,
-                        start_date=start_date,
-                        end_date=end_date
-                    )
-            
-            messages.success(request, 'Car updated successfully')
-            return redirect('agency_cars')
-            
-        except Exception as e:
-            messages.error(request, f'Error updating car: {str(e)}')
-            context = {
-                'car': car,
-                'brands': Brand.objects.filter(is_active=True),
-                'car_models': CarModel.objects.filter(is_active=True),
-                'gear_types': GearType.objects.filter(is_active=True)
-            }
-            return render(request, 'car/update_car_form.html', context)
-            
-    return redirect('agency_cars')
-
-class CarModelRequestView(View):
-    template_name = 'car/request_car_model.html'
-    
-    def get(self, request, *args, **kwargs):
-        context = {
-            'brands': Brand.objects.filter(is_active=True)
-        }
-        return render(request, self.template_name, context)
-    
-    def post(self, request, *args, **kwargs):
-        brand_name = request.POST.get('brand_name')
-        model_name = request.POST.get('name')
-        description = request.POST.get('description')
-        
-        CarModelRequest.objects.create(
-            brand_name=brand_name,
-            model_name=model_name,
-            description=description,
-            status='pending',
-            requested_by=request.user
-        )
-        
-        messages.success(request, _('Car model request submitted successfully. Awaiting admin approval.'))
-        return redirect('agency_cars_list', agency_id=request.GET.get('agency_id'))
-
-class CarModelRequestHistoryView(LoginRequiredMixin, ListView):
-    template_name = 'car/request_car_model_history.html'
-    context_object_name = 'requests'
-    paginate_by = 10
-
-    def get_queryset(self):
-        return CarModelRequest.objects.filter(
-            requested_by=self.request.user
-        ).order_by('-created_at')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['agency_id'] = self.request.GET.get('agency_id')
         return context
-
-class CarSearchView(View):
-    template_name = 'car/search.html'
-    
-    def get(self, request):
-        return render(request, self.template_name)
-
-class CarSearchResultsView(View):
-    template_name = 'car/search_results.html'
-    
-    def get(self, request):
-        search_params = {
-            'start_date': request.GET.get('start_date'),
-            'end_date': request.GET.get('end_date'),
-            'latitude': request.GET.get('latitude'),
-            'longitude': request.GET.get('longitude'),
-            'radius': request.GET.get('radius', 10)
-        }
-        
-        if not all(search_params.values()):
-            messages.error(request, _('Missing search parameters'))
-            return redirect('car_search')
-
-        point = Point(
-            float(search_params['longitude']), 
-            float(search_params['latitude']), 
-            srid=4326
-        )
-
-        cars = self.get_available_cars(point, search_params)
-        
-        brands = Brand.objects.filter(is_active=True)
-        gear_types = GearType.objects.filter(is_active=True)
-        price_range = cars.aggregate(min_price=Min('price_per_day'), max_price=Max('price_per_day'))
-
-        price_range = AgencyCar.objects.filter(is_active=True).aggregate(
-            min_price=Min('price_per_day'),
-            max_price=Max('price_per_day')
-        )
-
-        page = request.GET.get('page', 1)
-        paginator = Paginator(cars, 6) 
-        try:
-            cars_page = paginator.page(page)
-        except PageNotAnInteger:
-            cars_page = paginator.page(1)
-        except EmptyPage:
-            cars_page = paginator.page(paginator.num_pages)
-
-        context = {
-            'cars': cars_page,
-            'search_params': search_params,
-            'brands': brands,
-            'gear_types': gear_types,
-            'price_range': price_range,
-            'comparison_enabled': True,
-            'filters': {
-                'min_price': request.GET.get('min_price', price_range['min_price']),
-                'max_price': request.GET.get('max_price', price_range['max_price'])
-            },
-            'sort': request.GET.get('sort', 'distance')
-        }
-        return render(request, self.template_name, context)
-
-    def get_available_cars(self, point, search_params):
-        return AgencyCar.objects.filter(
-            agence__location__distance_lte=(point, D(km=float(search_params['radius']))),
-            agence__is_active=True,
-            is_active=True,
-            available=True
-        ).exclude(
-            unavailability_periods__start_date__lte=search_params['end_date'],
-            unavailability_periods__end_date__gte=search_params['start_date']
-        ).select_related('brand', 'car_model', 'gear_type', 'agence').annotate(
-            distance=Distance('agence__location', point)
-        )
-
-class CarSearchFilterView(View):
-    def get(self, request):
-        search_params = {
-            'start_date': request.GET.get('start_date'),
-            'end_date': request.GET.get('end_date'),
-            'latitude': request.GET.get('latitude'),
-            'longitude': request.GET.get('longitude'),
-            'radius': request.GET.get('radius', 10)
-        }
-
-        point = Point(
-            float(search_params['longitude']), 
-            float(search_params['latitude']), 
-            srid=4326
-        )
-
-        cars = self.get_filtered_cars(point, search_params, request.GET)
-        
-        sort = request.GET.get('sort', 'distance')
-        cars = self.apply_sorting(cars, sort)
-
-        page = request.GET.get('page', 1)
-        paginator = Paginator(cars, 6) 
-        try:
-            cars_page = paginator.page(page)
-        except PageNotAnInteger:
-            cars_page = paginator.page(1)
-        except EmptyPage:
-            cars_page = paginator.page(paginator.num_pages)
-
-        context = {
-            'cars': cars_page,
-            'search_params': search_params,
-            'filters': {
-                'brand': request.GET.get('brand'),
-                'gear_types': request.GET.getlist('gear_types'),
-                'min_price': request.GET.get('min_price'),
-                'max_price': request.GET.get('max_price')
-            },
-            'sort': sort,
-            'comparison_enabled': True
-        }
-        return render(request, 'car/search_results.html', context)
-
-    def get_filtered_cars(self, point, search_params, filters):
-        cars = AgencyCar.objects.filter(
-            agence__location__distance_lte=(point, D(km=float(search_params['radius']))),
-            agence__is_active=True, 
-            is_active=True,
-            available=True
-        )
-
-        if filters.get('brand'):
-            cars = cars.filter(brand_id=filters['brand'])
-        
-        if filters.getlist('gear_types'):
-            cars = cars.filter(gear_type_id__in=filters.getlist('gear_types'))
-        
-        if filters.get('price'):
-            cars = cars.filter(price_per_day__lte=filters['price'])
-
-        return cars.select_related('brand', 'car_model', 'gear_type', 'agence').annotate(
-            distance=Distance('agence__location', point)
-        )
-
-    def apply_sorting(self, queryset, sort):
-        if sort == 'price_asc':
-            return queryset.order_by('price_per_day')
-        elif sort == 'price_desc':
-            return queryset.order_by('-price_per_day')
-        else: 
-            return queryset.order_by('distance')
 
 class CarRentalRequestView(LoginRequiredMixin, View):
     template_name = 'car/rental_request.html'
@@ -288,3 +57,250 @@ class CarRentalRequestView(LoginRequiredMixin, View):
         car = get_object_or_404(AgencyCar, id=car_id)
         messages.success(request, _('Rental request submitted successfully'))
         return redirect('car_search_results')
+
+class CarModelRequestView(LoginRequiredMixin, View):
+    template_name = 'car/request_car_model.html'
+    
+    def get(self, request, *args, **kwargs):
+        context = {
+            'brands': Brand.objects.filter(is_active=True)
+        }
+        return render(request, self.template_name, context)
+    
+    def post(self, request, *args, **kwargs):
+        CarModelRequest.objects.create(
+            brand_name=request.POST.get('brand_name'),
+            model_name=request.POST.get('name'),
+            description=request.POST.get('description'),
+            status='pending',
+            requested_by=request.user
+        )
+        
+        messages.success(request, _('Car model request submitted successfully. Awaiting admin approval.'))
+        return redirect('agency_cars_list', agency_id=request.GET.get('agency_id'))
+
+class CarModelRequestHistoryView(LoginRequiredMixin, View):
+    template_name = 'car/request_car_model_history.html'
+    paginate_by = 10
+
+    def get(self, request):
+        requests = CarModelRequest.objects.filter(
+            requested_by=request.user
+        ).order_by('-created_at')
+        
+        paginator = Paginator(requests, self.paginate_by)
+        page = request.GET.get('page', 1)
+        
+        try:
+            requests_page = paginator.page(page)
+        except PageNotAnInteger:
+            requests_page = paginator.page(1)
+        except EmptyPage:
+            requests_page = paginator.page(paginator.num_pages)
+
+        context = {
+            'requests': requests_page,
+            'agency_id': request.GET.get('agency_id')
+        }
+        return render(request, self.template_name, context)
+
+class UpdateCarView(LoginRequiredMixin, CarManagementMixin, View):
+    template_name = "car/update_car_form.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        car = get_object_or_404(AgencyCar, pk=kwargs.get('pk'))
+        agency_id = car.agence.id
+        
+        if not (car.agence.creator == request.user or 
+                has_agency_permission(request.user, agency_id, 'edit')):
+            raise PermissionDenied
+            
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        car = get_object_or_404(AgencyCar, pk=kwargs.get('pk'))
+        context = self.get_car_form_context(car=car)
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        car = get_object_or_404(AgencyCar, pk=kwargs.get('pk'))
+        
+        try:
+            car.brand_id = request.POST.get('brand')
+            car.car_model_id = request.POST.get('car_model')
+            car.fuel_policy = request.POST.get('fuel_policy')
+            car.security_deposit = request.POST.get('security_deposit')
+            car.minimum_license_age = request.POST.get('minimum_license_age')
+            car.price_per_day = request.POST.get('price_per_day')
+            car.available = request.POST.get('available') == 'on'
+            car.gear_type_id = request.POST.get('gear_type')
+            
+            if request.FILES.get('image'):
+                car.image = request.FILES.get('image')
+                
+            car.save()
+            
+            # Mise à jour des périodes d'indisponibilité
+            car.unavailability_periods.all().delete()
+            start_dates = request.POST.getlist('unavailability_periods[start][]')
+            end_dates = request.POST.getlist('unavailability_periods[end][]')
+            
+            for start_date, end_date in zip(start_dates, end_dates):
+                if start_date and end_date:
+                    CarUnavailability.objects.create(
+                        car=car,
+                        start_date=start_date,
+                        end_date=end_date
+                    )
+                    
+            messages.success(request, _('Car updated successfully'))
+            return redirect('agency_cars_list', agency_id=car.agence.id)
+            
+        except Exception as e:
+            messages.error(request, f'Error updating car: {str(e)}')
+            context = self.get_car_form_context(car=car)
+            return render(request, self.template_name, context)
+
+class DeleteCarView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        car = get_object_or_404(AgencyCar, pk=kwargs.get('pk'))
+        agency_id = car.agence.id
+        
+        if not (car.agence.creator == request.user or 
+                has_agency_permission(request.user, agency_id, 'delete')):
+            raise PermissionDenied
+            
+        try:
+            car.is_active = False
+            car.save()
+            messages.success(request, _('Car deleted successfully'))
+            return JsonResponse({'success': True})
+        except Exception as e:
+            messages.error(request, f'Error deleting car: {str(e)}')
+            return JsonResponse({'success': False, 'error': str(e)})
+
+class AgencyCarsListView(LoginRequiredMixin, ListView):
+    template_name = 'car/agency_cars_list.html'
+    context_object_name = 'agency_cars'
+    paginate_by = 10
+
+    def get_queryset(self):
+        agency_id = self.kwargs.get('agency_id')
+        agency = get_object_or_404(Agences, id=agency_id)
+        
+        if agency.creator == self.request.user:
+            return AgencyCar.objects.filter(agence_id=agency_id, is_active=True)
+        
+        if has_agency_permission(self.request.user, agency_id, 'view'):
+            return AgencyCar.objects.filter(agence_id=agency_id, is_active=True)
+        
+        raise PermissionDenied
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        agency_id = self.kwargs.get('agency_id')
+        agency = get_object_or_404(Agences, id=agency_id)
+        
+        context.update({
+            'can_add': (agency.creator == self.request.user or 
+                       has_agency_permission(self.request.user, agency_id, 'add')),
+            'can_edit': (agency.creator == self.request.user or 
+                        has_agency_permission(self.request.user, agency_id, 'edit')),
+            'can_delete': (agency.creator == self.request.user or 
+                          has_agency_permission(self.request.user, agency_id, 'delete')),
+            'selected_agency': agency,
+            'brands': Brand.objects.filter(is_active=True),
+            'gear_types': GearType.objects.filter(is_active=True)
+        })
+        return context
+
+class RegisterCarView(LoginRequiredMixin, CarManagementMixin, View):
+    template_name = "car/car_form.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        agency_id = kwargs.get('agency_id')
+        agency = get_object_or_404(Agences, id=agency_id)
+        
+        if not (agency.creator == request.user or 
+                has_agency_permission(request.user, agency_id, 'add')):
+            raise PermissionDenied
+            
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        agency_id = kwargs.get('agency_id')
+        agency = get_object_or_404(Agences, id=agency_id, creator=request.user, is_active=True)
+        context = self.get_car_form_context(agency=agency)
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        agency_id = kwargs.get('agency_id')
+        agency = get_object_or_404(Agences, id=agency_id, creator=request.user, is_active=True)
+
+        try:
+            car = AgencyCar(
+                agence=agency,
+                brand_id=request.POST.get('brand'),
+                car_model_id=request.POST.get('car_model'),
+                fuel_policy=request.POST.get('fuel_policy'),
+                security_deposit=request.POST.get('security_deposit'),
+                minimum_license_age=request.POST.get('minimum_license_age'),
+                price_per_day=request.POST.get('price_per_day'),
+                is_active=agency.is_auto,
+                available=request.POST.get('available') == 'on',
+                gear_type_id=request.POST.get('gear_type')
+            )
+            
+            if request.FILES.get('image'):
+                car.image = request.FILES['image']
+                
+            car.save()
+            
+            # Gestion des périodes d'indisponibilité
+            start_dates = request.POST.getlist('unavailability_periods[start][]')
+            end_dates = request.POST.getlist('unavailability_periods[end][]')
+            
+            for start_date, end_date in zip(start_dates, end_dates):
+                if start_date and end_date:
+                    CarUnavailability.objects.create(
+                        car=car,
+                        start_date=start_date,
+                        end_date=end_date
+                    )
+                    
+            messages.success(request, _('Car added successfully'))
+            return redirect('agency_cars_list', agency_id=agency_id)
+            
+        except Exception as e:
+            messages.error(request, f'Error adding car: {str(e)}')
+            context = self.get_car_form_context(agency=agency)
+            return render(request, self.template_name, context)
+
+class CarModelsJsonView(View):
+    """Vue pour récupérer les modèles de voiture en format JSON pour un usage AJAX"""
+    def get(self, request, *args, **kwargs):
+        brand_id = request.GET.get('brand_id')
+        models = CarModel.objects.filter(
+            brand_id=brand_id, 
+            is_active=True
+        ).values('id', 'name')
+        return JsonResponse(list(models), safe=False)
+
+class CarModelDetailsView(DetailView):
+    """Vue pour afficher les détails d'un modèle de voiture"""
+    model = CarModel
+    template_name = 'car/model_details.html'
+    context_object_name = 'car_model'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        car_model = self.get_object()
+        context.update({
+            'brand': car_model.brand,
+            'available_cars': AgencyCar.objects.filter(
+                car_model=car_model,
+                is_active=True,
+                available=True
+            ).select_related('agence')
+        })
+        return context

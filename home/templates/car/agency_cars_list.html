@@ -7,7 +7,9 @@
     <div class="row mb-3">
         <div class="col-md-6">
             <div class="btn-group">
+                {% if can_add %}
                 <a href="{% url 'car_add' selected_agency.id %}" class="btn btn-success">{% translate "Add Car" %}</a>
+                {% endif %}
                 <a href="{% url 'request_car_model' %}?agency_id={{ selected_agency.id }}" class="btn btn-secondary">{% translate "Request New Car Model" %}</a>
                 <a href="{% url 'car_model_requests_history' %}?agency_id={{ selected_agency.id }}" class="btn btn-info">{% translate "View Requests History" %}</a>
             </div>
@@ -59,8 +61,12 @@
                 <td>{{ car.gear_type.name }}</td>
                 <td>{{ car.price_per_day }}</td>
                 <td>
+                    {% if can_edit %}
                     <a href="{% url 'car_update' car.id %}" class="btn btn-primary">{% translate "Update" %}</a>
+                    {% endif %}
+                    {% if can_delete %}
                     <button class="btn btn-danger delete-car-btn" data-id="{{ car.id }}">{% translate "Delete" %}</button>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}

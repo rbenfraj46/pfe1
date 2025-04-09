@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block bodyContent %}
+<div class="container" style="margin-top: 180px; margin-bottom: 40px;">
+    <h2>{% translate "Manage Agency Permissions" %}</h2>
+    <div class="row">
+        <div class="col-md-6">
+            <form method="post" class="card shadow p-4">
+                {% csrf_token %}
+                <div class="form-group mb-3">
+                    <label for="user_email">{% translate "User Email" %}</label>
+                    <input type="email" name="user_email" id="user_email" class="form-control" required>
+                </div>
+                <div class="form-group mb-3">
+                    <label>{% translate "Permissions" %}</label>
+                    {% for value, label in permission_choices %}
+                    <div class="form-check">
+                        <input type="checkbox" name="permissions" value="{{ value }}" class="form-check-input" id="perm_{{ value }}">
+                        <label class="form-check-label" for="perm_{{ value }}">{{ label }}</label>
+                    </div>
+                    {% endfor %}
+                </div>
+                <button type="submit" class="btn btn-primary">{% translate "Save Permissions" %}</button>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h4>{% translate "Current Permissions" %}</h4>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>{% translate "User" %}</th>
+                                <th>{% translate "Permission" %}</th>
+                                <th>{% translate "Granted By" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for perm in permissions %}
+                            <tr>
+                                <td>{{ perm.user.email }}</td>
+                                <td>{{ perm.get_permission_display }}</td>
+                                <td>{{ perm.granted_by.email }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

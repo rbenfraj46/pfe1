@@ -30,17 +30,12 @@
                         <div class="filter-group">
                             <label class="filter-label">{% translate "Price Range" %}</label>
                             <div class="price-slider-container">
-                                <input type="range" 
-                                       class="slider" 
-                                       id="priceRange" 
-                                       name="price" 
-                                       min="{{ price_range.min_price|default:0 }}" 
-                                       max="{{ price_range.max_price|default:1000 }}"
-                                       value="{{ filters.min_price|default:price_range.min_price }}"
-                                       step="1">
+                                <div id="priceRangeSlider"></div>
                                 <div class="price-range-display">
-                                    <span id="priceValue">{{ filters.min_price|default:price_range.min_price }}</span> TND
+                                    <span id="minPriceValue">40</span> - <span id="maxPriceValue">4000</span> TND
                                 </div>
+                                <input type="hidden" name="min_price" id="minPrice" value="{{ filters.min_price|default:40 }}">
+                                <input type="hidden" name="max_price" id="maxPrice" value="{{ filters.max_price|default:4000 }}">
                             </div>
                         </div>
 
@@ -88,15 +83,15 @@
                             <p class="search-dates"><i class="far fa-calendar-alt"></i> {% translate "From" %} {{ search_params.start_date }} {% translate "to" %} {{ search_params.end_date }}</p>
                         </div>
                         <div class="col-md-5 text-md-right">
-                            <select class="form-control sort-select" onChange="updateSort(this.value)">
+                            <select class="form-control sort-select" id="sortSelect">
+                                <option value="distance" {% if sort == 'distance' %}selected{% endif %}>
+                                    {% translate "Distance" %}
+                                </option>
                                 <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>
-                                    <i class="fas fa-sort-amount-down-alt"></i> {% translate "Price: Low to High" %}
+                                    {% translate "Price: Low to High" %}
                                 </option>
                                 <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>
-                                    <i class="fas fa-sort-amount-up"></i> {% translate "Price: High to Low" %}
-                                </option>
-                                <option value="distance" {% if sort == 'distance' %}selected{% endif %}>
-                                    <i class="fas fa-map-marker-alt"></i> {% translate "Distance" %}
+                                    {% translate "Price: High to Low" %}
                                 </option>
                             </select>
                         </div>
@@ -176,12 +171,12 @@
                         <ul class="pagination">
                             {% if cars.has_previous %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?page=1{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.price %}&price={{ request.GET.price }}{% endif %}" aria-label="First">
+                                    <a class="page-link" href="?page=1{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.gear_types %}&gear_types={{ request.GET.gear_types }}{% endif %}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}" aria-label="First">
                                         <i class="fas fa-angle-double-left"></i>
                                     </a>
                                 </li>
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ cars.previous_page_number }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.price %}&price={{ request.GET.price }}{% endif %}" aria-label="Previous">
+                                    <a class="page-link" href="?page={{ cars.previous_page_number }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.gear_types %}&gear_types={{ request.GET.gear_types }}{% endif %}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}" aria-label="Previous">
                                         <i class="fas fa-angle-left"></i>
                                     </a>
                                 </li>
@@ -194,19 +189,19 @@
                                     </li>
                                 {% elif num > cars.number|add:'-3' and num < cars.number|add:'3' %}
                                     <li class="page-item">
-                                        <a class="page-link" href="?page={{ num }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.price %}&price={{ request.GET.price }}{% endif %}">{{ num }}</a>
+                                        <a class="page-link" href="?page={{ num }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.gear_types %}&gear_types={{ request.GET.gear_types }}{% endif %}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}">{{ num }}</a>
                                     </li>
                                 {% endif %}
                             {% endfor %}
 
                             {% if cars.has_next %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ cars.next_page_number }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.price %}&price={{ request.GET.price }}{% endif %}" aria-label="Next">
+                                    <a class="page-link" href="?page={{ cars.next_page_number }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.gear_types %}&gear_types={{ request.GET.gear_types }}{% endif %}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}" aria-label="Next">
                                         <i class="fas fa-angle-right"></i>
                                     </a>
                                 </li>
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ cars.paginator.num_pages }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.price %}&price={{ request.GET.price }}{% endif %}" aria-label="Last">
+                                    <a class="page-link" href="?page={{ cars.paginator.num_pages }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.gear_types %}&gear_types={{ request.GET.gear_types }}{% endif %}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}" aria-label="Last">
                                         <i class="fas fa-angle-double-right"></i>
                                     </a>
                                 </li>
@@ -236,6 +231,7 @@
 </div>
 
 {% block footerContent %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.6.3/nouislider.min.js"></script>
 <script>
 let selectedCars = new Set();
 
@@ -279,98 +275,148 @@ function compareSelected() {
 }
 
 function updateSort(value) {
-    const url = new URL(window.location.href);
-    url.searchParams.set('sort', value);
-    window.location.href = url.toString();
+    const currentUrl = new URL(window.location.href);
+    const searchParams = currentUrl.searchParams;
+    
+    // Conserver tous les paramètres existants
+    const params = new URLSearchParams(searchParams);
+    params.set('sort', value);
+    
+    // S'assurer que les paramètres de gear_types sont conservés
+    const gearTypes = searchParams.getAll('gear_types');
+    params.delete('gear_types');
+    gearTypes.forEach(type => params.append('gear_types', type));
+    
+    window.location.href = `${currentUrl.pathname}?${params.toString()}`;
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Price Range Slider
-    const priceSlider = document.getElementById('priceRange');
-    const priceDisplay = document.getElementById('priceValue');
-    
-    priceSlider.addEventListener('input', function() {
-        priceDisplay.textContent = this.value;
-    });
-    
-    // Add animation to car cards
-    const carCards = document.querySelectorAll('.card-car');
-    carCards.forEach((card, index) => {
-        card.style.animationDelay = `${index * 0.1}s`;
-    });
-    
-    // Make sure form doesn't submit on every slider change
-    // Only submit when slider is released
-    priceSlider.addEventListener('change', function() {
-        document.getElementById('filterForm').submit();
-    });
-    
-    // Initialize noUiSlider if present
-    if (document.getElementById('price-slider')) {
-        const priceSliderElement = document.getElementById('price-slider');
-        const minPrice = {{ price_range.min_price|default:0 }};
-        const maxPrice = {{ price_range.max_price|default:1000 }};
-        
-        noUiSlider.create(priceSliderElement, {
+    const priceRangeSlider = document.getElementById('priceRangeSlider');
+    if (priceRangeSlider) {
+        noUiSlider.create(priceRangeSlider, {
             start: [
-                {{ filters.min_price|default:price_range.min_price }},
-                {{ filters.max_price|default:price_range.max_price }}
+                parseInt("{{ filters.min_price|default:40 }}"),
+                parseInt("{{ filters.max_price|default:4000 }}")
             ],
             connect: true,
+            step: 10,
             range: {
-                'min': minPrice,
-                'max': maxPrice
+                'min': 40,
+                'max': 4000
             },
-            step: 1,
             format: {
-                to: function (value) {
-                    return Math.round(value);
+                to: function(value) {
+                    return parseInt(value);
                 },
-                from: function (value) {
-                    return Math.round(value);
+                from: function(value) {
+                    return parseInt(value);
                 }
             }
         });
+
+        const minPriceValue = document.getElementById('minPriceValue');
+        const maxPriceValue = document.getElementById('maxPriceValue');
+        const minPriceInput = document.getElementById('minPrice');
+        const maxPriceInput = document.getElementById('maxPrice');
+
+        priceRangeSlider.noUiSlider.on('update', function(values) {
+            minPriceValue.textContent = values[0];
+            maxPriceValue.textContent = values[1];
+            minPriceInput.value = values[0];
+            maxPriceInput.value = values[1];
+        });
+
+        priceRangeSlider.noUiSlider.on('change', function() {
+            document.getElementById('filterForm').submit();
+        });
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        const priceSlider = document.getElementById('priceRange');
+        const priceDisplay = document.getElementById('priceValue');
+        const sortSelect = document.getElementById('sortSelect');
         
-        const minPriceInput = document.getElementById('min-price');
-        const maxPriceInput = document.getElementById('max-price');
-        
-        if (minPriceInput && maxPriceInput) {
-            priceSliderElement.noUiSlider.on('update', function(values, handle) {
-                const value = parseInt(values[handle]);
-                if (handle === 0) {
-                    minPriceInput.value = value;
-                } else {
-                    maxPriceInput.value = value;
-                }
+        if (priceSlider && priceDisplay) {
+            priceSlider.addEventListener('input', function() {
+                priceDisplay.textContent = this.value;
             });
             
-            // Update form when slider changes
-            priceSliderElement.noUiSlider.on('change', function() {
+            priceSlider.addEventListener('change', function() {
                 document.getElementById('filterForm').submit();
             });
         }
+
+        if (sortSelect) {
+            sortSelect.addEventListener('change', function() {
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('sort', this.value);
+                window.location.href = currentUrl.toString();
+            });
+        }
+    } catch (error) {
+        console.error('Error initializing components:', error);
     }
-    
-    // Toggle filters on mobile
-    const filterHeaderBtn = document.querySelector('.filter-header');
-    if (filterHeaderBtn) {
-        filterHeaderBtn.addEventListener('click', function() {
-            const filterGroups = document.querySelectorAll('.filter-group');
-            const applyBtn = document.querySelector('.apply-filters-btn');
-            
-            // Check if we're on mobile
-            if (window.innerWidth < 768) {
-                filterGroups.forEach(group => {
-                    group.classList.toggle('d-none');
-                });
-                
-                if (applyBtn) {
-                    applyBtn.classList.toggle('d-none');
-                }
-            }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Add event listener for image click to display in a modal
+    const carImages = document.querySelectorAll('.car-img');
+    carImages.forEach(image => {
+        image.addEventListener('click', function() {
+            const modal = document.createElement('div');
+            modal.classList.add('image-modal');
+
+            const overlay = document.createElement('div');
+            overlay.classList.add('modal-overlay');
+
+            const modalImage = document.createElement('img');
+            modalImage.src = this.src;
+            modalImage.classList.add('modal-image');
+
+            modal.appendChild(modalImage);
+            document.body.appendChild(overlay);
+            document.body.appendChild(modal);
+
+            overlay.addEventListener('click', function() {
+                document.body.removeChild(modal);
+                document.body.removeChild(overlay);
+            });
         });
-    }
+    });
+
+    // Add styles for modal and overlay
+    const style = document.createElement('style');
+    style.textContent = `
+        .image-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1050;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1040;
+            backdrop-filter: blur(5px);
+        }
+        .modal-image {
+            max-width: 90vw;
+            max-height: 90vh;
+            display: block;
+        }
+    `;
+    document.head.appendChild(style);
 });
 </script>
 {% endblock %}

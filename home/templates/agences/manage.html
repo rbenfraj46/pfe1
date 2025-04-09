@@ -56,14 +56,14 @@
                                     <a href="{% url 'agency_cars_list' agence.id %}" class="btn btn-primary">{% translate "Go to Cars" %}</a>
                                 </div>
                             </div>
-                            <!-- Manage Employees Section -->
+                            <!-- Manage Permissions Section -->
                             <div class="col-md-4 mb-4">
                                 <div class="wheel-dashboard-item bg-white p-3 rounded shadow dashboard-item fade-in">
                                     <div class="wheel-dashboard-icon text-center mb-3">
                                         <img src="{% static 'images/employ1.png' %}" alt="" class="wheel-dashboard-icon img">
                                     </div>
-                                    <h4>{% translate "Manage Employees" %}</h4>
-                                    <a href="#" class="btn btn-primary">{% translate "Go to Employees" %}</a>
+                                    <h4>{% translate "Manage Permissions" %}</h4>
+                                    <a href="{% url 'agency_permissions' agence.id %}" class="btn btn-primary">{% translate "Go to Permissions" %}</a>
                                 </div>
                             </div>
                             <div class="col-md-4 mb-4">

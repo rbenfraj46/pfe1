@@ -8,7 +8,6 @@
 {% endblock %}
 
 {% block bodyContent %}
-<!-- Hero Section -->
 <div class="jumbotron hero-section">
     <div class="container">
         <div class="hero-content">
@@ -19,7 +18,6 @@
     </div>
 </div>
 
-<!-- Car Search Section -->
 <div class="container search-container" id="search-form">
     <div class="row">
         <div class="col-md-12">
@@ -70,7 +68,6 @@
     </div>
 </div>
 
-<!-- Features Section -->
 <div class="features-section">
     <div class="container">
         <div class="row text-center mb-5">
@@ -111,7 +108,6 @@
     </div>
 </div>
 
-<!-- Car Categories Section -->
 <div class="car-categories">
     <div class="container">
         <div class="row text-center mb-5">
@@ -152,7 +148,6 @@
     </div>
 </div>
 
-<!-- Testimonials Section -->
 <div class="testimonials">
     <div class="container">
         <div class="row text-center mb-5">
@@ -193,7 +188,6 @@
     </div>
 </div>
 
-<!-- CTA Section -->
 <div class="cta-section">
     <div class="container">
         <div class="row">
@@ -214,7 +208,6 @@
     let selectedLocation = null;
 
     document.addEventListener('DOMContentLoaded', function() {
-        // Set default dates (today and tomorrow)
         const today = new Date();
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
@@ -222,8 +215,7 @@
         document.getElementById('start_date').valueAsDate = today;
         document.getElementById('end_date').valueAsDate = tomorrow;
         
-        // Initialize map
-        map = L.map('map').setView([34.0, 9.0], 7);  // Center on Tunisia
+        map = L.map('map').setView([34.0, 9.0], 7); 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
         const radiusInput = document.getElementById('radius');
@@ -244,7 +236,6 @@
             }
             marker = L.marker(e.latlng).addTo(map);
             
-            // Update circle
             updateCircle();
             
             if (circle) {
@@ -268,7 +259,6 @@
             }).addTo(map);
         }
         
-        // Smooth scroll for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();

@@ -2,21 +2,23 @@
 {% load static %}
 {% load i18n %}
 {% block title %}{% translate "Your Agencies" %}{% endblock title %}
+
 {% block headerContent %}
-    <h1 class="text-center mt-5">{% translate "Your Agencies" %}</h1>
+    <h1 class="text-center mt-5">{% translate "Your Access to Agencies" %}</h1>
 {% endblock headerContent %}
+
 {% block headerCSSContent %}
     <link rel="stylesheet" type="text/css" href="{% static 'assets/css/agencies.css' %}">
     {{ block.super }}
 {% endblock headerCSSContent %}
+
 {% block bodyContent %}
-<div class="container agency-container mt-7"> 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>{% translate "Your Agencies" %}</h2>
-        <a href="{% url 'agences_register' %}" class="btn btn-success"> {% translate "Register your Agencies" %}</a>
-    </div>
-    <div class="row">
-        {% for agence in agencies %}
+<div class="container agency-container mt-7">
+    {% if user_owned_agencies %}
+    <div class="mb-5">
+        <h3>{% translate "Agencies You Own" %}</h3>
+        <div class="row">
+            {% for agence in user_owned_agencies %}
             <div class="col-md-4 mb-4">
                 <div class="card agency-card p-3">
                     <img src="{{ agence.logo.url }}" class="card-img-top agency-img mb-3" alt="{{ agence.agency_name }}">
@@ -33,7 +35,41 @@
                     </div>
                 </div>
             </div>
-        {% endfor %}
+            {% endfor %}
+        </div>
     </div>
+    {% endif %}
+
+    {% if user_permissions %}
+    <div>
+        <h3>{% translate "Agencies You Have Access To" %}</h3>
+        <div class="row">
+            {% for perm_group in user_permissions %}
+            <div class="col-md-4 mb-4">
+                <div class="card agency-card p-3">
+                    <img src="{{ perm_group.agency.logo.url }}" class="card-img-top agency-img mb-3" alt="{{ perm_group.agency.agency_name }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ perm_group.agency.agency_name }}</h5>
+                        <p class="card-text">{{ perm_group.agency.adress_agency }}</p>
+                        <div class="permissions-badges mb-3">
+                            {% for permission in perm_group.permissions %}
+                            <span class="badge bg-info me-1">{{ permission.get_permission_display }}</span>
+                            {% endfor %}
+                        </div>
+                        <a href="{% url 'agency_cars_list' perm_group.agency.id %}" class="btn btn-primary">{% translate "Manage Cars" %}</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if not user_owned_agencies and not user_permissions %}
+    <div class="text-center">
+        <p>{% translate "You don't have access to any agencies yet." %}</p>
+        <a href="{% url 'agences_register' %}" class="btn btn-success">{% translate "Register your Agency" %}</a>
+    </div>
+    {% endif %}
 </div>
 {% endblock bodyContent %}
