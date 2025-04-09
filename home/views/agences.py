@@ -192,6 +192,25 @@ class AgencyPermissionView(LoginRequiredMixin, UserPassesTestMixin, View):
         
         return redirect('agency_permissions', agency_id=agency_id)
 
+class RevokeAgencyPermissionView(LoginRequiredMixin, UserPassesTestMixin, View):
+    def test_func(self):
+        agency_id = self.kwargs.get('agency_id')
+        return Agences.objects.filter(id=agency_id, creator=self.request.user).exists()
+
+    def post(self, request, agency_id, permission_id):
+        try:
+            permission = get_object_or_404(AgencyPermission, 
+                id=permission_id, 
+                agency_id=agency_id
+            )
+            user_email = permission.user.email
+            permission.delete()
+            messages.success(request, _('Permission revoked successfully from {}').format(user_email))
+        except Exception as e:
+            messages.error(request, _('Error revoking permission: {}').format(str(e)))
+        
+        return redirect('agency_permissions', agency_id=agency_id)
+
 class CarModelsJsonView(View):
     def get(self, request, *args, **kwargs):
         brand_id = request.GET.get('brand_id')

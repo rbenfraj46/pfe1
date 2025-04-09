@@ -36,6 +36,7 @@
                                 <th>{% translate "User" %}</th>
                                 <th>{% translate "Permission" %}</th>
                                 <th>{% translate "Granted By" %}</th>
+                                <th>{% translate "Action" %}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -44,6 +45,16 @@
                                 <td>{{ perm.user.email }}</td>
                                 <td>{{ perm.get_permission_display }}</td>
                                 <td>{{ perm.granted_by.email }}</td>
+                                <td>
+                                    <form method="post" action="{% url 'revoke_agency_permission' agency.id perm.id %}" 
+                                          style="display: inline;"
+                                          onsubmit="return confirm('{% translate 'Are you sure you want to revoke this permission?' %}')">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            <i class="fas fa-times"></i> {% translate "Revoke" %}
+                                        </button>
+                                    </form>
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>

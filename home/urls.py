@@ -49,6 +49,9 @@ urlpatterns = [
     path('agences/<int:agency_id>/permissions/', agences.AgencyPermissionView.as_view(), name='agency_permissions'),
     path('activate_agency/<uidb64>/<token>/', agences.activate_agency, name='activate_agency'),
     path('mailNotConfirmedAgency.php', agences.MailNotConfirmedAgencyView.as_view(), name='mail_not_confirmed_agency'),
+    path('agency/<int:agency_id>/permissions/<int:permission_id>/revoke/', 
+        agences.RevokeAgencyPermissionView.as_view(), 
+        name='revoke_agency_permission'),
     
     # Gestion des voitures
     path('agency/cars/<int:agency_id>/', car.AgencyCarsListView.as_view(), name='agency_cars_list'),
