@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-22 23:02+0000\n"
+"POT-Creation-Date: 2025-04-09 09:17+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,44 +19,460 @@ msgstr ""
 "Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
 "&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
 
-#: carrent/settings.py:156
+#: build/lib/carrent/settings.py:202 carrent/settings.py:202
 msgid "English"
 msgstr ""
 
-#: carrent/settings.py:157
+#: build/lib/carrent/settings.py:203 carrent/settings.py:203
 msgid "French"
 msgstr ""
 
-#: carrent/settings.py:158
+#: build/lib/carrent/settings.py:204 carrent/settings.py:204
 msgid "Arabic"
 msgstr ""
 
-#: home/forms/login_forms.py:20 home/forms/registration_forms.py:19
-#: home/templates/login.html:118
-msgid "Email"
+#: build/lib/cars/models.py:10 build/lib/cars/models.py:22
+#: build/lib/cars/models.py:34 build/lib/cars/models.py:49
+#: build/lib/home/models.py:38 build/lib/home/models.py:176 cars/models.py:15
+#: cars/models.py:27 cars/models.py:39 cars/models.py:54 home/models.py:41
+#: home/models.py:180
+msgid "Is Active"
 msgstr ""
 
-#: home/forms/login_forms.py:25 home/forms/registration_forms.py:26
-msgid "The field "
+#: build/lib/cars/models.py:45 cars/models.py:50
+#: home/templates/car/request_car_model.html:28
+#: home/templates/car/request_car_model_history.html:16
+msgid "Model Name"
 msgstr ""
 
-#: home/forms/login_forms.py:25 home/forms/registration_forms.py:26
-msgid " is required"
+#: build/lib/cars/models.py:46 cars/models.py:51
+msgid "Model Description"
 msgstr ""
 
-#: home/forms/registration_forms.py:17 home/templates/login.html:121
-msgid "Username"
+#: build/lib/cars/models.py:50 cars/models.py:55
+#: home/templates/car/agency_cars_list.html:49
+#: home/templates/car/car_form.html:82
+#: home/templates/car/search_results.html:43
+#: home/templates/car/update_car_form.html:82
+msgid "Brand"
 msgstr ""
 
-#: home/forms/registration_forms.py:18
+#: build/lib/cars/models.py:52 cars/models.py:57
+msgid "Air Conditioner"
+msgstr ""
+
+#: build/lib/cars/models.py:53 cars/models.py:58
+msgid "Category"
+msgstr ""
+
+#: build/lib/cars/models.py:55 cars/models.py:60
+msgid "Engine Cylinder"
+msgstr ""
+
+#: build/lib/cars/models.py:56 cars/models.py:61
+msgid "Horse Power"
+msgstr ""
+
+#: build/lib/cars/models.py:58 cars/models.py:63
+msgid "Door Number"
+msgstr ""
+
+#: build/lib/cars/models.py:59 cars/models.py:64
+msgid "Place Number"
+msgstr ""
+
+#: build/lib/cars/models.py:60 cars/models.py:65
+msgid "Energy"
+msgstr ""
+
+#: build/lib/cars/models.py:62 cars/models.py:67
+msgid "Extra Urban Consumption"
+msgstr ""
+
+#: build/lib/cars/models.py:63 cars/models.py:68
+msgid "Urban Consumption"
+msgstr ""
+
+#: build/lib/cars/models.py:64 cars/models.py:69
+msgid "Mixte Consumption"
+msgstr ""
+
+#: build/lib/cars/models.py:66 build/lib/cars/models.py:95 cars/models.py:71
+#: cars/models.py:100 home/templates/car/agency_cars_list.html:51
+#: home/templates/car/car_form.html:155
+#: home/templates/car/search_results.html:55
+#: home/templates/car/update_car_form.html:155
+msgid "Gear Type"
+msgstr ""
+
+#: build/lib/cars/models.py:68 cars/models.py:73
+msgid "Gear Number"
+msgstr ""
+
+#: build/lib/cars/models.py:69 cars/models.py:74
+msgid "Transmission"
+msgstr ""
+
+#: build/lib/cars/models.py:72 cars/models.py:77
+msgid "Max Speed"
+msgstr ""
+
+#: build/lib/cars/models.py:75 cars/models.py:80
+msgid "Car Length"
+msgstr ""
+
+#: build/lib/cars/models.py:76 cars/models.py:81
+msgid "Car Width"
+msgstr ""
+
+#: build/lib/cars/models.py:77 cars/models.py:82
+msgid "Car Height"
+msgstr ""
+
+#: build/lib/cars/models.py:78 cars/models.py:83
+msgid "Trunk Volume"
+msgstr ""
+
+#: build/lib/cars/models.py:81 build/lib/home/models.py:164 cars/models.py:86
+#: home/models.py:168
+msgid "Created At"
+msgstr ""
+
+#: build/lib/cars/models.py:82 build/lib/home/models.py:165 cars/models.py:87
+#: home/models.py:169
+msgid "Last Updated"
+msgstr ""
+
+#: build/lib/home/mail_util.py:24 home/mail_util.py:24
+msgid "Activate your account."
+msgstr ""
+
+#: build/lib/home/mail_util.py:37 home/mail_util.py:37
+msgid "Password Reset Requested"
+msgstr ""
+
+#: build/lib/home/mail_util.py:58 home/mail_util.py:58
+msgid "Activate your agency."
+msgstr ""
+
+#: build/lib/home/models.py:19 home/models.py:22
+msgid "Is The Mail Verified"
+msgstr ""
+
+#: build/lib/home/models.py:20 build/lib/home/models.py:124
+#: build/lib/home/models.py:157 home/models.py:23 home/models.py:127
+#: home/models.py:161
+msgid "email address"
+msgstr ""
+
+#: build/lib/home/models.py:49 build/lib/home/models.py:149
+#: build/lib/home/models.py:167 build/lib/home/models.py:174 home/models.py:52
+#: home/models.py:153 home/models.py:171 home/models.py:178
+#: home/templates/agences/permissions.html:36
+msgid "User"
+msgstr ""
+
+#: build/lib/home/models.py:50 home/forms/index_forms.py:12 home/models.py:53
+msgid "Devise"
+msgstr ""
+
+#: build/lib/home/models.py:76 home/models.py:79
+msgid "states"
+msgstr ""
+
+#: build/lib/home/models.py:84 home/models.py:87
+msgid "State"
+msgstr ""
+
+#: build/lib/home/models.py:102 build/lib/home/models.py:123 home/models.py:105
+#: home/models.py:126 home/templates/agences.html:112
+#: home/templates/agences.html:122 home/templates/agences/create.html:112
+#: home/templates/agences/create.html:122
+msgid "Delegation"
+msgstr ""
+
+#: build/lib/home/models.py:109 home/models.py:112
+msgid "cities"
+msgstr ""
+
+#: build/lib/home/models.py:114 build/lib/home/models.py:115 home/models.py:117
+#: home/models.py:118
+msgid "Agency Name"
+msgstr ""
+
+#: build/lib/home/models.py:116 build/lib/home/models.py:130 home/models.py:119
+#: home/models.py:134
+msgid "CEO Name"
+msgstr ""
+
+#: build/lib/home/models.py:117 home/models.py:120
+msgid "CEO Phone"
+msgstr ""
+
+#: build/lib/home/models.py:119 home/models.py:122
+msgid "Tax registration Number"
+msgstr ""
+
+#: build/lib/home/models.py:120 home/models.py:123
+#: home/templates/contact.html:58
+msgid "Address"
+msgstr ""
+
+#: build/lib/home/models.py:121 home/models.py:124
+msgid "Governorate"
+msgstr ""
+
+#: build/lib/home/models.py:122 home/models.py:125
+#: home/templates/agences.html:121 home/templates/agences.html:128
+#: home/templates/agences/create.html:121
+#: home/templates/agences/create.html:128
+msgid "City"
+msgstr ""
+
+#: build/lib/home/models.py:125 home/models.py:128
+msgid "Phone"
+msgstr ""
+
+#: build/lib/home/models.py:133 home/models.py:137
+msgid "Creator"
+msgstr ""
+
+#: build/lib/home/models.py:146 home/models.py:150
+msgid "Field"
+msgstr ""
+
+#: build/lib/home/models.py:148 home/models.py:152
+msgid "Access Type"
+msgstr ""
+
+#: build/lib/home/models.py:156 home/models.py:160
+msgid "User Name"
+msgstr ""
+
+#: build/lib/home/models.py:158 home/models.py:162
+msgid "User Phone"
+msgstr ""
+
+#: build/lib/home/models.py:159 home/models.py:163
+msgid "Subject"
+msgstr ""
+
+#: build/lib/home/models.py:160 home/models.py:164
+#: home/templates/contact.html:94
+msgid "Message"
+msgstr ""
+
+#: build/lib/home/models.py:162 home/models.py:166
+msgid "Is Read"
+msgstr ""
+
+#: build/lib/home/models.py:175 home/models.py:179
+msgid "Subscripted At"
+msgstr ""
+
+#: build/lib/home/models.py:177 home/models.py:181
+msgid "UnSubscripted At"
+msgstr ""
+
+#: build/lib/home/models.py:178 home/models.py:182
+msgid "Promotion price"
+msgstr ""
+
+#: build/lib/home/models.py:179 home/models.py:183
+msgid "Is Promotion Used"
+msgstr ""
+
+#: build/lib/home/views/agences.py:63 home/views/agences.py:74
+msgid ""
+"Agence created Successfully. Please check your mail box and hit the mail "
+"verification."
+msgstr ""
+
+#: build/lib/home/views/agences.py:66 build/lib/home/views/registration.py:33
+#: home/templates/base.html:93 home/views/agences.py:77
+#: home/views/registration.py:33
+msgid "Register"
+msgstr ""
+
+#: build/lib/home/views/agences.py:182 home/views/agences.py:126
+msgid "Activation email has been resent."
+msgstr ""
+
+#: build/lib/home/views/agences.py:195 home/views/agences.py:139
+msgid "Your agency mail address is successfully activated."
+msgstr ""
+
+#: build/lib/home/views/agences.py:198 home/views/agences.py:142
+msgid "This link is invalid. Try to generate another link."
+msgstr ""
+
+#: build/lib/home/views/connection_views.py:77
+#: build/lib/home/views/connection_views.py:138
+#: build/lib/home/views/connection_views.py:162
+#: build/lib/home/views/registration.py:50
+#: home/templates/agences/register.html:23 home/templates/base.html:92
+#: home/templates/change_password.html:22 home/templates/login.html:25
+#: home/templates/mail_not_confirmed.html:22
+#: home/templates/mail_not_confirmed_agency.html:21
+#: home/templates/password_reset_confirm.html:22
+#: home/views/connection_views.py:77 home/views/connection_views.py:138
+#: home/views/connection_views.py:162 home/views/registration.py:50
+msgid "Login"
+msgstr ""
+
+#: build/lib/home/views/connection_views.py:108
+#: home/views/connection_views.py:108
+msgid "Your account is deactivated. Please contact support!!"
+msgstr ""
+
+#: build/lib/home/views/connection_views.py:131
+#: home/views/connection_views.py:131
+msgid "You must fill the captcha."
+msgstr ""
+
+#: build/lib/home/views/connection_views.py:134
+#: home/views/connection_views.py:134
+msgid "Invalid Credentials."
+msgstr ""
+
+#: build/lib/home/views/connection_views.py:153
+#: home/views/connection_views.py:153
+msgid ""
+"We have emailed you instructions for setting your password. You should "
+"receive the email shortly!"
+msgstr ""
+
+#: build/lib/home/views/connection_views.py:157
+#: home/views/connection_views.py:157
+msgid "No user with this email !!"
+msgstr ""
+
+#: build/lib/home/views/connection_views.py:168
+#: home/views/connection_views.py:168
+msgid "Password changed successfully."
+msgstr ""
+
+#: build/lib/home/views/connection_views.py:200
+#: home/views/connection_views.py:200
+msgid "Please check your mail box and hit the mail verification."
+msgstr ""
+
+#: build/lib/home/views/contact.py:42 home/views/contact.py:42
+msgid "Thank you for contacting us. We will reply you As Soon As Possible"
+msgstr ""
+
+#: build/lib/home/views/index.py:99 build/lib/home/views/test_views.py:12
+#: build/lib/home/views/test_views.py:13 build/lib/home/views/test_views.py:14
+#: build/lib/home/views/test_views.py:15 home/views/index.py:99
+#: home/views/test_views.py:12 home/views/test_views.py:13
+#: home/views/test_views.py:14 home/views/test_views.py:15
+msgid "Your subscription is activated successfully."
+msgstr ""
+
+#: build/lib/home/views/registration.py:47 home/views/registration.py:47
+msgid ""
+"User created Successfully. Please check your mail box and hit the mail "
+"verification."
+msgstr ""
+
+#: build/lib/home/views/registration.py:64 home/views/registration.py:64
+msgid "Your mail address is successfully activated."
+msgstr ""
+
+#: build/lib/home/views/registration.py:67 home/views/registration.py:67
+msgid "This link is dead. Try to generate another link."
+msgstr ""
+
+#: cars/models.py:125 home/templates/car/car_form.html:229
+#: home/templates/car/rental_request.html:205
+#: home/templates/car/update_car_form.html:227
+msgid "Start Date"
+msgstr ""
+
+#: cars/models.py:126 home/templates/car/car_form.html:230
+#: home/templates/car/rental_request.html:210
+#: home/templates/car/update_car_form.html:228
+msgid "End Date"
+msgstr ""
+
+#: cars/models.py:130 cars/models.py:131
+msgid "Car Unavailability"
+msgstr ""
+
+#: cars/models.py:141
+msgid "Invalid start date format"
+msgstr ""
+
+#: cars/models.py:147
+msgid "Invalid end date format"
+msgstr ""
+
+#: cars/models.py:152
+msgid "Start date cannot be in the past"
+msgstr ""
+
+#: cars/models.py:155
+msgid "End date must be after start date"
+msgstr ""
+
+#: cars/models.py:164
+msgid "This period overlaps with an existing unavailability period"
+msgstr ""
+
+#: cars/models.py:172 home/templates/car/request_car_model_history.html:30
+msgid "Pending"
+msgstr ""
+
+#: cars/models.py:173 home/templates/car/request_car_model_history.html:32
+msgid "Approved"
+msgstr ""
+
+#: cars/models.py:174 home/templates/car/request_car_model_history.html:34
+msgid "Rejected"
+msgstr ""
+
+#: cars/models.py:187
+msgid "Car Model Request"
+msgstr ""
+
+#: cars/models.py:188
+msgid "Car Model Requests"
+msgstr ""
+
+#: home/forms/agences_forms.py:17 home/forms/registration_forms.py:18
 msgid "Accept Terms"
 msgstr ""
 
-#: home/forms/registration_forms.py:20 home/templates/login.html:112
+#: home/forms/agences_forms.py:29 home/forms/login_forms.py:25
+#: home/forms/registration_forms.py:26
+msgid "The field "
+msgstr ""
+
+#: home/forms/agences_forms.py:29 home/forms/login_forms.py:25
+#: home/forms/registration_forms.py:26
+msgid " is required"
+msgstr ""
+
+#: home/forms/index_forms.py:15
+#: home/templates/car/request_car_model_history.html:70
+msgid "Next"
+msgstr ""
+
+#: home/forms/index_forms.py:18 home/forms/login_forms.py:20
+#: home/forms/registration_forms.py:19 home/templates/contact.html:81
+#: home/templates/login.html:120
+msgid "Email"
+msgstr ""
+
+#: home/forms/registration_forms.py:17 home/templates/login.html:123
+msgid "Username"
+msgstr ""
+
+#: home/forms/registration_forms.py:20 home/templates/login.html:114
 msgid "First Name"
 msgstr ""
 
-#: home/forms/registration_forms.py:21 home/templates/login.html:115
+#: home/forms/registration_forms.py:21 home/templates/login.html:117
 msgid "Last Name"
 msgstr ""
 
@@ -64,16 +480,298 @@ msgstr ""
 msgid "This email is already in use."
 msgstr ""
 
-#: home/mail_util.py:24
-msgid "Activate your account."
+#: home/models.py:133
+msgid "Auto Activate Cars"
 msgstr ""
 
-#: home/mail_util.py:37
-msgid "Password Reset Requested"
+#: home/models.py:191
+msgid "View Cars"
 msgstr ""
 
-#: home/models.py:8
-msgid "email address"
+#: home/models.py:192
+msgid "Add Cars"
+msgstr ""
+
+#: home/models.py:193
+msgid "Edit Cars"
+msgstr ""
+
+#: home/models.py:194
+msgid "Delete Cars"
+msgstr ""
+
+#: home/templates/agences.html:92 home/templates/agences/create.html:92
+msgid "Company Details :&nbsp;"
+msgstr ""
+
+#: home/templates/agences.html:94 home/templates/agences/create.html:94
+msgid "Company Name"
+msgstr ""
+
+#: home/templates/agences.html:96 home/templates/agences/create.html:96
+msgid "TAX Number"
+msgstr ""
+
+#: home/templates/agences.html:99 home/templates/agences/create.html:99
+msgid "Company Logo (Optional)"
+msgstr ""
+
+#: home/templates/agences.html:105 home/templates/agences/create.html:105
+msgid "Commercial Name (Optional)"
+msgstr ""
+
+#: home/templates/agences.html:107 home/templates/agences/create.html:107
+msgid "Buisness Adress"
+msgstr ""
+
+#: home/templates/agences.html:113 home/templates/agences/create.html:113
+msgid "State / County"
+msgstr ""
+
+#: home/templates/agences.html:139 home/templates/agences/create.html:139
+msgid "Contact Details :&nbsp;"
+msgstr ""
+
+#: home/templates/agences.html:141 home/templates/agences/create.html:141
+msgid "CEO Name..."
+msgstr ""
+
+#: home/templates/agences.html:142 home/templates/agences/create.html:142
+msgid "CEO Phone number"
+msgstr ""
+
+#: home/templates/agences.html:147 home/templates/agences/create.html:147
+msgid "Agence Phone number"
+msgstr ""
+
+#: home/templates/agences.html:198 home/templates/agences/create.html:181
+msgid "Set Your Location "
+msgstr ""
+
+#: home/templates/agences.html:205 home/templates/agences/create.html:188
+#: home/templates/car/agency_cars_list.html:134
+#: home/templates/car/request_car_model.html:36
+msgid "Cancel"
+msgstr ""
+
+#: home/templates/agences.html:206 home/templates/agences/create.html:189
+msgid "Done"
+msgstr ""
+
+#: home/templates/agences/manage.html:26
+#: home/templates/agences/register.html:21
+#: home/templates/change_password.html:20 home/templates/login.html:23
+#: home/templates/mail_not_confirmed.html:20
+#: home/templates/mail_not_confirmed.html:69
+#: home/templates/mail_not_confirmed_agency.html:19
+#: home/templates/mail_not_confirmed_agency.html:68
+#: home/templates/password_reset_confirm.html:20
+#: home/templates/password_reset_confirm.html:72
+#: home/templates/terms_and_conditions.html:42
+msgid "Home"
+msgstr ""
+
+#: home/templates/agences/manage.html:27
+msgid "Pages"
+msgstr ""
+
+#: home/templates/agences/manage.html:28
+#: home/templates/agences/user_agencies.html:31
+msgid "Manage"
+msgstr ""
+
+#: home/templates/agences/manage.html:42
+msgid "Manage your Agency"
+msgstr ""
+
+#: home/templates/agences/manage.html:44
+msgid "Dashboard"
+msgstr ""
+
+#: home/templates/agences/manage.html:55
+#: home/templates/agences/user_agencies.html:59
+msgid "Manage Cars"
+msgstr ""
+
+#: home/templates/agences/manage.html:56
+msgid "Go to Cars"
+msgstr ""
+
+#: home/templates/agences/manage.html:65
+msgid "Manage Permissions"
+msgstr ""
+
+#: home/templates/agences/manage.html:66
+msgid "Go to Permissions"
+msgstr ""
+
+#: home/templates/agences/manage.html:74
+msgid "Edit Agency Details"
+msgstr ""
+
+#: home/templates/agences/manage.html:75
+msgid "Go to Edit Details"
+msgstr ""
+
+#: home/templates/agences/manage.html:83
+msgid "Agency Statistics"
+msgstr ""
+
+#: home/templates/agences/pending.html:182
+#: home/templates/agences/user_agencies.html:33
+msgid "Pending Approval"
+msgstr ""
+
+#: home/templates/agences/pending.html:185
+msgid "Your application is currently under review by our team"
+msgstr ""
+
+#: home/templates/agences/pending.html:195
+msgid "Submitted"
+msgstr ""
+
+#: home/templates/agences/pending.html:201
+msgid "Reviewing"
+msgstr ""
+
+#: home/templates/agences/pending.html:207
+msgid "Approval"
+msgstr ""
+
+#: home/templates/agences/pending.html:213
+msgid "We'll notify you via email once your application is approved"
+msgstr ""
+
+#: home/templates/agences/pending.html:216
+msgid "Need Help? Contact Support"
+msgstr ""
+
+#: home/templates/agences/permissions.html:6
+msgid "Manage Agency Permissions"
+msgstr ""
+
+#: home/templates/agences/permissions.html:12
+msgid "User Email"
+msgstr ""
+
+#: home/templates/agences/permissions.html:16
+msgid "Permissions"
+msgstr ""
+
+#: home/templates/agences/permissions.html:24
+msgid "Save Permissions"
+msgstr ""
+
+#: home/templates/agences/permissions.html:30
+msgid "Current Permissions"
+msgstr ""
+
+#: home/templates/agences/permissions.html:37
+msgid "Permission"
+msgstr ""
+
+#: home/templates/agences/permissions.html:38
+msgid "Granted By"
+msgstr ""
+
+#: home/templates/agences/permissions.html:39
+msgid "Action"
+msgstr ""
+
+#: home/templates/agences/permissions.html:51
+msgid "Are you sure you want to revoke this permission?"
+msgstr ""
+
+#: home/templates/agences/permissions.html:54
+msgid "Revoke"
+msgstr ""
+
+#: home/templates/agences/register.html:22
+#: home/templates/change_password.html:21 home/templates/login.html:24
+#: home/templates/mail_not_confirmed.html:21
+#: home/templates/mail_not_confirmed_agency.html:20
+#: home/templates/password_reset_confirm.html:21
+msgid "pages"
+msgstr ""
+
+#: home/templates/agences/register.html:37 home/templates/login.html:106
+msgid "Sign up Now"
+msgstr ""
+
+#: home/templates/agences/register.html:39 home/templates/login.html:108
+msgid "Get"
+msgstr ""
+
+#: home/templates/agences/register.html:39 home/templates/login.html:108
+msgid "Registered"
+msgstr ""
+
+#: home/templates/agences/register.html:46
+msgid "nom_agence"
+msgstr ""
+
+#: home/templates/agences/register.html:49
+msgid "nom_responsable"
+msgstr ""
+
+#: home/templates/agences/register.html:52
+msgid "mf_agence"
+msgstr ""
+
+#: home/templates/agences/register.html:55
+msgid "adresse_agence"
+msgstr ""
+
+#: home/templates/agences/register.html:58
+msgid "contact"
+msgstr ""
+
+#: home/templates/agences/register.html:61
+msgid "member"
+msgstr ""
+
+#: home/templates/agences/register.html:64
+msgid "member_role"
+msgstr ""
+
+#: home/templates/agences/register.html:66 home/templates/login.html:135
+msgid "Sign Up"
+msgstr ""
+
+#: home/templates/agences/register.html:69 home/templates/login.html:138
+msgid "Register With Facebook"
+msgstr ""
+
+#: home/templates/agences/register.html:70 home/templates/login.html:139
+msgid "Register With Twitter"
+msgstr ""
+
+#: home/templates/agences/user_agencies.html:4
+msgid "Your Agencies"
+msgstr ""
+
+#: home/templates/agences/user_agencies.html:7
+msgid "Your Access to Agencies"
+msgstr ""
+
+#: home/templates/agences/user_agencies.html:19
+msgid "Agencies You Own"
+msgstr ""
+
+#: home/templates/agences/user_agencies.html:29
+msgid "Confirm Email"
+msgstr ""
+
+#: home/templates/agences/user_agencies.html:45
+msgid "Agencies You Have Access To"
+msgstr ""
+
+#: home/templates/agences/user_agencies.html:70
+msgid "You don't have access to any agencies yet."
+msgstr ""
+
+#: home/templates/agences/user_agencies.html:71 home/templates/base.html:158
+msgid "Register your Agency"
 msgstr ""
 
 #: home/templates/base.html:5
@@ -84,86 +782,526 @@ msgstr ""
 msgid "The first tunisian rent car website"
 msgstr ""
 
-#: home/templates/base.html:16
+#: home/templates/base.html:17
 msgid "tunisia, tunisian, car, rent, rental"
 msgstr ""
 
-#: home/templates/base.html:92
+#: home/templates/base.html:82
 msgid "Account"
 msgstr ""
 
-#: home/templates/base.html:98
+#: home/templates/base.html:88
 msgid "Profile"
 msgstr ""
 
-#: home/templates/base.html:99 home/templates/change_password.html:71
+#: home/templates/base.html:89 home/templates/change_password.html:71
 msgid "Change Password"
 msgstr ""
 
-#: home/templates/base.html:100
+#: home/templates/base.html:90
 msgid "Log Out"
 msgstr ""
 
-#: home/templates/base.html:102 home/templates/change_password.html:22
-#: home/templates/login.html:23 home/templates/mail_not_confirmed.html:22
-#: home/templates/password_reset_confirm.html:22
-#: home/views/connection_views.py:48 home/views/connection_views.py:103
-#: home/views/connection_views.py:127 home/views/registration.py:50
-msgid "Login"
+#: home/templates/base.html:156
+msgid "List of your agencies"
 msgstr ""
 
-#: home/templates/base.html:103 home/views/registration.py:33
-msgid "Register"
+#: home/templates/base.html:173
+msgid "Contact"
 msgstr ""
 
-#: home/templates/base.html:111
-msgid "Eng"
+#: home/templates/base.html:179
+msgid "Promotion"
 msgstr ""
 
-#: home/templates/base.html:115
-msgid "Brazil"
+#: home/templates/base.html:337
+msgid "Success"
 msgstr ""
 
-#: home/templates/base.html:116
-msgid "France"
+#: home/templates/base.html:339
+msgid "Info"
 msgstr ""
 
-#: home/templates/base.html:117
-msgid "Germany"
+#: home/templates/base.html:341
+msgid "Warning"
 msgstr ""
 
-#: home/templates/base.html:118
-msgid "India"
+#: home/templates/base.html:343
+msgid "Error"
 msgstr ""
 
-#: home/templates/base.html:119
-msgid "Japan"
+#: home/templates/car/agency_cars_list.html:6
+msgid "Agency Cars"
 msgstr ""
 
-#: home/templates/base.html:120
-msgid "Serbia"
+#: home/templates/car/agency_cars_list.html:11
+msgid "Add Car"
+msgstr ""
+
+#: home/templates/car/agency_cars_list.html:13
+#: home/templates/car/request_car_model.html:8
+msgid "Request New Car Model"
+msgstr ""
+
+#: home/templates/car/agency_cars_list.html:14
+msgid "View Requests History"
+msgstr ""
+
+#: home/templates/car/agency_cars_list.html:23
+#: home/templates/car/search_results.html:45
+msgid "All Brands"
+msgstr ""
+
+#: home/templates/car/agency_cars_list.html:31
+msgid "All Gear Types"
+msgstr ""
+
+#: home/templates/car/agency_cars_list.html:40
+msgid "Filter"
+msgstr ""
+
+#: home/templates/car/agency_cars_list.html:50
+#: home/templates/car/car_form.html:93
+#: home/templates/car/update_car_form.html:93
+msgid "Model"
+msgstr ""
+
+#: home/templates/car/agency_cars_list.html:52
+msgid "Price per Day"
+msgstr ""
+
+#: home/templates/car/agency_cars_list.html:53
+msgid "Actions"
+msgstr ""
+
+#: home/templates/car/agency_cars_list.html:65
+msgid "Update"
+msgstr ""
+
+#: home/templates/car/agency_cars_list.html:68
+#: home/templates/car/agency_cars_list.html:135
+msgid "Delete"
+msgstr ""
+
+#: home/templates/car/agency_cars_list.html:118
+msgid "Showing"
+msgstr ""
+
+#: home/templates/car/agency_cars_list.html:118
+msgid "of"
+msgstr ""
+
+#: home/templates/car/agency_cars_list.html:118
+msgid "entries"
+msgstr ""
+
+#: home/templates/car/agency_cars_list.html:127
+msgid "Confirm Deletion"
+msgstr ""
+
+#: home/templates/car/agency_cars_list.html:131
+msgid "Are you sure you want to delete this car?"
+msgstr ""
+
+#: home/templates/car/agency_cars_list.html:170
+msgid "Failed to delete the car."
+msgstr ""
+
+#: home/templates/car/car_form.html:74
+#: home/templates/car/update_car_form.html:74
+msgid "Update Car"
+msgstr ""
+
+#: home/templates/car/car_form.html:74
+msgid "Add a New Car"
+msgstr ""
+
+#: home/templates/car/car_form.html:84
+#: home/templates/car/update_car_form.html:84
+msgid "Select a brand"
+msgstr ""
+
+#: home/templates/car/car_form.html:95
+#: home/templates/car/update_car_form.html:95
+msgid "Select a model"
+msgstr ""
+
+#: home/templates/car/car_form.html:107
+#: home/templates/car/update_car_form.html:107
+msgid "Image"
+msgstr ""
+
+#: home/templates/car/car_form.html:119
+#: home/templates/car/update_car_form.html:119
+msgid "Fuel Policy"
+msgstr ""
+
+#: home/templates/car/car_form.html:125
+#: home/templates/car/update_car_form.html:125
+msgid "Security Deposit (TND)"
+msgstr ""
+
+#: home/templates/car/car_form.html:137
+#: home/templates/car/update_car_form.html:137
+msgid "Minimum License Age (YEARS)"
+msgstr ""
+
+#: home/templates/car/car_form.html:143
+#: home/templates/car/update_car_form.html:143
+msgid "Price per Day (TND)"
+msgstr ""
+
+#: home/templates/car/car_form.html:157
+#: home/templates/car/update_car_form.html:157
+msgid "Select a gear type"
+msgstr ""
+
+#: home/templates/car/car_form.html:169
+#: home/templates/car/update_car_form.html:169
+msgid "Unavailability Periods"
+msgstr ""
+
+#: home/templates/car/car_form.html:176 home/templates/car/car_form.html:231
+#: home/templates/car/update_car_form.html:175
+#: home/templates/car/update_car_form.html:229
+msgid "Remove"
+msgstr ""
+
+#: home/templates/car/car_form.html:181
+#: home/templates/car/update_car_form.html:179
+msgid "Add Period"
+msgstr ""
+
+#: home/templates/car/car_form.html:189
+#: home/templates/car/update_car_form.html:187
+msgid "Available"
+msgstr ""
+
+#: home/templates/car/car_form.html:194
+#: home/templates/car/update_car_form.html:192
+msgid "Submit"
+msgstr ""
+
+#: home/templates/car/rental_request.html:183
+#: home/templates/car/search_results.html:145
+msgid "day"
+msgstr ""
+
+#: home/templates/car/rental_request.html:201
+msgid "Rental Period"
+msgstr ""
+
+#: home/templates/car/rental_request.html:228
+msgid "deposit"
+msgstr ""
+
+#: home/templates/car/rental_request.html:232
+msgid "years min"
+msgstr ""
+
+#: home/templates/car/rental_request.html:239
+msgid "Additional Information"
+msgstr ""
+
+#: home/templates/car/rental_request.html:242
+msgid "Special requests or notes..."
+msgstr ""
+
+#: home/templates/car/rental_request.html:248
+msgid "Summary"
+msgstr ""
+
+#: home/templates/car/rental_request.html:251
+msgid "Price per day"
+msgstr ""
+
+#: home/templates/car/rental_request.html:255
+msgid "Security deposit"
+msgstr ""
+
+#: home/templates/car/rental_request.html:260
+msgid "Total"
+msgstr ""
+
+#: home/templates/car/rental_request.html:268
+msgid "Confirm Rental Request"
+msgstr ""
+
+#: home/templates/car/request_car_model.html:14
+#: home/templates/car/request_car_model_history.html:15
+msgid "Brand Name"
+msgstr ""
+
+#: home/templates/car/request_car_model.html:16
+msgid "Enter brand name"
+msgstr ""
+
+#: home/templates/car/request_car_model.html:24
+msgid "You can enter an existing brand or request a new one"
+msgstr ""
+
+#: home/templates/car/request_car_model.html:32
+#: home/templates/car/request_car_model_history.html:17
+msgid "Description"
+msgstr ""
+
+#: home/templates/car/request_car_model.html:35
+msgid "Submit Request"
+msgstr ""
+
+#: home/templates/car/request_car_model_history.html:7
+msgid "Car Model Requests History"
+msgstr ""
+
+#: home/templates/car/request_car_model_history.html:8
+msgid "Back to Cars List"
+msgstr ""
+
+#: home/templates/car/request_car_model_history.html:18
+msgid "Status"
+msgstr ""
+
+#: home/templates/car/request_car_model_history.html:19
+msgid "Requested Date"
+msgstr ""
+
+#: home/templates/car/request_car_model_history.html:41
+msgid "No requests found"
+msgstr ""
+
+#: home/templates/car/request_car_model_history.html:53
+msgid "First"
+msgstr ""
+
+#: home/templates/car/request_car_model_history.html:56
+msgid "Previous"
+msgstr ""
+
+#: home/templates/car/request_car_model_history.html:73
+msgid "Last"
+msgstr ""
+
+#: home/templates/car/search.html:14 home/templates/index.html:14
+msgid "Find Your Perfect Ride"
+msgstr ""
+
+#: home/templates/car/search.html:15 home/templates/index.html:15
+msgid ""
+"Discover the freedom of exploring Tunisia with our premium car rental service"
+msgstr ""
+
+#: home/templates/car/search.html:16 home/templates/car/search_results.html:152
+#: home/templates/index.html:16
+msgid "Rent Now"
+msgstr ""
+
+#: home/templates/car/search.html:25 home/templates/index.html:25
+msgid "Search Available Cars"
+msgstr ""
+
+#: home/templates/car/search.html:30 home/templates/index.html:30
+msgid "Pick-up Date"
+msgstr ""
+
+#: home/templates/car/search.html:36 home/templates/index.html:36
+msgid "Return Date"
+msgstr ""
+
+#: home/templates/car/search.html:42 home/templates/index.html:42
+msgid "Search Radius"
+msgstr ""
+
+#: home/templates/car/search.html:47 home/templates/index.html:47
+msgid "km"
+msgstr ""
+
+#: home/templates/car/search.html:54 home/templates/index.html:54
+msgid "Select your location on the map"
+msgstr ""
+
+#: home/templates/car/search.html:62 home/templates/index.html:62
+msgid "Search Cars"
+msgstr ""
+
+#: home/templates/car/search.html:75 home/templates/index.html:75
+msgid "Why Choose Us"
+msgstr ""
+
+#: home/templates/car/search.html:76 home/templates/index.html:76
+msgid "Discover the advantages of our premium car rental service"
+msgstr ""
+
+#: home/templates/car/search.html:85 home/templates/index.html:85
+msgid "Best Price Guarantee"
+msgstr ""
+
+#: home/templates/car/search.html:86 home/templates/index.html:86
+msgid "We offer the most competitive rates in the market with no hidden fees"
+msgstr ""
+
+#: home/templates/car/search.html:94 home/templates/index.html:94
+msgid "Wide Range of Vehicles"
+msgstr ""
+
+#: home/templates/car/search.html:95 home/templates/index.html:95
+msgid "From economy to luxury, we have the perfect car to suit your needs"
+msgstr ""
+
+#: home/templates/car/search.html:103 home/templates/index.html:103
+msgid "24/7 Customer Support"
+msgstr ""
+
+#: home/templates/car/search.html:104 home/templates/index.html:104
+msgid "Our dedicated team is always ready to assist you anytime, anywhere"
+msgstr ""
+
+#: home/templates/car/search.html:115 home/templates/index.html:115
+msgid "Explore Our Car Categories"
+msgstr ""
+
+#: home/templates/car/search.html:116 home/templates/index.html:116
+msgid "Find the perfect vehicle for your journey"
+msgstr ""
+
+#: home/templates/car/search.html:124 home/templates/index.html:124
+msgid "Economy"
+msgstr ""
+
+#: home/templates/car/search.html:125 home/templates/index.html:125
+msgid "Affordable and fuel-efficient"
+msgstr ""
+
+#: home/templates/car/search.html:133 home/templates/index.html:133
+msgid "SUVs"
+msgstr ""
+
+#: home/templates/car/search.html:134 home/templates/index.html:134
+msgid "Perfect for adventures and family trips"
+msgstr ""
+
+#: home/templates/car/search.html:142 home/templates/index.html:142
+msgid "Luxury"
+msgstr ""
+
+#: home/templates/car/search.html:143 home/templates/index.html:143
+msgid "Premium vehicles for a special experience"
+msgstr ""
+
+#: home/templates/car/search.html:155 home/templates/index.html:155
+msgid "What Our Customers Say"
+msgstr ""
+
+#: home/templates/car/search.html:156 home/templates/index.html:156
+msgid "Read about experiences from our satisfied clients"
+msgstr ""
+
+#: home/templates/car/search.html:165 home/templates/index.html:165
+msgid ""
+"The service was excellent! The car was in perfect condition and the booking "
+"process was simple and fast."
+msgstr ""
+
+#: home/templates/car/search.html:174 home/templates/index.html:174
+msgid ""
+"I love how easy it was to find a car near my location. The map feature is "
+"really helpful!"
+msgstr ""
+
+#: home/templates/car/search.html:183 home/templates/index.html:183
+msgid ""
+"Great prices and even better customer service. I'll definitely rent with "
+"them again."
+msgstr ""
+
+#: home/templates/car/search.html:195 home/templates/index.html:195
+msgid "Ready to Start Your Journey?"
+msgstr ""
+
+#: home/templates/car/search.html:196 home/templates/index.html:196
+msgid ""
+"Join thousands of satisfied customers and experience Tunisia like never "
+"before"
+msgstr ""
+
+#: home/templates/car/search.html:197 home/templates/index.html:197
+msgid "Rent Your Car Now"
+msgstr ""
+
+#: home/templates/car/search_results.html:27
+msgid "Filters"
+msgstr ""
+
+#: home/templates/car/search_results.html:31
+msgid "Price Range"
+msgstr ""
+
+#: home/templates/car/search_results.html:71
+msgid "Apply Filters"
+msgstr ""
+
+#: home/templates/car/search_results.html:82
+msgid "Available Cars"
+msgstr ""
+
+#: home/templates/car/search_results.html:83
+msgid "From"
+msgstr ""
+
+#: home/templates/car/search_results.html:83
+msgid "to"
+msgstr ""
+
+#: home/templates/car/search_results.html:88
+msgid "Distance"
+msgstr ""
+
+#: home/templates/car/search_results.html:91
+msgid "Price: Low to High"
+msgstr ""
+
+#: home/templates/car/search_results.html:94
+msgid "Price: High to Low"
+msgstr ""
+
+#: home/templates/car/search_results.html:113
+msgid "Compare"
+msgstr ""
+
+#: home/templates/car/search_results.html:137
+msgid "years"
+msgstr ""
+
+#: home/templates/car/search_results.html:160
+msgid "No cars available for the selected criteria"
+msgstr ""
+
+#: home/templates/car/search_results.html:161
+msgid "Try adjusting your filters or search dates to see more results."
+msgstr ""
+
+#: home/templates/car/search_results.html:224
+msgid "cars selected"
+msgstr ""
+
+#: home/templates/car/search_results.html:226
+msgid "Compare Cars"
+msgstr ""
+
+#: home/templates/car/search_results.html:244
+msgid "You can compare up to 3 cars at a time"
+msgstr ""
+
+#: home/templates/car/search_results.html:269
+msgid "Please select at least 2 cars to compare"
 msgstr ""
 
 #: home/templates/change_password.html:9 home/templates/change_password.html:18
 msgid "Change your password"
 msgstr ""
 
-#: home/templates/change_password.html:20 home/templates/login.html:21
-#: home/templates/mail_not_confirmed.html:20
-#: home/templates/mail_not_confirmed.html:69
-#: home/templates/password_reset_confirm.html:20
-#: home/templates/password_reset_confirm.html:72
-msgid "Home"
-msgstr ""
-
-#: home/templates/change_password.html:21 home/templates/login.html:22
-#: home/templates/mail_not_confirmed.html:21
-#: home/templates/password_reset_confirm.html:21
-msgid "pages"
-msgstr ""
-
 #: home/templates/change_password.html:39
 #: home/templates/mail_not_confirmed.html:39
+#: home/templates/mail_not_confirmed_agency.html:38
 #: home/templates/password_reset_confirm.html:39
 msgid "Welcome "
 msgstr ""
@@ -224,7 +1362,7 @@ msgstr ""
 msgid "Please Enter New Password"
 msgstr ""
 
-#: home/templates/change_password.html:68 home/templates/login.html:127
+#: home/templates/change_password.html:68 home/templates/login.html:129
 #: home/templates/password_reset_confirm.html:64
 msgid "Confirm Password"
 msgstr ""
@@ -234,7 +1372,56 @@ msgstr ""
 msgid "Please confirm the Password"
 msgstr ""
 
+#: home/templates/contact.html:30
+msgid "Contact US"
+msgstr ""
+
+#: home/templates/contact.html:41 home/templates/test.html:52
+msgid "Get in touch"
+msgstr ""
+
+#: home/templates/contact.html:65
+msgid "telePhone"
+msgstr ""
+
+#: home/templates/contact.html:73
+msgid "Fax"
+msgstr ""
+
+#: home/templates/contact.html:93
+msgid "Say Hello! "
+msgstr ""
+
+#: home/templates/contact.html:94
+msgid "Send Us a"
+msgstr ""
+
+#: home/templates/contact.html:105
+msgid "Your Name *"
+msgstr ""
+
+#: home/templates/contact.html:109
+msgid "Your Email *"
+msgstr ""
+
+#: home/templates/contact.html:113
+msgid "Your Phone (Optional)"
+msgstr ""
+
+#: home/templates/contact.html:117
+msgid "Subject*"
+msgstr ""
+
+#: home/templates/contact.html:121
+msgid "Message *"
+msgstr ""
+
+#: home/templates/contact.html:123
+msgid "Submit Message"
+msgstr ""
+
 #: home/templates/email_template.html:2
+#: home/templates/email_template_agency.html:2
 msgid "Hi,"
 msgstr ""
 
@@ -242,145 +1429,140 @@ msgstr ""
 msgid "Please click on the link to confirm your registration,"
 msgstr ""
 
-#: home/templates/login.html:37
+#: home/templates/email_template_agency.html:3
+msgid "Please click on the link to confirm your agency registration,"
+msgstr ""
+
+#: home/templates/login.html:39
 msgid "have an account? Log In"
 msgstr ""
 
-#: home/templates/login.html:50
+#: home/templates/login.html:52
 msgid "Username / Email"
 msgstr ""
 
-#: home/templates/login.html:50
+#: home/templates/login.html:52
 msgid "Please Enter your Username or Email"
 msgstr ""
 
-#: home/templates/login.html:53
+#: home/templates/login.html:55
 msgid "Passsword"
 msgstr ""
 
-#: home/templates/login.html:53
+#: home/templates/login.html:55
 msgid "Please Enter your Password"
 msgstr ""
 
-#: home/templates/login.html:55
+#: home/templates/login.html:57
 msgid "Login Now"
 msgstr ""
 
-#: home/templates/login.html:58
+#: home/templates/login.html:60
 msgid "Keep me signed in"
 msgstr ""
 
-#: home/templates/login.html:59
+#: home/templates/login.html:61
 msgid "Forgot password?"
 msgstr ""
 
-#: home/templates/login.html:72
+#: home/templates/login.html:74
 msgid "Please enter your email:"
 msgstr ""
 
-#: home/templates/login.html:78
+#: home/templates/login.html:80
 msgid "Your Email Adddress"
 msgstr ""
 
-#: home/templates/login.html:80
+#: home/templates/login.html:82
 msgid "Please Enter your email"
 msgstr ""
 
-#: home/templates/login.html:83 home/templates/password_reset_confirm.html:67
+#: home/templates/login.html:85 home/templates/password_reset_confirm.html:67
 msgid "Reset Password"
 msgstr ""
 
-#: home/templates/login.html:95
+#: home/templates/login.html:97
 msgid "Sign in With Facebook"
 msgstr ""
 
-#: home/templates/login.html:96
+#: home/templates/login.html:98
 msgid "Sign in With Twitter"
 msgstr ""
 
-#: home/templates/login.html:104
-msgid "Sign up Now"
-msgstr ""
-
-#: home/templates/login.html:106
-msgid "Get"
-msgstr ""
-
-#: home/templates/login.html:106
-msgid "Registered"
-msgstr ""
-
-#: home/templates/login.html:124
+#: home/templates/login.html:126
 msgid "Password"
 msgstr ""
 
-#: home/templates/login.html:131
+#: home/templates/login.html:133
 msgid "agree with the"
 msgstr ""
 
-#: home/templates/login.html:131
+#: home/templates/login.html:133 home/templates/terms_and_conditions.html:40
+#: home/templates/terms_and_conditions.html:43
 msgid "Terms and Conditions"
 msgstr ""
 
-#: home/templates/login.html:133
-msgid "Sign Up"
-msgstr ""
-
-#: home/templates/login.html:136
-msgid "Register With Facebook"
-msgstr ""
-
-#: home/templates/login.html:137
-msgid "Register With Twitter"
-msgstr ""
-
 #: home/templates/mail_not_confirmed.html:9
+#: home/templates/mail_not_confirmed_agency.html:9
 msgid "Resend confirmation mail"
 msgstr ""
 
 #: home/templates/mail_not_confirmed.html:18
+#: home/templates/mail_not_confirmed_agency.html:17
 msgid "Re Send confirmation mail"
 msgstr ""
 
 #: home/templates/mail_not_confirmed.html:41
+#: home/templates/mail_not_confirmed_agency.html:40
 msgid "Your Mail is "
 msgstr ""
 
 #: home/templates/mail_not_confirmed.html:41
+#: home/templates/mail_not_confirmed_agency.html:40
 msgid "Unconfirmed"
 msgstr ""
 
 #: home/templates/mail_not_confirmed.html:43
+#: home/templates/mail_not_confirmed_agency.html:42
 msgid "Your Request is "
 msgstr ""
 
 #: home/templates/mail_not_confirmed.html:43
+#: home/templates/mail_not_confirmed_agency.html:42
 msgid "Ambiguious"
 msgstr ""
 
 #: home/templates/mail_not_confirmed.html:49
+#: home/templates/mail_not_confirmed_agency.html:48
 msgid "Verifying your mail:"
 msgstr ""
 
 #: home/templates/mail_not_confirmed.html:54
+#: home/templates/mail_not_confirmed_agency.html:53
 msgid "Please check your mail inbox and hit the activation link."
 msgstr ""
 
 #: home/templates/mail_not_confirmed.html:55
 #: home/templates/mail_not_confirmed.html:56
 #: home/templates/mail_not_confirmed.html:57
+#: home/templates/mail_not_confirmed_agency.html:54
+#: home/templates/mail_not_confirmed_agency.html:55
+#: home/templates/mail_not_confirmed_agency.html:56
 msgid " "
 msgstr ""
 
 #: home/templates/mail_not_confirmed.html:61
+#: home/templates/mail_not_confirmed_agency.html:60
 msgid "Re-Send Activation Mail"
 msgstr ""
 
 #: home/templates/mail_not_confirmed.html:66
+#: home/templates/mail_not_confirmed_agency.html:65
 msgid "Ambiguious Request !!"
 msgstr ""
 
 #: home/templates/mail_not_confirmed.html:67
+#: home/templates/mail_not_confirmed_agency.html:66
 msgid "Please hit home page."
 msgstr ""
 
@@ -432,46 +1614,144 @@ msgstr ""
 msgid "TunCar Team"
 msgstr ""
 
-#: home/views/connection_views.py:79
-msgid "Your account is deactivated. Please contact support!!"
+#: home/templates/terms_and_conditions.html:56
+msgid "Please read the following terms and conditions carefully:"
 msgstr ""
 
-#: home/views/connection_views.py:96
-msgid "You must fill the captcha."
+#: home/templates/terms_and_conditions.html:60
+msgid "Compliance with Laws"
 msgstr ""
 
-#: home/views/connection_views.py:99
-msgid "Invalid Credentials."
-msgstr ""
-
-#: home/views/connection_views.py:118
+#: home/templates/terms_and_conditions.html:61
 msgid ""
-"We have emailed you instructions for setting your password. You should "
-"receive the email shortly!"
+"You must ensure that your agency complies with all local laws and "
+"regulations, including but not limited to:"
 msgstr ""
 
-#: home/views/connection_views.py:122
-msgid "No user with this email !!"
+#: home/templates/terms_and_conditions.html:63
+msgid "Business registration requirements"
 msgstr ""
 
-#: home/views/connection_views.py:133
-msgid "Password changed successfully."
+#: home/templates/terms_and_conditions.html:64
+msgid "Tax obligations"
 msgstr ""
 
-#: home/views/connection_views.py:165
-msgid "Please check your mail box and hit the mail verification."
+#: home/templates/terms_and_conditions.html:65
+msgid "Insurance requirements"
 msgstr ""
 
-#: home/views/registration.py:47
+#: home/templates/terms_and_conditions.html:66
+msgid "Vehicle safety standards"
+msgstr ""
+
+#: home/templates/terms_and_conditions.html:71
+msgid "Information Accuracy"
+msgstr ""
+
+#: home/templates/terms_and_conditions.html:72
 msgid ""
-"User created Successfully. Please check your mail box and hit the mail "
-"verification."
+"Your agency must provide accurate and truthful information during "
+"registration, including:"
 msgstr ""
 
-#: home/views/registration.py:64
-msgid "Your mail address is successfully activated."
+#: home/templates/terms_and_conditions.html:74
+msgid "Company details"
 msgstr ""
 
-#: home/views/registration.py:67
-msgid "This link is dead. Try to generate another link."
+#: home/templates/terms_and_conditions.html:75
+msgid "Contact information"
+msgstr ""
+
+#: home/templates/terms_and_conditions.html:76
+msgid "Vehicle specifications"
+msgstr ""
+
+#: home/templates/terms_and_conditions.html:77
+msgid "Rental terms"
+msgstr ""
+
+#: home/templates/terms_and_conditions.html:82
+msgid "Code of Conduct"
+msgstr ""
+
+#: home/templates/terms_and_conditions.html:83
+msgid "Your agency agrees to adhere to the platform\\"
+msgstr ""
+
+#: home/templates/terms_and_conditions.html:85
+msgid "Fair pricing practices"
+msgstr ""
+
+#: home/templates/terms_and_conditions.html:86
+msgid "Professional customer service"
+msgstr ""
+
+#: home/templates/terms_and_conditions.html:87
+msgid "Transparent booking policies"
+msgstr ""
+
+#: home/templates/terms_and_conditions.html:88
+msgid "Timely responses to inquiries"
+msgstr ""
+
+#: home/templates/terms_and_conditions.html:93
+msgid "Data Protection"
+msgstr ""
+
+#: home/templates/terms_and_conditions.html:94
+msgid ""
+"Your agency must comply with data protection regulations and ensure customer "
+"privacy."
+msgstr ""
+
+#: home/templates/terms_and_conditions.html:98
+msgid "Service Quality"
+msgstr ""
+
+#: home/templates/terms_and_conditions.html:99
+msgid "Maintain high standards of service quality and vehicle maintenance."
+msgstr ""
+
+#: home/templates/test.html:43
+msgid "Test Page"
+msgstr ""
+
+#: home/views/agences.py:189
+msgid "Permissions updated successfully"
+msgstr ""
+
+#: home/views/agences.py:191
+msgid "User not found"
+msgstr ""
+
+#: home/views/agences.py:208
+msgid "Permission revoked successfully from {}"
+msgstr ""
+
+#: home/views/agences.py:210
+msgid "Error revoking permission: {}"
+msgstr ""
+
+#: home/views/car.py:58
+msgid "Rental request submitted successfully"
+msgstr ""
+
+#: home/views/car.py:79
+msgid "Car model request submitted successfully. Awaiting admin approval."
+msgstr ""
+
+#: home/views/car.py:156
+msgid "Car updated successfully"
+msgstr ""
+
+#: home/views/car.py:176
+msgid "Car deleted successfully"
+msgstr ""
+
+#: home/views/car.py:271
+msgid "Car added successfully"
+msgstr ""
+
+#: home/views/search.py:84 home/views/search.py:145
+msgid "Missing search parameters"
 msgstr ""

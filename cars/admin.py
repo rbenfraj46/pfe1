@@ -4,10 +4,19 @@ from django.utils.html import format_html
 from django.templatetags.static import static
 from django.utils.safestring import mark_safe
 from django.db import transaction
+from django.contrib import messages
+from django.utils.translation import gettext_lazy as _
+from django.core.mail import send_mail
+import logging
 
-from cars.models import Brand, GearType, CarModel, Transmission, AgencyCar, CarUnavailability
+from cars.models import (
+    Brand, GearType, CarModel, Transmission, 
+    AgencyCar, CarUnavailability, CarModelRequest,
+    CarReservation
+)
 from cars.forms import CarModelAdminForm, BrandAdminForm
-from .models import CarModelRequest
+
+logger = logging.getLogger(__name__)
 
 class BrandAdmin(admin.ModelAdmin):
     form = BrandAdminForm
@@ -93,6 +102,72 @@ class CarModelRequestAdmin(admin.ModelAdmin):
                 self.message_user(request, f'Error creating car model: {str(e)}', level='error')
         else:
             super().save_model(request, obj, form, change)
+
+@admin.register(CarReservation)
+class CarReservationAdmin(admin.ModelAdmin):
+    list_display = ('car', 'user', 'start_date', 'end_date', 'total_price', 'status', 'created_at')
+    list_filter = ('status', 'created_at', 'start_date')
+    search_fields = ('car__brand__name', 'car__car_model__name', 'user__username', 'user__email')
+    ordering = ('-created_at',)
+    
+    def save_model(self, request, obj, form, change):
+        old_status = None
+        if change:
+            old_obj = CarReservation.objects.get(pk=obj.pk)
+            old_status = old_obj.status
+            
+        super().save_model(request, obj, form, change)
+        
+        # Envoi des notifications si le statut a changé
+        if change and old_status != obj.status:
+            if obj.status == 'approved':
+                subject = _('Your car rental request has been approved')
+                message = _('''Your rental request has been approved:
+                    Car: {car}
+                    From: {start}
+                    To: {end}
+                    Total Price: {price}
+                    
+                    Please proceed with the payment of the security deposit to confirm your reservation.
+                ''').format(
+                    car=obj.car,
+                    start=obj.start_date,
+                    end=obj.end_date,
+                    price=obj.total_price
+                )
+            elif obj.status == 'rejected':
+                subject = _('Your car rental request has been rejected')
+                message = _('''Unfortunately, your rental request has been rejected:
+                    Car: {car}
+                    From: {start}
+                    To: {end}
+                    
+                    Reason: {reason}
+                    
+                    Please feel free to try another date or contact us for more information.
+                ''').format(
+                    car=obj.car,
+                    start=obj.start_date,
+                    end=obj.end_date,
+                    reason=obj.rejection_reason or _('No specific reason provided')
+                )
+            
+            try:
+                send_mail(
+                    subject,
+                    message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [obj.user.email],
+                    fail_silently=True
+                )
+            except Exception as e:
+                messages.error(request, _('Failed to send notification email to customer'))
+                logger.error(f"Failed to send email to customer: {str(e)}")
+    
+    def get_readonly_fields(self, request, obj=None):
+        if obj and obj.status in ['approved', 'rejected', 'cancelled']:
+            return self.readonly_fields + ('car', 'user', 'start_date', 'end_date', 'total_price')
+        return self.readonly_fields
 
 
 

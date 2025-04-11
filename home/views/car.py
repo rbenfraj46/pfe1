@@ -3,10 +3,14 @@ from django.contrib import messages
 from django.views import View
 from django.views.generic import ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.utils.translation import gettext as _
 from django.http import JsonResponse
+from django.core.mail import send_mail
+from django.conf import settings
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 import logging
+from datetime import datetime
 
 from cars.models import (
     AgencyCar, 
@@ -14,7 +18,8 @@ from cars.models import (
     Brand, 
     CarModel, 
     GearType,
-    CarModelRequest
+    CarModelRequest,
+    CarReservation
 )
 from home.models import Agences
 from home.views.agences import has_agency_permission
@@ -43,6 +48,7 @@ class CarManagementMixin:
 
 class CarRentalRequestView(LoginRequiredMixin, View):
     template_name = 'car/rental_request.html'
+    login_url = '/login.php'  # URL de connexion correcte
 
     def get(self, request, car_id):
         car = get_object_or_404(AgencyCar, id=car_id)
@@ -55,8 +61,84 @@ class CarRentalRequestView(LoginRequiredMixin, View):
 
     def post(self, request, car_id):
         car = get_object_or_404(AgencyCar, id=car_id)
-        messages.success(request, _('Rental request submitted successfully'))
-        return redirect('car_search_results')
+        try:
+            # Conversion des dates depuis les chaînes de caractères
+            start_date = datetime.strptime(request.POST.get('start_date'), '%Y-%m-%d').date()
+            end_date = datetime.strptime(request.POST.get('end_date'), '%Y-%m-%d').date()
+            
+            # Calcul du nombre de jours et du prix total
+            days = (end_date - start_date).days
+            total_price = car.price_per_day * days
+            
+            reservation = CarReservation.objects.create(
+                car=car,
+                user=request.user,
+                start_date=start_date,
+                end_date=end_date,
+                notes=request.POST.get('notes'),
+                status='pending',
+                total_price=total_price
+            )
+            
+            # Envoyer une notification à l'agence
+            subject = _('New Rental Request')
+            message = _('''A new rental request has been submitted for your car:
+                Car: {car}
+                Customer: {user}
+                From: {start}
+                To: {end}
+                Total Price: {price}
+                Notes: {notes}
+                
+                Please review this request in your admin panel.
+            ''').format(
+                car=car,
+                user=request.user.get_full_name() or request.user.username,
+                start=reservation.start_date,
+                end=reservation.end_date,
+                price=reservation.total_price,
+                notes=reservation.notes or _('No special notes')
+            )
+            
+            try:
+                send_mail(
+                    subject,
+                    message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [car.agence.email],
+                    fail_silently=True
+                )
+            except Exception as e:
+                logger.error(f"Failed to send email to agency: {str(e)}")
+
+            messages.success(
+                request, 
+                _('Your rental request has been submitted successfully. Please wait for the agency approval.')
+            )
+            return redirect('index')
+            
+        except (ValueError, TypeError) as e:
+            messages.error(request, _('Invalid date format. Please use YYYY-MM-DD format.'))
+            context = {
+                'car': car,
+                'start_date': request.POST.get('start_date'),
+                'end_date': request.POST.get('end_date'),
+                'notes': request.POST.get('notes')
+            }
+            return render(request, self.template_name, context)
+        except ValidationError as e:
+            messages.error(request, str(e))
+            context = {
+                'car': car,
+                'start_date': request.POST.get('start_date'),
+                'end_date': request.POST.get('end_date'),
+                'notes': request.POST.get('notes')
+            }
+            return render(request, self.template_name, context)
+        except Exception as e:
+            messages.error(request, _('An error occurred while processing your request.'))
+            logger.error(f"Error creating reservation: {str(e)}")
+            return redirect('car_search_results')
 
 class CarModelRequestView(LoginRequiredMixin, View):
     template_name = 'car/request_car_model.html'

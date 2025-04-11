@@ -12,7 +12,8 @@ RUN apt-get update && \
     libgdal-dev \
     python3-gdal \
     binutils \
-    libproj-dev && \
+    libproj-dev \
+    gettext && \
     rm -rf /var/lib/apt/lists/*
 
 COPY . /app

@@ -251,7 +251,7 @@ CAPTCHA_FLITE_PATH = '/usr/bin/flite'
 #LOGIN LOGOUT URL
 LOGOUT_REDIRECT_URL = "/"
 LOGIN_REDIRECT_URL = "/"
-LOGIN_URL = 'login.php'
+LOGIN_URL = 'login'  # Modifié pour utiliser le nom d'URL au lieu du chemin
 LOGOUT_URL = 'logout.php'
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
