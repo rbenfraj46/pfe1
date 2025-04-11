@@ -16,14 +16,15 @@ RUN apt-get update && \
     gettext && \
     rm -rf /var/lib/apt/lists/*
 
+COPY requirements.txt /app/
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
+
 COPY . /app
 
-RUN pip install --upgrade pip && \
-    pip install -e .
+ENV PYTHONUNBUFFERED=1
+ENV DJANGO_SETTINGS_MODULE=carrent.settings_dev
 
 EXPOSE 8000
-
-
-ENV DJANGO_SETTINGS_MODULE=carrent.settings_dev
 
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

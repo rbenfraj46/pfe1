@@ -9,19 +9,22 @@ services:
       - .:/app  
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
       - DJANGO_SETTINGS_MODULE=carrent.settings_dev
-      - DATABASE_URL=postgres://myuser:12345@db:5432/carrental  
     depends_on:
       - db
 
   db:
     image: postgis/postgis
     container_name: postgresql
+    env_file:
+      - .env
     environment:
-      POSTGRES_DB: carrental
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5432:5432"
     volumes:

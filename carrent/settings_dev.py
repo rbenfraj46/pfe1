@@ -1,12 +1,48 @@
+import os
+from pathlib import Path
 from carrent.settings import *
+from django.utils.translation import gettext_lazy as _
+from dotenv import load_dotenv
 
-DEBUG = True
+# Charger les variables d'environnement
+load_dotenv()
 
-ALLOWED_HOSTS = [
-    '127.0.0.1', 
-    'localhost', 
-    'scaling-bassoon-7vrgj675g96wcwp97-8000.app.github.dev'
-]
+# Debug
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
+
+# Allowed hosts
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+
+# Secret key
+SECRET_KEY = os.getenv('SECRET_KEY')
+
+# Database
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
+    }
+}
+
+# Configuration email mise à jour
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND')
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
+NO_REPLY_EMAIL_ADRESS = os.getenv('NO_REPLY_EMAIL_ADRESS')
+
+# Other settings
+DEFAULT_CURRENCY = os.getenv('DEFAULT_CURRENCY')
+FREECURRENCYAPI_TOKEN = os.getenv('FREECURRENCYAPI_TOKEN')
+DEFAULT_LON = os.getenv('DEFAULT_LON')
+DEFAULT_LAT = os.getenv('DEFAULT_LAT')
 
 CSRF_TRUSTED_ORIGINS = [
     "https://scaling-bassoon-7vrgj675g96wcwp97-8000.app.github.dev",
@@ -38,18 +74,6 @@ if DEBUG:
     MIDDLEWARE += [
         'debug_toolbar.middleware.DebugToolbarMiddleware',
     ]
-
-    # Configuration de la base de données
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.contrib.gis.db.backends.postgis',
-            'NAME': 'carrental',
-            'USER': 'myuser',
-            'PASSWORD': '12345',
-            'HOST': 'postgresql',  
-            'PORT': '5432',
-        }
-    } 
 
     INTERNAL_IPS = ['127.0.0.1']
 
@@ -206,10 +230,6 @@ if DEBUG:
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
 
-    # Configuration des emails en développement
-    EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
-    EMAIL_FILE_PATH = str(BASE_DIR.joinpath('sent_emails'))
-    
     # Configuration des médias
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

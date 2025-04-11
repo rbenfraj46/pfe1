@@ -29,24 +29,49 @@ class CarSearchMixin:
         return Point(float(longitude), float(latitude), srid=4326)
 
     def get_available_cars(self, point, search_params, filters=None):
-        cars = AgencyCar.objects.filter(
-            agence__location__distance_lte=(point, D(km=float(search_params['radius']))),
-            agence__is_active=True,
+        logger.info(f"Recherche de voitures avec les paramètres: {search_params}")
+        
+        # Base query pour les voitures actives et disponibles
+        cars = AgencyCar.objects.select_related(
+            'brand', 'car_model', 'gear_type', 'agence'
+        ).filter(
             is_active=True,
             available=True
-        ).exclude(
-            unavailability_periods__start_date__lte=search_params['end_date'],
-            unavailability_periods__end_date__gte=search_params['start_date']
         )
 
-        if filters:
-            cars = self.apply_filters(cars, filters)
+        # Filtre par distance
+        cars = cars.filter(
+            agence__location__distance_lte=(point, D(km=float(search_params['radius'])))
+        )
 
-        return cars.select_related(
-            'brand', 'car_model', 'gear_type', 'agence'
-        ).annotate(
+        # Exclure les voitures indisponibles pour les dates sélectionnées
+        if search_params.get('start_date') and search_params.get('end_date'):
+            cars = cars.exclude(
+                unavailability_periods__start_date__lte=search_params['end_date'],
+                unavailability_periods__end_date__gte=search_params['start_date']
+            )
+
+        # Appliquer les filtres supplémentaires
+        if filters:
+            if filters.get('brand'):
+                cars = cars.filter(brand_id=filters['brand'])
+            
+            if filters.get('gear_types'):
+                cars = cars.filter(gear_type_id__in=filters['gear_types'])
+            
+            if filters.get('min_price') and filters.get('max_price'):
+                cars = cars.filter(
+                    price_per_day__gte=filters.get('min_price'),
+                    price_per_day__lte=filters.get('max_price')
+                )
+
+        # Ajouter la distance
+        cars = cars.annotate(
             distance=Distance('agence__location', point)
         )
+
+        logger.info(f"Nombre de voitures trouvées: {cars.count()}")
+        return cars
 
     def apply_filters(self, queryset, filters):
         if filters.get('brand'):
