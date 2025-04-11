@@ -41,6 +41,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',  # Doit être avant django.contrib.admin
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -283,3 +284,73 @@ CAR_DOWNLOAD_FOLDER = "/cars/brands/"
 SPATIALITE_LIBRARY_PATH = '/usr/lib/x86_64-linux-gnu/mod_spatialite.so'
 
 GEOIP_KEY = "A2h5fPXmqQNYZCqz"
+
+# Admin site customization
+JAZZMIN_SETTINGS = {
+    "site_title": "TunCar Admin",
+    "site_header": "TunCar",
+    "site_brand": "TunCar",
+    "welcome_sign": "Bienvenue dans l'administration TunCar",
+    "copyright": "TunCar",
+    "show_ui_builder": True,
+    "changeform_format": "horizontal_tabs",
+    "related_modal_active": True,
+    "custom_css": "admin/css/custom_admin.css",
+    "custom_js": "admin/js/custom_admin.js",
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "cars.CarModel": "fas fa-car",
+        "cars.Brand": "fas fa-copyright",
+        "cars.AgencyCar": "fas fa-warehouse",
+        "cars.CarReservation": "fas fa-calendar-check",
+        "home.Agences": "fas fa-building",
+        "home.Contact": "fas fa-envelope",
+    },
+    "default_icon_parents": "fas fa-folder",
+    "default_icon_children": "fas fa-circle",
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "hide_apps": [],
+    "hide_models": [],
+    "order_with_respect_to": ["auth", "cars", "home"],
+    "custom_links": {
+        "cars": [{
+            "name": "Statistiques des réservations", 
+            "url": "admin:car_stats",
+            "icon": "fas fa-chart-line",
+        }]
+    },
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": "navbar-primary",
+    "accent": "accent-primary",
+    "navbar": "navbar-dark",
+    "no_navbar_border": False,
+    "navbar_fixed": True,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": True,
+    "sidebar": "sidebar-dark-primary",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": True,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "theme": "default",
+    "dark_mode_theme": None,
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    }
+}

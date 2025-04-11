@@ -1,6 +1,3 @@
-
-
-
 import os
 import sys
 
@@ -35,8 +32,9 @@ install_requires = [
     'jsonfield==3.1.0',
     'django-extensions==3.1.5',
     'django-debug-toolbar==3.2.4',
+    'django-jazzmin==2.6.0',
     'polib==1.2.0',
-    'googletrans==3.1.0a0,
+    'googletrans==3.1.0a0',
 ]
 
 dev_requires = [

@@ -6,12 +6,12 @@ participant "Interface Web" as ui
 participant "Système" as system
 participant "Base de données" as db
 participant "Service Upload" as upload
-participant "Service Email" as email
+actor "Admin" as admin
 
 autonumber
 
 ' Authentification
-agent -> ui : Se connecter à l'interface agence
+agent -> ui : Se connecter à l'interface 
 activate ui
 ui -> system : Vérifier permissions
 activate system
@@ -64,38 +64,53 @@ db --> system : Résultat vérification
 deactivate db
 
 alt données valides
-    system -> db : Enregistrer voiture
+    system -> db : Vérifier statut agence (is_auto)
     activate db
-    db --> system : Confirmation enregistrement
+    db --> system : Statut agence
     deactivate db
-    
-    ' Notification succès
-    system -> email : Envoyer confirmation
-    activate email
-    email -> agent : Email confirmation
-    deactivate email
-    
-    system --> ui : Succès enregistrement
-    ui --> agent : Afficher confirmation
+
+    alt agence.is_auto == true
+        system -> db : Enregistrer voiture (is_active=true)
+        activate db
+        db --> system : Voiture activée et enregistrée
+        deactivate db
+        system --> ui : Succès enregistrement\n(Voiture disponible immédiatement)
+        ui --> agent : Afficher confirmation\n(Voiture active)
+    else agence.is_auto == false
+        system -> db : Enregistrer voiture (is_active=false)
+        activate db
+        db --> system : Voiture en attente
+        deactivate db
+        system --> ui : Succès enregistrement\n(En attente d'activation)
+        ui --> agent : Afficher confirmation\n(En attente d'approbation)
+        
+        ' Processus d'activation manuel par l'admin
+        admin -> ui : Accéder interface admin
+        activate ui
+        ui -> system : Liste des voitures en attente
+        activate system
+        system -> db : Récupérer voitures (is_active=false)
+        activate db
+        db --> system : Liste voitures inactives
+        deactivate db
+        system --> ui : Afficher liste
+        admin -> ui : Activer voiture
+        ui -> system : Demande activation
+        system -> db : Mettre à jour (is_active=true)
+        activate db
+        db --> system : Confirmation activation
+        deactivate db
+        system --> ui : Confirmation
+        ui --> admin : Notification succès
+        deactivate system
+        deactivate ui
+    end
+
 else données invalides
     system --> ui : Erreurs validation
     ui --> agent : Afficher erreurs
 end
 deactivate system
 deactivate ui
-
-' Activation automatique
-alt activation auto activée
-    system -> db : Activer voiture
-    activate system
-    activate db
-    db --> system : Confirmation activation
-    deactivate db
-    system -> email : Notification disponibilité
-    activate email
-    email -> agent : Email activation
-    deactivate email
-    deactivate system
-end
 
 @enduml

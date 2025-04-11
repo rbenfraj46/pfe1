@@ -1,0 +1,421 @@
+/* Style personnalisé pour l'interface d'administration */
+
+/* Variables de couleurs */
+:root {
+    --primary-color: #1a73e8;
+    --secondary-color: #34495e;
+    --success-color: #27ae60;
+    --danger-color: #e74c3c;
+    --warning-color: #f1c40f;
+    --info-color: #3498db;
+    --light-gray: #f8f9fa;
+    --dark-gray: #343a40;
+}
+
+/* En-tête */
+#header {
+    background: #2c3e50;
+    color: white;
+}
+
+#header a:link, #header a:visited {
+    color: white;
+}
+
+/* Menu principal */
+#branding h1 {
+    color: white;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.module h2, .module caption {
+    background: #34495e;
+}
+
+/* Listes */
+.row1 {
+    background: #f9f9f9;
+}
+
+.row2 {
+    background: #f5f5f5;
+}
+
+/* Boutons d'action */
+.button, input[type=submit], input[type=button], .submit-row input {
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 15px;
+}
+
+.button:hover, input[type=submit]:hover, input[type=button]:hover, .submit-row input:hover {
+    background: #2980b9;
+}
+
+.button.default, input[type=submit].default {
+    background: #27ae60;
+}
+
+.button.default:hover, input[type=submit].default:hover {
+    background: #219a52;
+}
+
+/* Formulaires */
+.form-row {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 1.5rem;
+}
+
+.aligned label {
+    color: #333;
+    font-weight: bold;
+}
+
+.form-group label {
+    font-weight: 500;
+    color: var(--dark-gray);
+    margin-bottom: 0.5rem;
+}
+
+.form-control {
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+    padding: 8px 12px;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(26,115,232,0.25);
+}
+
+/* Messages */
+.success {
+    background: #27ae60;
+    color: white;
+}
+
+.error {
+    background: #e74c3c;
+    color: white;
+}
+
+.message {
+    border-radius: 4px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: none;
+}
+
+.message.success {
+    background: rgba(39,174,96,0.1);
+    color: var(--success-color);
+}
+
+.message.error {
+    background: rgba(231,76,60,0.1);
+    color: var(--danger-color);
+}
+
+/* Tableau de bord */
+.dashboard .module table th {
+    background: #34495e;
+    color: white;
+}
+
+.dashboard .module table td a {
+    color: #2c3e50;
+}
+
+/* Navigation latérale */
+.object-tools a {
+    background: #3498db;
+    border-radius: 4px;
+}
+
+.object-tools a:hover {
+    background: #2980b9;
+}
+
+/* Fieldsets */
+.module {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.module h2 {
+    padding: 12px;
+    margin: 0;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Images dans les listes */
+.field-get_image img,
+.field-get_car_image img {
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Statuts et badges */
+.field-is_active .true,
+.field-is_mail_verified .true {
+    background: #27ae60;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 3px;
+}
+
+.field-is_active .false,
+.field-is_mail_verified .false {
+    background: #e74c3c;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 3px;
+}
+
+/* Filtres */
+.filtered {
+    background: #ecf0f1;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+.filtered .selected {
+    color: #2c3e50;
+    font-weight: bold;
+}
+
+/* Pagination */
+.paginator {
+    margin: 15px 0;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 4px;
+}
+
+.paginator a {
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    color: #3498db;
+}
+
+.paginator a:hover {
+    background: #3498db;
+    color: white;
+    border-color: #3498db;
+}
+
+.pagination {
+    margin-top: 2rem;
+}
+
+.pagination .page-link {
+    border-radius: 4px;
+    margin: 0 4px;
+    color: var(--primary-color);
+}
+
+.pagination .page-item.active .page-link {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Responsive design */
+@media (max-width: 767px) {
+    #header {
+        padding: 10px;
+    }
+    
+    .form-row {
+        padding: 8px;
+    }
+    
+    .aligned label {
+        float: none;
+        display: block;
+        width: auto;
+        padding-right: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        flex-direction: column;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Tooltips et aides */
+.help {
+    color: #7f8c8d;
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+
+[data-tooltip] {
+    position: relative;
+    cursor: help;
+}
+
+[data-tooltip]:hover::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 4px 8px;
+    background: var(--dark-gray);
+    color: white;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    z-index: 1000;
+}
+
+/* États des réservations et demandes */
+.field-status .pending {
+    background: #f1c40f;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 3px;
+}
+
+.field-status .approved {
+    background: #27ae60;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 3px;
+}
+
+.field-status .rejected {
+    background: #e74c3c;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 3px;
+}
+
+.field-status .cancelled {
+    background: #95a5a6;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 3px;
+}
+
+/* En-tête et barre de navigation */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Contenu principal */
+.main-content {
+    padding: 2rem;
+}
+
+/* Tableaux */
+.results {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(0,0,0,0.05);
+}
+
+.results thead th {
+    background: var(--secondary-color);
+    color: white;
+    padding: 12px;
+    font-weight: 500;
+}
+
+.results tbody tr:hover {
+    background-color: var(--light-gray);
+}
+
+/* Boutons */
+.btn {
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-success {
+    background: var(--success-color);
+    border-color: var(--success-color);
+}
+
+.btn-danger {
+    background: var(--danger-color);
+    border-color: var(--danger-color);
+}
+
+/* Badges et états */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-active {
+    background: var(--success-color);
+    color: white;
+}
+
+.status-inactive {
+    background: var(--danger-color);
+    color: white;
+}
+
+.status-pending {
+    background: var(--warning-color);
+    color: white;
+}
+
+/* Images et aperçus */
+.preview-image {
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Filtres et recherche */
+.search-form {
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin-bottom: 2rem;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Icônes personnalisées */
+.custom-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+}
