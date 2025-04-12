@@ -66,6 +66,7 @@ urlpatterns = [
     path('cars/search/', search.CarSearchView.as_view(), name='car_search'),
     path('cars/search/results/', search.CarSearchResultsView.as_view(), name='car_search_results'),
     path('cars/search/filter/', search.CarSearchFilterView.as_view(), name='car_search_filter'),
+    path('cars/search/debug/', search.CarSearchDebugView.as_view(), name='car_search_debug'),
     path('cars/rent/<int:car_id>/', car.CarRentalRequestView.as_view(), name='rental_request'),
     
     # Données géographiques

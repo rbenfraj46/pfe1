@@ -7,6 +7,11 @@ from cars.models import GearType
 from datetime import datetime
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now
+from django.contrib.gis.gdal import SpatialReference, CoordTransform
+from django.contrib.gis.geos import Point
+import logging
+
+logger = logging.getLogger(__name__)
 
 RIGHTS_NAME = {
     'agence': 'AGENCE',
@@ -136,7 +141,43 @@ class Agences(models.Model):
 
     creator = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name=_("Creator"), null=True)
 
-    location = gis_models.PointField(null=True)
+    location = gis_models.PointField(srid=4326, null=True)
+
+    def save(self, *args, **kwargs):
+        # Si nous avons une localisation
+        if self.location:
+            try:
+                # S'assurer que la localisation est en WGS84 (SRID 4326)
+                if self.location.srid != 4326:
+                    from django.contrib.gis.gdal import SpatialReference, CoordTransform
+                    
+                    # Obtenir les systèmes de référence
+                    source_srs = SpatialReference(self.location.srid)
+                    target_srs = SpatialReference(4326)
+                    
+                    # Créer et appliquer la transformation
+                    transform = CoordTransform(source_srs, target_srs)
+                    self.location.transform(transform)
+                
+                # S'assurer que les coordonnées sont dans des plages valides
+                if not (-180 <= self.location.x <= 180 and -90 <= self.location.y <= 90):
+                    from django.contrib.gis.geos import Point
+                    # Si les coordonnées sont en projection Web Mercator (EPSG:3857)
+                    if abs(self.location.x) > 180 or abs(self.location.y) > 90:
+                        import math
+                        
+                        # Conversion de Web Mercator vers WGS84
+                        lon = self.location.x / 20037508.34 * 180
+                        lat = math.atan(math.exp(self.location.y / 20037508.34 * math.pi)) * 360 / math.pi - 90
+                        
+                        self.location = Point(lon, lat, srid=4326)
+            
+            except Exception as e:
+                logger.error(f"Erreur lors de la transformation des coordonnées: {e}")
+                # En cas d'erreur, on conserve les coordonnées telles quelles
+                pass
+        
+        super().save(*args, **kwargs)
 
     @property
     def geom(self):

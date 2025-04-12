@@ -30,30 +30,53 @@
 			$('#geolong').val(e.latlng.lng);
 		}
 
+		function setLocationMap(marker) {
+			if (marker) {
+				var position = marker.getLatLng();
+				$('#geolat').val(position.lat);
+				$('#geolong').val(position.lng);
+				$('#GeoModal').modal('hide');
+			}
+		}
 
 		window.addEventListener("map:init", function (event) {
-			map = event.detail.map;;
-
+			map = event.detail.map;
 			map.on('click', onMapClick);
-			//L.marker(latlng).addTo(map);
+			
+			if ($('#geolat').val() && $('#geolong').val()) {
+				var savedLat = parseFloat($('#geolat').val());
+				var savedLon = parseFloat($('#geolong').val());
+				if (!isNaN(savedLat) && !isNaN(savedLon)) {
+					latlng = L.latLng(savedLat, savedLon);
+					marker = L.marker(latlng).addTo(map);
+				}
+			}
 	  	});
+
 		$('#GeoModal').on('show.bs.modal', function(){
-			  setTimeout(function() {
-				if ($('#city').val() != ""){
+			setTimeout(function() {
+				if ($('#city').val() != "") {
 					lat = city_data[$('#city').val()]['position'][1];
 					lon = city_data[$('#city').val()]['position'][0];
 				}
 				if ($('#geolat').val()) {
-					lat = $('#geolat').val();
+					lat = parseFloat($('#geolat').val());
 				}
 				if ($('#geolong').val()){
-					lon = $('#geolong').val();
+					lon = parseFloat($('#geolong').val());
 				}
 				latlng = L.latLng(lat, lon);
 				map.setView(latlng, 12);
-			    map.invalidateSize();
-			  }, 200);
-			 });
+				map.invalidateSize();
+
+				// Mettre à jour ou créer le marqueur
+				if (marker) {
+					marker.setLatLng(latlng);
+				} else {
+					marker = L.marker(latlng).addTo(map);
+				}
+			}, 200);
+		});
 	</script>
   </head>
 {% endblock headerJSContent %}
@@ -134,8 +157,8 @@
 					<input type="text" required name="zipcode" id="zipcode" placeholder="ZIP / Postcode" class="wheel-half-width pull-left zipcode" >
 					<div class="map-marker-logo wheel-half-width pull-right marg-r0" data-bs-toggle="modal" data-bs-target="#GeoModal"><i class="fa fa-map-marker"></i></div>
 					</div>
-					<input type="hidden" value="" name="lon" id="geolong">
 					<input type="hidden" value="" name="lat" id="geolat">
+					<input type="hidden" value="" name="lon" id="geolong">
 					<label class="question top_question" for="RESULT_TextField-1">{% translate 'Contact Details :&nbsp;' %}<b class="icon_required" style="color:#F00">*</b></label>
 					<div class="zipcode-row">
 					<input type="text" required name="ceo_name" placeholder="{% translate 'CEO Name...' %}" class="wheel-half-width pull-left ">

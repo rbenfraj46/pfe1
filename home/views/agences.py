@@ -69,6 +69,18 @@ class RegisterView(LoginRequiredMixin, IndexView):
             agence = form.save(commit=False)
             agence.creator = self.request.user
             agence.logo = request.FILES.get('logo')
+
+            # Gérer la localisation
+            lat = request.POST.get('lat')
+            lon = request.POST.get('lon')
+            if lat and lon:
+                try:
+                    from django.contrib.gis.geos import Point
+                    agence.location = Point(float(lon), float(lat), srid=4326)
+                except (ValueError, TypeError) as e:
+                    messages.error(request, _('Invalid coordinates provided'))
+                    return render(request, 'agences/create.html', {'form_reg': form, 'action_name': _('Register')}, status=400)
+
             agence.save()
             send_mail_verification_agency(request, agence)
             messages.success(request, _('Agence created Successfully. Please check your mail box and hit the mail verification.'))

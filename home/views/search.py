@@ -2,14 +2,16 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.views import View
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Min, Max
+from django.db.models import Min, Max, Q
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
 from django.contrib.gis.db.models.functions import Distance
 from django.utils.translation import gettext as _
 import logging
+from django.http import JsonResponse
 
 from cars.models import AgencyCar, Brand, GearType
+from home.models import Agences
 
 logger = logging.getLogger(__name__)
 
@@ -26,52 +28,53 @@ class CarSearchMixin:
         }
 
     def get_point_from_coords(self, latitude, longitude):
-        return Point(float(longitude), float(latitude), srid=4326)
+        try:
+            if latitude and longitude:
+                return Point(float(longitude), float(latitude), srid=4326)
+            return None
+        except (ValueError, TypeError) as e:
+            logger.error(f"Erreur de conversion des coordonnées: {e}")
+            return None
 
     def get_available_cars(self, point, search_params, filters=None):
-        logger.info(f"Recherche de voitures avec les paramètres: {search_params}")
-        
-        # Base query pour les voitures actives et disponibles
-        cars = AgencyCar.objects.select_related(
-            'brand', 'car_model', 'gear_type', 'agence'
-        ).filter(
+        """Récupérer les voitures disponibles en fonction des critères de recherche"""
+        base_query = AgencyCar.objects.filter(
             is_active=True,
-            available=True
+            available=True,
+            agence__is_active=True
         )
 
-        # Filtre par distance
-        cars = cars.filter(
-            agence__location__distance_lte=(point, D(km=float(search_params['radius'])))
-        )
-
-        # Exclure les voitures indisponibles pour les dates sélectionnées
-        if search_params.get('start_date') and search_params.get('end_date'):
-            cars = cars.exclude(
-                unavailability_periods__start_date__lte=search_params['end_date'],
-                unavailability_periods__end_date__gte=search_params['start_date']
+        if point:
+            radius_km = float(search_params.get('radius', 10))
+            # Utiliser ST_DWithin pour la recherche par distance
+            base_query = base_query.filter(
+                agence__location__dwithin=(point, radius_km / 111.0)  # Conversion approximative km en degrés
+            ).annotate(
+                distance=Distance('agence__location', point)
             )
+
+        # Filtrer par dates si spécifiées
+        if search_params.get('start_date') and search_params.get('end_date'):
+            unavailable = AgencyCar.objects.filter(
+                Q(
+                    unavailability_periods__start_date__lte=search_params['end_date'],
+                    unavailability_periods__end_date__gte=search_params['start_date']
+                ) |
+                Q(
+                    reservations__status='approved',
+                    reservations__start_date__lte=search_params['end_date'],
+                    reservations__end_date__gte=search_params['start_date']
+                )
+            )
+            base_query = base_query.exclude(id__in=unavailable.values('id'))
 
         # Appliquer les filtres supplémentaires
         if filters:
-            if filters.get('brand'):
-                cars = cars.filter(brand_id=filters['brand'])
-            
-            if filters.get('gear_types'):
-                cars = cars.filter(gear_type_id__in=filters['gear_types'])
-            
-            if filters.get('min_price') and filters.get('max_price'):
-                cars = cars.filter(
-                    price_per_day__gte=filters.get('min_price'),
-                    price_per_day__lte=filters.get('max_price')
-                )
+            base_query = self.apply_filters(base_query, filters)
 
-        # Ajouter la distance
-        cars = cars.annotate(
-            distance=Distance('agence__location', point)
+        return base_query.select_related(
+            'brand', 'car_model', 'gear_type', 'agence'
         )
-
-        logger.info(f"Nombre de voitures trouvées: {cars.count()}")
-        return cars
 
     def apply_filters(self, queryset, filters):
         if filters.get('brand'):
@@ -193,3 +196,98 @@ class CarSearchFilterView(CarSearchResultsView):
             filters=filter_params  # Ajouter les filtres au contexte
         )
         return render(request, self.template_name, context)
+
+class CarSearchDebugView(CarSearchMixin, View):
+    def get(self, request):
+        search_params = self.get_search_params(request)
+        point = self.get_point_from_coords(
+            search_params['latitude'],
+            search_params['longitude']
+        )
+
+        # Vérifier les voitures de base (sans filtres)
+        base_cars = AgencyCar.objects.filter(
+            is_active=True,
+            available=True,
+            agence__is_active=True
+        )
+        
+        # Obtenir les informations de toutes les agences actives
+        all_agencies = Agences.objects.filter(is_active=True).values('id', 'agency_name', 'location')
+        agencies_info = []
+        for agency in all_agencies:
+            if agency['location']:
+                agencies_info.append({
+                    'id': agency['id'],
+                    'name': agency['agency_name'],
+                    'location': str(agency['location']),
+                    'distance_km': None
+                })
+                if point:
+                    # Calculer la distance entre le point de recherche et l'agence
+                    distance = Distance('location', point)
+                    agency_with_distance = Agences.objects.annotate(
+                        distance=distance
+                    ).get(id=agency['id'])
+                    agencies_info[-1]['distance_km'] = agency_with_distance.distance.km
+
+        # Vérifier les voitures dans le rayon
+        cars_in_radius = base_cars.filter(
+            agence__location__dwithin=(point, float(search_params['radius']) / 111.0)
+        ) if point else base_cars
+
+        # Vérifier les disponibilités
+        unavailable_cars = set()
+        if search_params.get('start_date') and search_params.get('end_date'):
+            unavailable_cars.update(
+                AgencyCar.objects.filter(
+                    unavailability_periods__start_date__lte=search_params['end_date'],
+                    unavailability_periods__end_date__gte=search_params['start_date']
+                ).values_list('id', flat=True)
+            )
+            
+            unavailable_cars.update(
+                AgencyCar.objects.filter(
+                    reservations__status='approved',
+                    reservations__start_date__lte=search_params['end_date'],
+                    reservations__end_date__gte=search_params['start_date']
+                ).values_list('id', flat=True)
+            )
+
+        # Appliquer les filtres
+        filter_params = {
+            'brand': request.GET.get('brand'),
+            'gear_types': request.GET.getlist('gear_types'),
+            'min_price': request.GET.get('min_price', 40),
+            'max_price': request.GET.get('max_price', 4000)
+        }
+        
+        filtered_cars = self.apply_filters(cars_in_radius, filter_params)
+        available_cars = filtered_cars.exclude(id__in=unavailable_cars)
+
+        response_data = {
+            'debug_info': {
+                'search_params': search_params,
+                'point': str(point) if point else None,
+                'total_active_cars': base_cars.count(),
+                'cars_in_radius': cars_in_radius.count(),
+                'unavailable_cars': len(unavailable_cars),
+                'cars_after_filters': filtered_cars.count(),
+                'final_available_cars': available_cars.count(),
+                'filters_applied': filter_params,
+                'agencies': agencies_info,
+                'radius_in_degrees': float(search_params['radius']) / 111.0,
+                'cars_in_radius_list': list(cars_in_radius.values(
+                    'id', 'brand__name', 'car_model__name', 
+                    'agence__agency_name', 'agence__location'
+                )),
+                'unavailable_cars_list': list(AgencyCar.objects.filter(
+                    id__in=unavailable_cars
+                ).values(
+                    'id', 'brand__name', 'car_model__name', 
+                    'agence__agency_name', 'agence__location'
+                ))
+            }
+        }
+        
+        return JsonResponse(response_data)
