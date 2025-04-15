@@ -83,6 +83,18 @@ class CarSearchMixin:
         if filters.get('gear_types'):
             queryset = queryset.filter(gear_type_id__in=filters['gear_types'])
         
+        if filters.get('fuel_types'):
+            queryset = queryset.filter(fuel_policy__in=filters['fuel_types'])
+            
+        if filters.get('categories'):
+            queryset = queryset.filter(car_model__category__in=filters['categories'])
+        
+        if filters.get('min_deposit') and filters.get('max_deposit'):
+            queryset = queryset.filter(
+                security_deposit__gte=filters.get('min_deposit'),
+                security_deposit__lte=filters.get('max_deposit')
+            )
+        
         min_price = int(filters.get('min_price') or 40)
         max_price = int(filters.get('max_price') or 4000)
         return queryset.filter(price_per_day__gte=min_price, price_per_day__lte=max_price)
@@ -152,7 +164,9 @@ class CarSearchResultsView(CarSearchMixin, View):
     def get_price_range(self):
         return AgencyCar.objects.filter(is_active=True).aggregate(
             min_price=Min('price_per_day'),
-            max_price=Max('price_per_day')
+            max_price=Max('price_per_day'),
+            min_deposit=Min('security_deposit'),
+            max_deposit=Max('security_deposit')
         )
 
     def get_current_filters(self):
@@ -160,8 +174,12 @@ class CarSearchResultsView(CarSearchMixin, View):
         return {
             'min_price': self.request.GET.get('min_price', price_range['min_price']),
             'max_price': self.request.GET.get('max_price', price_range['max_price']),
+            'min_deposit': self.request.GET.get('min_deposit', price_range['min_deposit']),
+            'max_deposit': self.request.GET.get('max_deposit', price_range['max_deposit']),
             'brand': self.request.GET.get('brand', ''),
-            'gear_types': self.request.GET.getlist('gear_types', [])
+            'gear_types': self.request.GET.getlist('gear_types', []),
+            'fuel_types': self.request.GET.getlist('fuel_types', []),
+            'categories': self.request.GET.getlist('categories', [])
         }
 
 class CarSearchFilterView(CarSearchResultsView):
@@ -181,8 +199,12 @@ class CarSearchFilterView(CarSearchResultsView):
         filter_params = {
             'brand': request.GET.get('brand'),
             'gear_types': request.GET.getlist('gear_types'),
+            'fuel_types': request.GET.getlist('fuel_types'),
+            'categories': request.GET.getlist('categories'),
             'min_price': request.GET.get('min_price'),
-            'max_price': request.GET.get('max_price')
+            'max_price': request.GET.get('max_price'),
+            'min_deposit': request.GET.get('min_deposit'),
+            'max_deposit': request.GET.get('max_deposit')
         }
 
         cars = self.get_available_cars(point, search_params, filter_params)
@@ -193,7 +215,7 @@ class CarSearchFilterView(CarSearchResultsView):
             cars=self.paginate_cars(cars, request),
             search_params=search_params,
             sort=sort,
-            filters=filter_params  # Ajouter les filtres au contexte
+            filters=filter_params
         )
         return render(request, self.template_name, context)
 

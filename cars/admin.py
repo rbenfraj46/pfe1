@@ -13,7 +13,7 @@ import logging
 from cars.models import (
     Brand, GearType, CarModel, Transmission, 
     AgencyCar, CarUnavailability, CarModelRequest,
-    CarReservation
+    CarReservation, RentalStatusChange
 )
 from cars.forms import CarModelAdminForm, BrandAdminForm
 
@@ -167,15 +167,35 @@ class CarModelRequestAdmin(admin.ModelAdmin):
 
 @admin.register(CarReservation)
 class CarReservationAdmin(admin.ModelAdmin):
-    list_display = ('get_car_info', 'user', 'start_date', 'end_date', 'total_price', 'status', 'deposit_paid', 'created_at')
-    list_filter = ('status', 'deposit_paid', 'created_at', 'start_date')
+    list_display = (
+        'get_car_info', 
+        'user', 
+        'start_date', 
+        'end_date', 
+        'total_price', 
+        'status', 
+        'deposit_paid',
+        'created_at',
+        'get_agency'
+    )
+    list_filter = (
+        'status', 
+        'deposit_paid', 
+        'created_at', 
+        'start_date',
+        'car__agence',
+        'car__brand'
+    )
     search_fields = (
-        'car__brand__name', 'car__car_model__name',
-        'user__username', 'user__email',
+        'car__brand__name', 
+        'car__car_model__name',
+        'car__agence__agency_name',
+        'user__username', 
+        'user__email',
         'notes'
     )
     ordering = ('-created_at',)
-    readonly_fields = ('created_at', 'updated_at')
+    readonly_fields = ('created_at', 'updated_at', 'total_price')
     
     fieldsets = (
         (_('Reservation Details'), {
@@ -192,7 +212,11 @@ class CarReservationAdmin(admin.ModelAdmin):
     def get_car_info(self, obj):
         return f"{obj.car.brand} {obj.car.car_model}" if obj.car else "-"
     get_car_info.short_description = _("Car")
-
+    
+    def get_agency(self, obj):
+        return obj.car.agence.agency_name if obj.car and obj.car.agence else "-"
+    get_agency.short_description = _("Agency")
+    
     def save_model(self, request, obj, form, change):
         old_status = None
         if change:
@@ -249,8 +273,62 @@ class CarReservationAdmin(admin.ModelAdmin):
     
     def get_readonly_fields(self, request, obj=None):
         if obj and obj.status in ['approved', 'rejected', 'cancelled']:
-            return self.readonly_fields + ('car', 'user', 'start_date', 'end_date', 'total_price')
+            return self.readonly_fields + ('car', 'user', 'start_date', 'end_date')
         return self.readonly_fields
+
+@admin.register(RentalStatusChange)
+class RentalStatusChangeAdmin(admin.ModelAdmin):
+    list_display = (
+        'reservation',
+        'current_status',
+        'requested_status',
+        'requested_by',
+        'status',
+        'created_at'
+    )
+    list_filter = ('status', 'current_status', 'requested_status', 'created_at')
+    search_fields = (
+        'reservation__car__brand__name',
+        'reservation__car__car_model__name',
+        'reservation__user__email',
+        'reason',
+        'admin_notes'
+    )
+    readonly_fields = ('current_status', 'created_at', 'updated_at')
+    raw_id_fields = ('reservation', 'requested_by', 'reviewed_by')
+    
+    fieldsets = (
+        (_('Request Details'), {
+            'fields': (
+                'reservation',
+                'current_status',
+                'requested_status',
+                'reason',
+            )
+        }),
+        (_('Review Information'), {
+            'fields': (
+                'status',
+                'reviewed_by',
+                'admin_notes',
+            )
+        }),
+        (_('Timestamps'), {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        })
+    )
+
+    def save_model(self, request, obj, form, change):
+        if not obj.reviewed_by and obj.status in ['approved', 'rejected']:
+            obj.reviewed_by = request.user
+        
+        if obj.status == 'approved':
+            # Update the reservation status
+            obj.reservation.status = obj.requested_status
+            obj.reservation.save()
+        
+        super().save_model(request, obj, form, change)
 
 
 

@@ -52,6 +52,7 @@ urlpatterns = [
     path('agency/<int:agency_id>/permissions/<int:permission_id>/revoke/', 
         agences.RevokeAgencyPermissionView.as_view(), 
         name='revoke_agency_permission'),
+    path('agency/<int:agency_id>/update-settings/', agences.AgencySettingsUpdateView.as_view(), name='agency_settings_update'),
     
     # Gestion des voitures
     path('agency/cars/<int:agency_id>/', car.AgencyCarsListView.as_view(), name='agency_cars_list'),
@@ -68,6 +69,10 @@ urlpatterns = [
     path('cars/search/filter/', search.CarSearchFilterView.as_view(), name='car_search_filter'),
     path('cars/search/debug/', search.CarSearchDebugView.as_view(), name='car_search_debug'),
     path('cars/rent/<int:car_id>/', car.CarRentalRequestView.as_view(), name='rental_request'),
+    
+    # Gestion des réservations
+    path('my-reservations/', car.UserReservationsView.as_view(), name='user_reservations'),
+    path('reservations/<int:reservation_id>/cancel/', car.CancelReservationView.as_view(), name='cancel_reservation'),
     
     # Données géographiques
     path('data.geojson', GeoJSONLayerView.as_view(model=State, properties=['name']), name='data'),

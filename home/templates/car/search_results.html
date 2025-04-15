@@ -27,6 +27,7 @@
                             <h4>{% translate "Filters" %}</h4>
                         </div>
                         
+                        <!-- Price Range Filter -->
                         <div class="filter-group">
                             <label class="filter-label">{% translate "Price Range" %}</label>
                             <div class="price-slider-container">
@@ -39,18 +40,33 @@
                             </div>
                         </div>
 
+                        <!-- Security Deposit Filter -->
+                        <div class="filter-group">
+                            <label class="filter-label">{% translate "Security Deposit Range" %}</label>
+                            <div class="deposit-slider-container">
+                                <div id="depositRangeSlider"></div>
+                                <div class="deposit-range-display">
+                                    <span id="minDepositValue">100</span> - <span id="maxDepositValue">5000</span> TND
+                                </div>
+                                <input type="hidden" name="min_deposit" id="minDeposit" value="{{ filters.min_deposit|default:100 }}">
+                                <input type="hidden" name="max_deposit" id="maxDeposit" value="{{ filters.max_deposit|default:5000 }}">
+                            </div>
+                        </div>
+
+                        <!-- Brand Filter -->
                         <div class="filter-group">
                             <label class="filter-label">{% translate "Brand" %}</label>
                             <select class="form-control brand-select" name="brand">
                                 <option value="">{% translate "All Brands" %}</option>
                                 {% for brand in brands %}
-                                <option value="{{ brand.id }}" {% if brand.id == filters.brand %}selected{% endif %}>
+                                <option value="{{ brand.id }}" {% if brand.id|stringformat:"s" == filters.brand %}selected{% endif %}>
                                     {{ brand.name }}
                                 </option>
                                 {% endfor %}
                             </select>
                         </div>
 
+                        <!-- Gear Type Filter -->
                         <div class="filter-group">
                             <label class="filter-label">{% translate "Gear Type" %}</label>
                             <div class="gear-type-options">
@@ -58,12 +74,90 @@
                                 <div class="form-check gear-type-option">
                                     <input class="form-check-input" type="checkbox" name="gear_types" 
                                         value="{{ gear_type.id }}" id="gear_{{ gear_type.id }}"
-                                        {% if gear_type.id in filters.gear_types %}checked{% endif %}>
+                                        {% if gear_type.id|stringformat:"s" in filters.gear_types %}checked{% endif %}>
                                     <label class="form-check-label" for="gear_{{ gear_type.id }}">
                                         {{ gear_type.name }}
                                     </label>
                                 </div>
                                 {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Fuel Type Filter -->
+                        <div class="filter-group">
+                            <label class="filter-label">{% translate "Fuel Type" %}</label>
+                            <div class="fuel-type-options">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="fuel_types" 
+                                        value="Essence" id="fuel_essence"
+                                        {% if 'Essence' in filters.fuel_types %}checked{% endif %}>
+                                    <label class="form-check-label" for="fuel_essence">
+                                        {% translate "Gasoline" %}
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="fuel_types" 
+                                        value="Diesel" id="fuel_diesel"
+                                        {% if 'Diesel' in filters.fuel_types %}checked{% endif %}>
+                                    <label class="form-check-label" for="fuel_diesel">
+                                        {% translate "Diesel" %}
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="fuel_types" 
+                                        value="Hybride" id="fuel_hybrid"
+                                        {% if 'Hybride' in filters.fuel_types %}checked{% endif %}>
+                                    <label class="form-check-label" for="fuel_hybrid">
+                                        {% translate "Hybrid" %}
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="fuel_types" 
+                                        value="Électrique" id="fuel_electric"
+                                        {% if 'Électrique' in filters.fuel_types %}checked{% endif %}>
+                                    <label class="form-check-label" for="fuel_electric">
+                                        {% translate "Electric" %}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Car Category Filter -->
+                        <div class="filter-group">
+                            <label class="filter-label">{% translate "Car Category" %}</label>
+                            <div class="category-options">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="categories" 
+                                        value="Citadine" id="cat_citadine"
+                                        {% if 'Citadine' in filters.categories %}checked{% endif %}>
+                                    <label class="form-check-label" for="cat_citadine">
+                                        {% translate "City Car" %}
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="categories" 
+                                        value="Berline" id="cat_berline"
+                                        {% if 'Berline' in filters.categories %}checked{% endif %}>
+                                    <label class="form-check-label" for="cat_berline">
+                                        {% translate "Sedan" %}
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="categories" 
+                                        value="SUV" id="cat_suv"
+                                        {% if 'SUV' in filters.categories %}checked{% endif %}>
+                                    <label class="form-check-label" for="cat_suv">
+                                        {% translate "SUV" %}
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="categories" 
+                                        value="Break" id="cat_break"
+                                        {% if 'Break' in filters.categories %}checked{% endif %}>
+                                    <label class="form-check-label" for="cat_break">
+                                        {% translate "Station Wagon" %}
+                                    </label>
+                                </div>
                             </div>
                         </div>
 
@@ -327,6 +421,46 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         priceRangeSlider.noUiSlider.on('change', function() {
+            document.getElementById('filterForm').submit();
+        });
+    }
+
+    const depositRangeSlider = document.getElementById('depositRangeSlider');
+    if (depositRangeSlider) {
+        noUiSlider.create(depositRangeSlider, {
+            start: [
+                parseInt("{{ filters.min_deposit|default:100 }}"),
+                parseInt("{{ filters.max_deposit|default:5000 }}")
+            ],
+            connect: true,
+            step: 50,
+            range: {
+                'min': 100,
+                'max': 5000
+            },
+            format: {
+                to: function(value) {
+                    return parseInt(value);
+                },
+                from: function(value) {
+                    return parseInt(value);
+                }
+            }
+        });
+
+        const minDepositValue = document.getElementById('minDepositValue');
+        const maxDepositValue = document.getElementById('maxDepositValue');
+        const minDepositInput = document.getElementById('minDeposit');
+        const maxDepositInput = document.getElementById('maxDeposit');
+
+        depositRangeSlider.noUiSlider.on('update', function(values) {
+            minDepositValue.textContent = values[0];
+            maxDepositValue.textContent = values[1];
+            minDepositInput.value = values[0];
+            maxDepositInput.value = values[1];
+        });
+
+        depositRangeSlider.noUiSlider.on('change', function() {
             document.getElementById('filterForm').submit();
         });
     }

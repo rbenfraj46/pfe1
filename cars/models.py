@@ -5,7 +5,9 @@ from django.utils import timezone
 from datetime import datetime
 from django.conf import settings
 from django.contrib.gis.db import models as gis_models
+import logging
 
+logger = logging.getLogger(__name__)
 
 class Brand(models.Model):
     name = models.CharField(max_length=255)
@@ -237,7 +239,7 @@ class CarReservation(models.Model):
         if self.end_date <= self.start_date:
             raise ValidationError(_('End date must be after start date'))
 
-        # Vérifier les chevauchements
+        # Check for overlapping reservations
         overlapping = CarReservation.objects.filter(
             car=self.car,
             status='approved',
@@ -246,13 +248,99 @@ class CarReservation(models.Model):
         ).exclude(pk=self.pk)
 
         if overlapping.exists():
-            raise ValidationError(_('This period overlaps with an existing reservation'))
+            raise ValidationError(_('This period overlaps with an existing approved reservation'))
+
+        # Check if car is unavailable during this period
+        if self.car.unavailability_periods.filter(
+            start_date__lte=self.end_date,
+            end_date__gte=self.start_date
+        ).exists():
+            raise ValidationError(_('The car is marked as unavailable during this period'))
 
     def save(self, *args, **kwargs):
         if not self.total_price:
-            # Calculer le prix total basé sur le nombre de jours
+            # Calculate total price based on the number of days
             days = (self.end_date - self.start_date).days
             self.total_price = self.car.price_per_day * days
 
+        # Store old status if this is an update
+        old_status = None
+        if self.pk:
+            old_obj = CarReservation.objects.get(pk=self.pk)
+            old_status = old_obj.status
+
         self.clean()
+        super().save(*args, **kwargs)
+
+        # Send notifications if status has changed
+        if old_status and old_status != self.status:
+            try:
+                from home.mail_util import send_car_rental_notification
+                
+                if self.status == 'approved':
+                    send_car_rental_notification(self, 'approved')
+                elif self.status == 'cancelled':
+                    send_car_rental_notification(
+                        self, 
+                        'cancelled', 
+                        cancellation_reason=getattr(self, 'cancellation_reason', None)
+                    )
+            except Exception as e:
+                logger.error(f"Failed to send reservation notification email: {str(e)}")
+
+    def request_status_change(self, requested_status, reason, requested_by):
+        """Request a status change based on agency's auto-approve setting"""
+        if self.car.agence.auto_approve_rental:
+            # Auto-approve the change
+            self.status = requested_status
+            self.save()
+            
+            # Create an auto-approved status change record
+            status_change = RentalStatusChange.objects.create(
+                reservation=self,
+                requested_by=requested_by,
+                reviewed_by=requested_by,
+                requested_status=requested_status,
+                reason=reason,
+                status='approved'
+            )
+        else:
+            # Create a pending status change request
+            status_change = RentalStatusChange.objects.create(
+                reservation=self,
+                requested_by=requested_by,
+                requested_status=requested_status,
+                reason=reason
+            )
+
+        return status_change
+
+class RentalStatusChange(models.Model):
+    STATUS_CHOICES = [
+        ('pending', _('Pending Review')),
+        ('approved', _('Approved')),
+        ('rejected', _('Rejected')),
+    ]
+
+    reservation = models.ForeignKey('CarReservation', on_delete=models.CASCADE, related_name='status_changes')
+    requested_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='requested_status_changes')
+    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reviewed_status_changes', null=True, blank=True)
+    current_status = models.CharField(max_length=20, choices=CarReservation.STATUS_CHOICES)
+    requested_status = models.CharField(max_length=20, choices=CarReservation.STATUS_CHOICES)
+    reason = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    admin_notes = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'rental_status_change'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Status change request for reservation {self.reservation.id}: {self.current_status} -> {self.requested_status}"
+
+    def save(self, *args, **kwargs):
+        if not self.pk:  # Only on creation
+            self.current_status = self.reservation.status
         super().save(*args, **kwargs)

@@ -1,0 +1,36 @@
+{% extends "email/base_notification.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Rental Request Approved" %}{% endblock %}
+
+{% block header_title %}{% trans "Great News!" %}{% endblock %}
+
+{% block main_content %}
+<div class="details-card" style="background-color: #e8f5e9; border-color: #43a047;">
+    <div style="text-align: center; margin-bottom: 20px;">
+        <i class="fas fa-check-circle" style="font-size: 48px; color: var(--success-color);"></i>
+    </div>
+    <h3 style="color: var(--success-color); text-align: center;">{% trans "Your Rental Request is Approved!" %}</h3>
+    <p>{% trans "Your car rental request has been approved. To confirm your reservation, please proceed with the security deposit payment." %}</p>
+    
+    <div style="background: white; padding: 15px; border-radius: 8px; margin-top: 20px;">
+        <div class="detail-row">
+            <span class="detail-label">{% trans "Security Deposit" %}</span>
+            <span class="price-tag">{{ security_deposit }} {{ currency }}</span>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block action_buttons %}
+<div style="text-align: center;">
+    <a href="{{ payment_url }}" class="button" style="background-color: var(--success-color);">
+        <i class="fas fa-lock"></i> {% trans "Pay Security Deposit" %}
+    </a>
+    
+    <p style="margin-top: 20px; color: #666;">
+        <i class="fas fa-info-circle"></i> 
+        {% trans "Please note: Your reservation will be confirmed once the security deposit is received." %}
+    </p>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "email/base_notification.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "New Car Rental Request" %}{% endblock %}
+
+{% block header_title %}{% trans "New Rental Request" %}{% endblock %}
+
+{% block main_content %}
+<div class="details-card">
+    <h3>{% trans "New Booking Request" %}</h3>
+    <p>{% trans "You have received a new rental request for your car. A customer would like to rent your vehicle. Please review the details below and take action." %}</p>
+</div>
+{% endblock %}
+
+{% block action_buttons %}
+<div style="text-align: center;">
+    <a href="{{ admin_url }}" class="button" style="background-color: var(--primary-color);">
+        <i class="fas fa-check-circle"></i> {% trans "Review Request" %}
+    </a>
+</div>
+{% endblock %}

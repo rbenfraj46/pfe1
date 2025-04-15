@@ -33,73 +33,86 @@
     </div>
 </div>
 
-<div class="wheel-register-block bg-light py-5" style="margin-top: 30px;">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12 padd-r0">
-                <div class="wheel-register-sign marg-lg-t150 marg-lg-b150 marg-sm-t100 marg-sm-b100">
-                    <div class="wheel-header">
-                        <h5 class="fade-text">{% translate "Manage your Agency" %}</h5>
-                        <h3 class="font-weight-bold text-primary fade-text">
-                            {% translate "Dashboard" %}
-                        </h3>
-                    </div>
-                    <div class="wheel-dashboard">
-                        <div class="row">
-                            <!-- Manage Cars Section -->
-                            <div class="col-md-4 mb-4">
-                                <div class="wheel-dashboard-item bg-white p-3 rounded shadow dashboard-item fade-in">
-                                    <div class="wheel-dashboard-icon text-center mb-3">
-                                        <img src="{% static 'images/car_manage.png' %}" alt="" class="wheel-dashboard-icon img">
-                                    </div>
-                                    <h4>{% translate "Manage Cars" %}</h4>
-                                    <a href="{% url 'agency_cars_list' agence.id %}" class="btn btn-primary">{% translate "Go to Cars" %}</a>
-                                </div>
-                            </div>
-                            <!-- Manage Permissions Section -->
-                            <div class="col-md-4 mb-4">
-                                <div class="wheel-dashboard-item bg-white p-3 rounded shadow dashboard-item fade-in">
-                                    <div class="wheel-dashboard-icon text-center mb-3">
-                                        <img src="{% static 'images/employ1.png' %}" alt="" class="wheel-dashboard-icon img">
-                                    </div>
-                                    <h4>{% translate "Manage Permissions" %}</h4>
-                                    <a href="{% url 'agency_permissions' agence.id %}" class="btn btn-primary">{% translate "Go to Permissions" %}</a>
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-4">
-                                <div class="wheel-dashboard-item bg-white p-3 rounded shadow dashboard-item fade-in">
-                                    <div class="wheel-dashboard-icon text-center mb-3">
-                                        <img src="{% static 'images/edit1.png' %}" alt="" class="wheel-dashboard-icon img">
-                                    </div>
-                                    <h4>{% translate "Edit Agency Details" %}</h4>
-                                    <a href="#" class="btn btn-primary">{% translate "Go to Edit Details" %}</a>
-                                </div>
-                            </div>
-                        </div>
 
-                        <div class="row marg-lg-t50">
-                            <div class="col-md-12">
-                                <div class="wheel-header">
-                                    <h5 class="fade-text">{% translate "Agency Statistics" %}</h5>
-                                </div>
-                                <div class="wheel-statistics">
-                                    <div class="row">
-                                        <!-- Add statistics content here if needed -->
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+<div class="wheel-info-text marg-lg-t150 marg-lg-b150 marg-md-t100 marg-md-b100 marg-sm-t50 marg-sm-b50">
+    <div class="wheel-header">
+        <h5>{% translate "Welcome " %}<span>{{ agence.agency_name }}</span></h5>
+        <h3>{% translate "Management Dashboard" %}</h3>
+    </div>
 
-                        <div class="row">
-                            <div class="col-md-12 text-center">
-                                <h4 class="text-dark font-weight-bold fade-text">{{ agence.agency_name }}</h4>
-                            </div>
-                        </div>
-                    </div>
+    <div class="row mt-4">
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-car fa-3x mb-3 text-primary"></i>
+                    <h5 class="card-title">{% translate "Cars Management" %}</h5>
+                    <a href="{% url 'agency_cars_list' agency_id=agence.id %}" class="btn btn-primary">
+                        {% translate "Manage Cars" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-calendar-alt fa-3x mb-3 text-success"></i>
+                    <h5 class="card-title">{% translate "Rental Management" %}</h5>
+                    <a href="{% url 'agency_rentals' agency_id=agence.id %}" class="btn btn-success">
+                        {% translate "Manage Rentals" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-3x mb-3 text-info"></i>
+                    <h5 class="card-title">{% translate "Access Management" %}</h5>
+                    <a href="{% url 'agency_permissions' agency_id=agence.id %}" class="btn btn-info">
+                        {% translate "Manage Access" %}
+                    </a>
                 </div>
             </div>
         </div>
     </div>
+
 </div>
 
 {% endblock bodyContent %}
+
+{% block headerJSContent %}
+{{ block.super }}
+<script>
+$(document).ready(function() {
+    $('#autoApproveToggle').change(function() {
+        const agencyId = $(this).data('agency-id');
+        const isChecked = $(this).prop('checked');
+        
+        $.ajax({
+            url: `/agency/${agencyId}/update-settings/`,
+            method: 'POST',
+            data: {
+                auto_approve_rental: isChecked,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    toastr.success("{% translate 'Settings updated successfully' %}");
+                } else {
+                    toastr.error(response.message || "{% translate 'An error occurred' %}");
+                    // Revert toggle if update failed
+                    $('#autoApproveToggle').prop('checked', !isChecked);
+                }
+            },
+            error: function() {
+                toastr.error("{% translate 'Failed to update settings' %}");
+                // Revert toggle if update failed
+                $('#autoApproveToggle').prop('checked', !isChecked);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

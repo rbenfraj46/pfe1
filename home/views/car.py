@@ -23,6 +23,7 @@ from cars.models import (
 )
 from home.models import Agences
 from home.views.agences import has_agency_permission
+from home.mail_util import send_car_rental_notification
 
 logger = logging.getLogger(__name__)
 
@@ -80,37 +81,9 @@ class CarRentalRequestView(LoginRequiredMixin, View):
                 total_price=total_price
             )
             
-            # Envoyer une notification à l'agence
-            subject = _('New Rental Request')
-            message = _('''A new rental request has been submitted for your car:
-                Car: {car}
-                Customer: {user}
-                From: {start}
-                To: {end}
-                Total Price: {price}
-                Notes: {notes}
-                
-                Please review this request in your admin panel.
-            ''').format(
-                car=car,
-                user=request.user.get_full_name() or request.user.username,
-                start=reservation.start_date,
-                end=reservation.end_date,
-                price=reservation.total_price,
-                notes=reservation.notes or _('No special notes')
-            )
+            # Send notification to agency
+            send_car_rental_notification(reservation, 'request', request=request)
             
-            try:
-                send_mail(
-                    subject,
-                    message,
-                    settings.DEFAULT_FROM_EMAIL,
-                    [car.agence.email],
-                    fail_silently=True
-                )
-            except Exception as e:
-                logger.error(f"Failed to send email to agency: {str(e)}")
-
             messages.success(
                 request, 
                 _('Your rental request has been submitted successfully. Please wait for the agency approval.')
@@ -138,7 +111,7 @@ class CarRentalRequestView(LoginRequiredMixin, View):
         except Exception as e:
             messages.error(request, _('An error occurred while processing your request.'))
             logger.error(f"Error creating reservation: {str(e)}")
-            return redirect('car_search_results')
+            return redirect('index')
 
 class CarModelRequestView(LoginRequiredMixin, View):
     template_name = 'car/request_car_model.html'
@@ -386,3 +359,81 @@ class CarModelDetailsView(DetailView):
             ).select_related('agence')
         })
         return context
+
+class UserReservationsView(LoginRequiredMixin, ListView):
+    template_name = 'car/user_reservations.html'
+    context_object_name = 'reservations'
+    paginate_by = 10
+
+    def get_queryset(self):
+        return CarReservation.objects.filter(
+            user=self.request.user
+        ).select_related(
+            'car__brand', 
+            'car__car_model', 
+            'car__agence'
+        ).order_by('-created_at')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['pending_count'] = self.get_queryset().filter(status='pending').count()
+        context['approved_count'] = self.get_queryset().filter(status='approved').count()
+        context['rejected_count'] = self.get_queryset().filter(status='rejected').count()
+        context['cancelled_count'] = self.get_queryset().filter(status='cancelled').count()
+        return context
+
+class CancelReservationView(LoginRequiredMixin, View):
+    def post(self, request, reservation_id):
+        reservation = get_object_or_404(
+            CarReservation, 
+            id=reservation_id,
+            user=request.user
+        )
+        
+        if reservation.status != 'pending':
+            return JsonResponse({
+                'success': False,
+                'message': _('Only pending reservations can be cancelled.')
+            }, status=400)
+            
+        try:
+            reservation.status = 'cancelled'
+            reservation.save()
+            
+            # Send notification email to agency
+            subject = _('Reservation Cancelled')
+            message = _('''A reservation has been cancelled by the customer:
+                Car: {car}
+                Customer: {user}
+                From: {start}
+                To: {end}
+                Booking Reference: {id}
+            ''').format(
+                car=reservation.car,
+                user=request.user.get_full_name() or request.user.username,
+                start=reservation.start_date,
+                end=reservation.end_date,
+                id=reservation.id
+            )
+            
+            try:
+                send_mail(
+                    subject,
+                    message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [reservation.car.agence.email],
+                    fail_silently=True
+                )
+            except Exception as e:
+                logger.error(f"Failed to send cancellation email to agency: {str(e)}")
+
+            return JsonResponse({
+                'success': True,
+                'message': _('Reservation cancelled successfully.')
+            })
+        except Exception as e:
+            logger.error(f"Error cancelling reservation: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'message': _('Failed to cancel reservation.')
+            }, status=500)

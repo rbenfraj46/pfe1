@@ -29,14 +29,18 @@ DATABASES = {
 }
 
 # Configuration email avec backend personnalisé
-EMAIL_BACKEND = 'home.smtp_backend.CustomEmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'noreply.tuncar@gmail.com'
-EMAIL_HOST_PASSWORD = 'SjBDn3uq4vTP2m9'
+EMAIL_HOST_PASSWORD = 'YOUR_APP_PASSWORD_HERE'  # Replace with Gmail App Password
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 NO_REPLY_EMAIL_ADRESS = EMAIL_HOST_USER
+
+# Email security settings
+EMAIL_TIMEOUT = 30  # Timeout in seconds
+EMAIL_USE_SSL = False  # We're using TLS instead of SSL
 
 # Configuration email simplifiée pour Python 3.12
 EMAIL_SSL_CERTFILE = None

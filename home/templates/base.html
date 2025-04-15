@@ -85,6 +85,7 @@
 										</button>
 										<ul class="dropdown-menu" aria-labelledby="dropdown_login_btn">
 											{% if user.is_authenticated %}
+												<li><a class="dropdown-item" href="{% url 'user_reservations' %}">{% translate "My Reservations" %}</a></li>
 												<li><a class="dropdown-item" href="{% url 'login' %}">{% translate "Profile" %}</a></li>
 												<li><a class="dropdown-item" href="{% url 'password_change' %}">{% translate "Change Password" %}</a></li>
 												<li><a class="dropdown-item" href="{% url 'logout' %}">{% translate "Log Out" %}</a></li>
@@ -164,7 +165,7 @@
 										</ul>
 									</li>
 									<li class="menu-item   ">
-										<a href="reservation1.html">Reservation</a>
+										<a href="{% url 'user_reservations' %}">Reservation</a>
 									</li>
 									<li class="menu-item menu-item-has-children">
 										<a href="about.html">About</a>

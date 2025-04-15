@@ -99,18 +99,19 @@ class CityAdmin(OSMGeoAdmin):
 @admin.register(Agences)
 class AgenceAdmin(OSMGeoAdmin):
     list_display = ('agency_name', 'commercial_name', 'email', 'phone_number', 
-                   'is_active', 'is_mail_verified', 'creation_date')
-    list_filter = ('is_active', 'is_mail_verified', 'is_auto', 'governorate')
+                   'is_active', 'is_mail_verified', 'is_auto', 'auto_approve_rental', 'creation_date')
+    list_filter = ('is_active', 'is_mail_verified', 'is_auto', 'auto_approve_rental', 'governorate')
     search_fields = ('agency_name', 'commercial_name', 'email', 'phone_number', 
                     'tax_number', 'ceo_name')
     readonly_fields = ('creation_date', 'update_date')
     ordering = ('-creation_date',)
+    list_editable = ('is_active', 'is_mail_verified', 'is_auto', 'auto_approve_rental')
     
     fieldsets = (
         (_('Basic Information'), {
             'fields': (
                 'agency_name', 'commercial_name', 'tax_number',
-                ('is_active', 'is_mail_verified', 'is_auto')
+                ('is_active', 'is_mail_verified', 'is_auto', 'auto_approve_rental')
             )
         }),
         (_('Contact Information'), {

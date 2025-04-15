@@ -1,0 +1,288 @@
+{% load i18n %}
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TunCar Notification{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --text-color: #333333;
+            --light-gray: #f8f9fa;
+            --border-color: #dee2e6;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #357abd 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 15px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .content {
+            padding: 30px;
+            background: white;
+        }
+
+        .details-card {
+            background-color: var(--light-gray);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 10px 0;
+        }
+
+        .status-badge.pending {
+            background-color: var(--warning-color);
+            color: #333;
+        }
+
+        .status-badge.approved {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .status-badge.cancelled {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            text-align: center;
+            margin: 20px 0;
+            transition: background-color 0.3s ease;
+        }
+
+        .button:hover {
+            background: #357abd;
+        }
+
+        .car-image {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .price-tag {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 15px 0;
+        }
+
+        .dates-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .dates-card i {
+            color: var(--primary-color);
+            margin-right: 5px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: var(--light-gray);
+            border-top: 1px solid var(--border-color);
+            color: #666;
+            font-size: 12px;
+        }
+
+        .social-links {
+            margin: 15px 0;
+        }
+
+        .social-link {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            margin: 0 5px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            color: white;
+            text-align: center;
+            line-height: 32px;
+            text-decoration: none;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .email-container {
+                margin: 0;
+                border-radius: 0;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <img src="{{ scheme }}://{{ domain }}{% static 'images/logo.png' %}" alt="TunCar" class="logo">
+            <h1>{% block header_title %}{% endblock %}</h1>
+        </div>
+
+        <div class="content">
+            <p>{% trans "Dear" %} {{ user_name }},</p>
+            
+            {% block main_content %}{% endblock %}
+
+            {% if car_info %}
+            <div class="details-card">
+                <h3>{% trans "Reservation Details" %}</h3>
+                
+                {% if car_image %}
+                <img src="{{ car_image }}" alt="{{ car_info }}" class="car-image">
+                {% endif %}
+
+                <div class="detail-row">
+                    <span class="detail-label">{% trans "Car" %}</span>
+                    <span>{{ car_info }}</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">{% trans "Agency" %}</span>
+                    <span>{{ agency_name }}</span>
+                </div>
+
+                <div class="dates-card">
+                    <div class="detail-row">
+                        <span class="detail-label">
+                            <i class="far fa-calendar-alt"></i> {% trans "From" %}
+                        </span>
+                        <span>{{ start_date }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">
+                            <i class="far fa-calendar-alt"></i> {% trans "To" %}
+                        </span>
+                        <span>{{ end_date }}</span>
+                    </div>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">{% trans "Total Price" %}</span>
+                    <span class="price-tag">{{ total_price }} {{ currency }}</span>
+                </div>
+
+                {% if status %}
+                <div class="status-badge {{ status|lower }}">
+                    {{ status_text }}
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% block action_buttons %}{% endblock %}
+        </div>
+
+        <div class="footer">
+            <div class="social-links">
+                <a href="https://facebook.com/tuncar" class="social-link">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                <a href="https://twitter.com/tuncar" class="social-link">
+                    <i class="fab fa-twitter"></i>
+                </a>
+                <a href="https://instagram.com/tuncar" class="social-link">
+                    <i class="fab fa-instagram"></i>
+                </a>
+            </div>
+            <p>{% trans "This is an automated message, please do not reply directly to this email." %}</p>
+            <p>&copy; {% now "Y" %} TunCar. {% trans "All rights reserved." %}</p>
+            <p>
+                <a href="{{ scheme }}://{{ domain }}/privacy-policy">{% trans "Privacy Policy" %}</a> |
+                <a href="{{ scheme }}://{{ domain }}/terms">{% trans "Terms of Service" %}</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

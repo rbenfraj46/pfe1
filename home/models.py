@@ -136,6 +136,7 @@ class Agences(models.Model):
     is_mail_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
     is_auto = models.BooleanField(default=False, verbose_name=_('Auto Activate Cars'))
+    auto_approve_rental = models.BooleanField(default=False, verbose_name=_('Auto Approve Rentals'))
     zipcode = models.CharField(max_length=150, verbose_name=_('CEO Name'), null=True)
     logo = models.ImageField(upload_to="logo",null=True, blank=True)
 

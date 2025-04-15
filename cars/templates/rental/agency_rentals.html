@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% translate "Manage Rentals" %} - {{ agency.agency_name }} - {{ block.super }}{% endblock %}
+
+{% block bodyContent %}
+<div class="wheel-content">
+    <div class="container" style="margin-top: 180px;">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="wheel-header text-center">
+                    <h3>{% translate "Rental Management" %} - {{ agency.agency_name }}</h3>
+                    {% if user_agencies.count > 1 %}
+                    <div class="agency-selector mb-4">
+                        <form method="get" class="form-inline justify-content-center">
+                            <div class="input-group">
+                                <select name="agency_id" class="form-select" onchange="this.form.submit()">
+                                    <option value="">{% translate "All My Agencies" %}</option>
+                                    {% for agency in user_agencies %}
+                                    <option value="{{ agency.id }}" {% if current_agency_id == agency.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ agency.agency_name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card bg-warning text-dark">
+                            <div class="card-body">
+                                <h5 class="card-title">{% translate "Pending" %}</h5>
+                                <p class="card-text display-4">{{ pending }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">{% translate "Approved" %}</h5>
+                                <p class="card-text display-4">{{ approved }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-danger text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">{% translate "Rejected" %}</h5>
+                                <p class="card-text display-4">{{ rejected }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-info text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">{% translate "Total" %}</h5>
+                                <p class="card-text display-4">{{ total }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rental-filters mb-4">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-primary filter-btn active" data-filter="all">
+                            {% translate "All" %}
+                        </button>
+                        <button type="button" class="btn btn-outline-warning filter-btn" data-filter="pending">
+                            {% translate "Pending" %}
+                        </button>
+                        <button type="button" class="btn btn-outline-success filter-btn" data-filter="approved">
+                            {% translate "Approved" %}
+                        </button>
+                        <button type="button" class="btn btn-outline-danger filter-btn" data-filter="rejected">
+                            {% translate "Rejected" %}
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>{% translate "Car" %}</th>
+                                <th>{% translate "Customer" %}</th>
+                                <th>{% translate "Dates" %}</th>
+                                <th>{% translate "Total Price" %}</th>
+                                <th>{% translate "Status" %}</th>
+                                <th>{% translate "Actions" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rental in rentals %}
+                            <tr class="rental-row" data-status="{{ rental.status }}">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        {% if rental.car.image %}
+                                            <img src="{{ rental.car.image.url }}" alt="{{ rental.car }}" class="rental-car-thumb">
+                                        {% endif %}
+                                        <div class="ml-2">
+                                            <strong>{{ rental.car.brand }} {{ rental.car.car_model }}</strong>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>{{ rental.user.get_full_name }}</div>
+                                    <small class="text-muted">{{ rental.user.email }}</small>
+                                </td>
+                                <td>
+                                    <div>{{ rental.start_date }}</div>
+                                    <div>{{ rental.end_date }}</div>
+                                </td>
+                                <td>{{ rental.total_price }} {{ devise.unit }}</td>
+                                <td>
+                                    <span class="badge {% if rental.status == 'approved' %}bg-success{% elif rental.status == 'pending' %}bg-warning{% elif rental.status == 'rejected' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                        {% translate rental.status|title %}
+                                    </span>
+                                    {% if rental.status_changes.exists and rental.status_changes.latest.status == 'pending' %}
+                                        <div class="mt-1">
+                                            <small class="text-muted">{% translate "Change pending review" %}</small>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if rental.status == 'pending' or rental.status == 'approved' %}
+                                        <button class="btn btn-sm btn-primary update-status" 
+                                                data-rental-id="{{ rental.id }}"
+                                                data-current-status="{{ rental.status }}"
+                                                {% if rental.status_changes.exists and rental.status_changes.latest.status == 'pending' %}
+                                                disabled
+                                                {% endif %}>
+                                            {% translate "Update Status" %}
+                                        </button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if is_paginated %}
+                <nav aria-label="{% translate 'Rental navigation' %}">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&agency_id={{ agency.id }}">{% translate "Previous" %}</a>
+                            </li>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                                <a class="page-link" href="?page={{ num }}&agency_id={{ agency.id }}">{{ num }}</a>
+                            </li>
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}&agency_id={{ agency.id }}">{% translate "Next" %}</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Status Update Modal -->
+<div class="modal fade" id="statusUpdateModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% translate "Update Rental Status" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="statusUpdateForm">
+                    <div class="mb-3">
+                        <label for="newStatus" class="form-label">{% translate "New Status" %}</label>
+                        <select class="form-select" id="newStatus" name="status" required>
+                            <option value="approved">{% translate "Approved" %}</option>
+                            <option value="rejected">{% translate "Rejected" %}</option>
+                            <option value="cancelled">{% translate "Cancelled" %}</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="statusReason" class="form-label">{% translate "Reason" %}</label>
+                        <textarea class="form-control" id="statusReason" name="reason" rows="3" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% translate "Close" %}</button>
+                <button type="button" class="btn btn-primary" id="submitStatusUpdate">{% translate "Update Status" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block headerJSContent %}
+<style>
+.rental-car-thumb {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.rental-filters {
+    margin: 20px 0;
+}
+
+.badge {
+    padding: 8px 12px;
+    font-size: 0.9em;
+}
+
+.display-4 {
+    font-size: 2.5rem;
+    font-weight: 300;
+    line-height: 1.2;
+}
+
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+</style>
+
+<script>
+$(document).ready(function() {
+    // Filter functionality
+    $('.filter-btn').click(function() {
+        $('.filter-btn').removeClass('active');
+        $(this).addClass('active');
+        
+        const filter = $(this).data('filter');
+        if (filter === 'all') {
+            $('.rental-row').show();
+        } else {
+            $('.rental-row').hide();
+            $(`.rental-row[data-status="${filter}"]`).show();
+        }
+    });
+
+    // Status update modal
+    let currentRentalId = null;
+    
+    $('.update-status').click(function() {
+        currentRentalId = $(this).data('rental-id');
+        $('#statusUpdateModal').modal('show');
+    });
+
+    $('#submitStatusUpdate').click(function() {
+        const form = $('#statusUpdateForm');
+        const status = form.find('[name="status"]').val();
+        const reason = form.find('[name="reason"]').val();
+
+        if (!status || !reason) {
+            alert("{% translate 'Please fill in all fields' %}");
+            return;
+        }
+
+        $.ajax({
+            url: `/rentals/${currentRentalId}/update-status/`,
+            method: 'POST',
+            data: {
+                status: status,
+                reason: reason,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    if (response.auto_approved) {
+                        // Update the UI immediately, preserving the agency context
+                        window.location.href = `/agency/{{ agency.id }}/rentals/`;
+                    } else {
+                        // Show pending review status
+                        const row = $(`.update-status[data-rental-id="${currentRentalId}"]`).closest('tr');
+                        row.find('.update-status').prop('disabled', true);
+                        row.find('td:eq(4)').append(
+                            '<div class="mt-1"><small class="text-muted">{% translate "Change pending review" %}</small></div>'
+                        );
+                    }
+                    $('#statusUpdateModal').modal('hide');
+                } else {
+                    alert(response.message || "{% translate 'An error occurred' %}");
+                }
+            },
+            error: function(xhr) {
+                alert(xhr.responseJSON?.message || "{% translate 'An error occurred' %}");
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -229,3 +229,22 @@ class CarModelsJsonView(View):
         models_qs = CarModel.objects.filter(brand_id=brand_id)
         data = [{'id': m.id, 'name': m.name} for m in models_qs]
         return JsonResponse(data, safe=False)
+
+class AgencySettingsUpdateView(LoginRequiredMixin, View):
+    def post(self, request, agency_id):
+        agency = get_object_or_404(Agences, id=agency_id, creator=request.user)
+        
+        try:
+            auto_approve = request.POST.get('auto_approve_rental')
+            agency.auto_approve_rental = auto_approve == 'true'
+            agency.save()
+            
+            return JsonResponse({
+                'success': True,
+                'message': _('Settings updated successfully')
+            })
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': str(e)
+            }, status=400)

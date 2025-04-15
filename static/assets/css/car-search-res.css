@@ -334,6 +334,38 @@
     border-radius: 8px;
 }
 
+.deposit-slider-container,
+.fuel-type-options,
+.category-options {
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.deposit-range-display {
+    text-align: center;
+    margin-top: 10px;
+    font-weight: 600;
+    color: #333;
+}
+
+.fuel-type-options .form-check,
+.category-options .form-check {
+    margin-bottom: 8px;
+}
+
+.fuel-type-options .form-check-label,
+.category-options .form-check-label {
+    color: #555;
+    font-size: 0.9rem;
+}
+
+.form-check-input:checked + .form-check-label {
+    color: #007bff;
+    font-weight: 600;
+}
+
 /* Form controls */
 .form-control, .brand-select {
     background: var(--bg-light);
