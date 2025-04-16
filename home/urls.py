@@ -11,9 +11,7 @@ from home.views import (
     connection_views,
     registration,
     agences,
-    contact,
-    car,
-    search
+    contact
 )
 
 from home.models import State
@@ -53,26 +51,6 @@ urlpatterns = [
         agences.RevokeAgencyPermissionView.as_view(), 
         name='revoke_agency_permission'),
     path('agency/<int:agency_id>/update-settings/', agences.AgencySettingsUpdateView.as_view(), name='agency_settings_update'),
-    
-    # Gestion des voitures
-    path('agency/cars/<int:agency_id>/', car.AgencyCarsListView.as_view(), name='agency_cars_list'),
-    path('agency/car/add/<int:agency_id>/', car.RegisterCarView.as_view(), name='car_add'),
-    path('agency/car/update/<int:pk>/', car.UpdateCarView.as_view(), name='car_update'),
-    path('agency/car/delete/<int:pk>/', car.DeleteCarView.as_view(), name='car_delete'),
-    path('car-models/', car.CarModelsJsonView.as_view(), name='car_models_json'),
-    path('car-model/request/', car.CarModelRequestView.as_view(), name='request_car_model'),
-    path('car-model/requests/history/', car.CarModelRequestHistoryView.as_view(), name='car_model_requests_history'),
-    
-    # Recherche et réservation de voitures
-    path('cars/search/', search.CarSearchView.as_view(), name='car_search'),
-    path('cars/search/results/', search.CarSearchResultsView.as_view(), name='car_search_results'),
-    path('cars/search/filter/', search.CarSearchFilterView.as_view(), name='car_search_filter'),
-    path('cars/search/debug/', search.CarSearchDebugView.as_view(), name='car_search_debug'),
-    path('cars/rent/<int:car_id>/', car.CarRentalRequestView.as_view(), name='rental_request'),
-    
-    # Gestion des réservations
-    path('my-reservations/', car.UserReservationsView.as_view(), name='user_reservations'),
-    path('reservations/<int:reservation_id>/cancel/', car.CancelReservationView.as_view(), name='cancel_reservation'),
     
     # Données géographiques
     path('data.geojson', GeoJSONLayerView.as_view(model=State, properties=['name']), name='data'),
