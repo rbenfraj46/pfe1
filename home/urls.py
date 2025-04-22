@@ -56,6 +56,8 @@ urlpatterns = [
     path('data.geojson', GeoJSONLayerView.as_view(model=State, properties=['name']), name='data'),
     path('delegations', ajax_views.DelegationsJsonView.as_view(), name='delegations'),
     path('cities', ajax_views.CitiesJsonView.as_view(), name='cities'),
+    path('admin/notifications/fetch/', ajax_views.AdminNotificationsView.as_view(), name='admin_notifications'),
+    path('ajax/admin-notifications/', ajax_views.AdminNotificationsView.as_view(), name='admin_notifications'),
     
     # Pages statiques
     path('terms-and-conditions/', TemplateView.as_view(template_name="terms_and_conditions.html"), name='terms_and_conditions'),

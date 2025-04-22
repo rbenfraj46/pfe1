@@ -245,3 +245,22 @@ class AgencyPermission(models.Model):
     class Meta:
         db_table = 'agency_permission'
         unique_together = ('agency', 'user', 'permission')
+
+
+class AdminNotification(models.Model):
+    NOTIFICATION_TYPES = (
+        ('rental', _('Rental Request')),
+        ('car_model', _('Car Model Request')),
+        ('agency', _('Agency Registration')),
+    )
+    
+    notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES)
+    message = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+    target_url = models.CharField(max_length=255)
+    reference_id = models.IntegerField(null=True)
+
+    class Meta:
+        db_table = 'admin_notification'
+        ordering = ['-created_at']

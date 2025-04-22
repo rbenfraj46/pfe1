@@ -134,8 +134,8 @@ if DEBUG:
         # Interface utilisateur
         "changeform_format": "horizontal_tabs",
         "related_modal_active": True,
-        "custom_css": "admin/css/custom_admin.css",
-        "custom_js": "admin/js/custom_admin.js",
+        "custom_css": "admin/css/admin_custom.css",  # Un seul fichier CSS combiné
+        "custom_js": "admin/js/admin_notifications.js",
         
         # Recherche
         "search_model": ["auth.User", "cars.CarModel", "cars.Brand", "home.Agences"],

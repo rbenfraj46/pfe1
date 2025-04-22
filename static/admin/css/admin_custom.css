@@ -1,0 +1,5 @@
+/* Import des styles de base */
+@import url('custom_admin.css');
+@import url('admin_notifications.css');
+
+/* Styles additionnels si nécessaire */

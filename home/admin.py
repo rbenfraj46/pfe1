@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 
 from home.models import (
     User, Devise, UserPreference, City, Delegation, 
-    State, Contact, Agences, MailSubscription, AgencyPermission
+    State, Contact, Agences, MailSubscription, AgencyPermission, AdminNotification
 )
 
 @admin.register(User)
@@ -171,3 +171,11 @@ class AgencyPermissionAdmin(admin.ModelAdmin):
     ordering = ('-granted_at',)
     
     readonly_fields = ('granted_at',)
+
+@admin.register(AdminNotification)
+class AdminNotificationAdmin(admin.ModelAdmin):
+    list_display = ('notification_type', 'message', 'created_at', 'is_read')
+    list_filter = ('notification_type', 'is_read', 'created_at')
+    search_fields = ('message',)
+    ordering = ('-created_at',)
+    readonly_fields = ('created_at',)
