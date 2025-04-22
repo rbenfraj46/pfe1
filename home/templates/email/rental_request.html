@@ -6,16 +6,33 @@
 {% block header_title %}{% trans "New Rental Request" %}{% endblock %}
 
 {% block main_content %}
-<div class="details-card">
-    <h3>{% trans "New Booking Request" %}</h3>
-    <p>{% trans "You have received a new rental request for your car. A customer would like to rent your vehicle. Please review the details below and take action." %}</p>
+<div class="notification-icon">
+    <i class="fas fa-car"></i>
+</div>
+
+<h3 style="text-align: center; color: var(--primary-color);">
+    {% trans "New Booking Request Received" %}
+</h3>
+
+<div class="alert-box">
+    <p style="margin: 0;">
+        {% trans "You have received a new rental request for your car. Please review the details below and take action as soon as possible." %}
+    </p>
 </div>
 {% endblock %}
 
 {% block action_buttons %}
-<div style="text-align: center;">
-    <a href="{{ admin_url }}" class="button" style="background-color: var(--primary-color);">
-        <i class="fas fa-check-circle"></i> {% trans "Review Request" %}
+<div class="btn-group">
+    <a href="{{ admin_url }}" class="button">
+        <i class="fas fa-check-circle"></i> 
+        {% trans "Review Request" %}
     </a>
+</div>
+
+<div class="alert-box warning">
+    <p style="margin: 0;">
+        <i class="fas fa-clock"></i>
+        {% trans "Quick response helps maintain high customer satisfaction." %}
+    </p>
 </div>
 {% endblock %}

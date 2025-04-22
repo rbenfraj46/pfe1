@@ -120,20 +120,12 @@
                                     <span class="badge {% if rental.status == 'approved' %}bg-success{% elif rental.status == 'pending' %}bg-warning{% elif rental.status == 'rejected' %}bg-danger{% else %}bg-secondary{% endif %}">
                                         {% translate rental.status|title %}
                                     </span>
-                                    {% if rental.status_changes.exists and rental.status_changes.latest.status == 'pending' %}
-                                        <div class="mt-1">
-                                            <small class="text-muted">{% translate "Change pending review" %}</small>
-                                        </div>
-                                    {% endif %}
                                 </td>
                                 <td>
                                     {% if rental.status == 'pending' or rental.status == 'approved' %}
                                         <button class="btn btn-sm btn-primary update-status" 
                                                 data-rental-id="{{ rental.id }}"
-                                                data-current-status="{{ rental.status }}"
-                                                {% if rental.status_changes.exists and rental.status_changes.latest.status == 'pending' %}
-                                                disabled
-                                                {% endif %}>
+                                                data-current-status="{{ rental.status }}">
                                             {% translate "Update Status" %}
                                         </button>
                                     {% endif %}
@@ -244,7 +236,6 @@ $(document).ready(function() {
     $('.filter-btn').click(function() {
         $('.filter-btn').removeClass('active');
         $(this).addClass('active');
-        
         const filter = $(this).data('filter');
         if (filter === 'all') {
             $('.rental-row').show();
@@ -253,25 +244,20 @@ $(document).ready(function() {
             $(`.rental-row[data-status="${filter}"]`).show();
         }
     });
-
     // Status update modal
     let currentRentalId = null;
-    
     $('.update-status').click(function() {
         currentRentalId = $(this).data('rental-id');
         $('#statusUpdateModal').modal('show');
     });
-
     $('#submitStatusUpdate').click(function() {
         const form = $('#statusUpdateForm');
         const status = form.find('[name="status"]').val();
         const reason = form.find('[name="reason"]').val();
-
         if (!status || !reason) {
             alert("{% translate 'Please fill in all fields' %}");
             return;
         }
-
         $.ajax({
             url: `/rentals/${currentRentalId}/update-status/`,
             method: 'POST',
@@ -282,18 +268,7 @@ $(document).ready(function() {
             },
             success: function(response) {
                 if (response.success) {
-                    if (response.auto_approved) {
-                        // Update the UI immediately, preserving the agency context
-                        window.location.href = `/agency/{{ agency.id }}/rentals/`;
-                    } else {
-                        // Show pending review status
-                        const row = $(`.update-status[data-rental-id="${currentRentalId}"]`).closest('tr');
-                        row.find('.update-status').prop('disabled', true);
-                        row.find('td:eq(4)').append(
-                            '<div class="mt-1"><small class="text-muted">{% translate "Change pending review" %}</small></div>'
-                        );
-                    }
-                    $('#statusUpdateModal').modal('hide');
+                    window.location.href = `/agency/{{ agency.id }}/rentals/`;
                 } else {
                     alert(response.message || "{% translate 'An error occurred' %}");
                 }

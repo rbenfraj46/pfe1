@@ -13,7 +13,7 @@ import logging
 from cars.models import (
     Brand, GearType, CarModel, Transmission, 
     AgencyCar, CarUnavailability, CarModelRequest,
-    CarReservation, RentalStatusChange
+    CarReservation
 )
 from cars.forms import CarModelAdminForm, BrandAdminForm
 
@@ -275,60 +275,6 @@ class CarReservationAdmin(admin.ModelAdmin):
         if obj and obj.status in ['approved', 'rejected', 'cancelled']:
             return self.readonly_fields + ('car', 'user', 'start_date', 'end_date')
         return self.readonly_fields
-
-@admin.register(RentalStatusChange)
-class RentalStatusChangeAdmin(admin.ModelAdmin):
-    list_display = (
-        'reservation',
-        'current_status',
-        'requested_status',
-        'requested_by',
-        'status',
-        'created_at'
-    )
-    list_filter = ('status', 'current_status', 'requested_status', 'created_at')
-    search_fields = (
-        'reservation__car__brand__name',
-        'reservation__car__car_model__name',
-        'reservation__user__email',
-        'reason',
-        'admin_notes'
-    )
-    readonly_fields = ('current_status', 'created_at', 'updated_at')
-    raw_id_fields = ('reservation', 'requested_by', 'reviewed_by')
-    
-    fieldsets = (
-        (_('Request Details'), {
-            'fields': (
-                'reservation',
-                'current_status',
-                'requested_status',
-                'reason',
-            )
-        }),
-        (_('Review Information'), {
-            'fields': (
-                'status',
-                'reviewed_by',
-                'admin_notes',
-            )
-        }),
-        (_('Timestamps'), {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
-        })
-    )
-
-    def save_model(self, request, obj, form, change):
-        if not obj.reviewed_by and obj.status in ['approved', 'rejected']:
-            obj.reviewed_by = request.user
-        
-        if obj.status == 'approved':
-            # Update the reservation status
-            obj.reservation.status = obj.requested_status
-            obj.reservation.save()
-        
-        super().save_model(request, obj, form, change)
 
 
 

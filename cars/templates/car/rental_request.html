@@ -279,23 +279,61 @@
     document.addEventListener('DOMContentLoaded', function() {
         const startDate = document.querySelector('input[name="start_date"]');
         const endDate = document.querySelector('input[name="end_date"]');
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
         
-        // Calculer le total en fonction des dates
-        function calculateTotal() {
+        function updateTotal() {
             if (startDate.value && endDate.value) {
-                const start = new Date(startDate.value);
-                const end = new Date(endDate.value);
-                const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-                const pricePerDay = {{ car.price_per_day }};
-                const total = days * pricePerDay;
-                
-                document.querySelector('.summary-total .summary-item span:last-child').textContent = 
-                    `${total} TND`;
+                const data = {
+                    car_id: "{{ car.id }}",
+                    start_date: startDate.value,
+                    end_date: endDate.value
+                };
+
+                fetch('/api/calculate-rental-total/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.querySelector('.summary-item:first-child span:last-child').textContent = 
+                            data.price_per_day + " TND × " + data.days + " {% translate 'days' %}";
+                        document.querySelector('.summary-item:nth-child(2) span:last-child').textContent = 
+                            data.security_deposit + " TND";
+                        document.querySelector('.summary-total .summary-item span:last-child').textContent = 
+                            data.total_price + " TND";
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur lors du calcul du total:', error);
+                });
             }
         }
 
-        startDate.addEventListener('change', calculateTotal);
-        endDate.addEventListener('change', calculateTotal);
+        // Initialiser la date minimale à aujourd'hui
+        const today = new Date().toISOString().split('T')[0];
+        startDate.min = today;
+        
+        // Gérer les changements de date de début
+        startDate.addEventListener('change', function() {
+            endDate.min = this.value;
+            if (endDate.value && endDate.value < this.value) {
+                endDate.value = this.value;
+            }
+            updateTotal();
+        });
+
+        // Gérer les changements de date de fin
+        endDate.addEventListener('change', updateTotal);
+        
+        // Calculer le total initial si les dates sont déjà remplies
+        if (startDate.value && endDate.value) {
+            updateTotal();
+        }
     });
 </script>
 {% endblock %}

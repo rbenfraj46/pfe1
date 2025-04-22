@@ -122,6 +122,31 @@ class AgencyCar(models.Model):
             self.image = f"media/{self.car_model.img_hash}.{self.car_model.img_extension}"
         super().save(*args, **kwargs)
 
+    def calculate_total_price(self, start_date, end_date):
+        """Calculer le prix total pour une période donnée"""
+        if isinstance(start_date, str):
+            try:
+                start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+            except ValueError:
+                return None
+            
+        if isinstance(end_date, str):
+            try:
+                end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+            except ValueError:
+                return None
+            
+        if start_date and end_date and end_date > start_date:
+            days = (end_date - start_date).days
+            total = self.price_per_day * days
+            return {
+                'days': days,
+                'price_per_day': float(self.price_per_day),
+                'security_deposit': float(self.security_deposit),
+                'total_price': float(total)
+            }
+        return None
+
 class CarUnavailability(models.Model):
     car = models.ForeignKey(AgencyCar, on_delete=models.CASCADE, related_name="unavailability_periods")
     start_date = models.DateField(verbose_name=_("Start Date"))
@@ -315,32 +340,25 @@ class CarReservation(models.Model):
 
         return status_change
 
-class RentalStatusChange(models.Model):
-    STATUS_CHOICES = [
-        ('pending', _('Pending Review')),
-        ('approved', _('Approved')),
-        ('rejected', _('Rejected')),
-    ]
-
-    reservation = models.ForeignKey('CarReservation', on_delete=models.CASCADE, related_name='status_changes')
-    requested_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='requested_status_changes')
-    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reviewed_status_changes', null=True, blank=True)
-    current_status = models.CharField(max_length=20, choices=CarReservation.STATUS_CHOICES)
-    requested_status = models.CharField(max_length=20, choices=CarReservation.STATUS_CHOICES)
-    reason = models.TextField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    admin_notes = models.TextField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        db_table = 'rental_status_change'
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return f"Status change request for reservation {self.reservation.id}: {self.current_status} -> {self.requested_status}"
-
-    def save(self, *args, **kwargs):
-        if not self.pk:  # Only on creation
-            self.current_status = self.reservation.status
-        super().save(*args, **kwargs)
+    def update_status(self, requested_status, reason, requested_by):
+        """
+        Met à jour le statut de la réservation selon le mode de l'agence :
+        - Si l'agence est en mode auto, le statut est mis à jour immédiatement.
+        - Sinon, la demande est bloquée et une notification (log ou email) est envoyée à l'admin.
+        """
+        if int(self.car.agence.auto_approve_rental) == 1:
+            old_status = self.status
+            self.status = requested_status
+            self.save()
+            from home.mail_util import send_car_rental_notification
+            if requested_status == 'approved':
+                send_car_rental_notification(self, 'approved')
+            elif requested_status == 'cancelled':
+                send_car_rental_notification(self, 'cancelled', cancellation_reason=reason)
+            return True
+        else:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info(f"Demande de changement de statut pour réservation {self.id} à '{requested_status}' par {requested_by.email}. Raison: {reason}")
+            # TODO: envoyer un email à l'admin si besoin
+            raise PermissionError("Seul un administrateur peut valider ce changement de statut pour cette agence.")

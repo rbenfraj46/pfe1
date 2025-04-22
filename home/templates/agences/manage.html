@@ -32,8 +32,6 @@
         </div>
     </div>
 </div>
-
-
 <div class="wheel-info-text marg-lg-t150 marg-lg-b150 marg-md-t100 marg-md-b100 marg-sm-t50 marg-sm-b50">
     <div class="wheel-header">
         <h5>{% translate "Welcome " %}<span>{{ agence.agency_name }}</span></h5>
@@ -80,12 +78,296 @@
 
 </div>
 
+<style>
+.stats-card {
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1.5px 4px rgba(0,0,0,0.04);
+    transition: transform 0.15s, box-shadow 0.15s;
+    border: none;
+    margin-bottom: 24px;
+}
+.stats-card:hover {
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 3px 8px rgba(0,0,0,0.08);
+}
+.stats-card .card-body {
+    padding: 1.5rem 1rem;
+}
+.stats-card i {
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.10));
+}
+.stats-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+.stats-value {
+    font-size: 2.1rem;
+    font-weight: 700;
+    margin-bottom: 0;
+}
+.section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.section-title i {
+    color: #007bff;
+    font-size: 2.2rem;
+}
+.chart-card {
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1.5px 4px rgba(0,0,0,0.04);
+    border: none;
+    margin-bottom: 24px;
+    background: linear-gradient(120deg, #f8fafc 60%, #e3e9f7 100%);
+}
+</style>
+
+<div class="container mt-5">
+    <div class="section-title mb-4"><i class="fas fa-chart-bar"></i> {% translate "Agency Statistics" %}</div>
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-2">
+            <div class="card stats-card bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-car fa-2x mb-2"></i>
+                    <div class="stats-title">{% translate "Cars" %}</div>
+                    <div class="stats-value">{{ stats.cars_count }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card stats-card bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-list fa-2x mb-2"></i>
+                    <div class="stats-title">{% translate "Total Rentals" %}</div>
+                    <div class="stats-value">{{ stats.reservations_total }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card stats-card bg-warning text-dark">
+                <div class="card-body text-center">
+                    <i class="fas fa-hourglass-half fa-2x mb-2"></i>
+                    <div class="stats-title">{% translate "Pending" %}</div>
+                    <div class="stats-value">{{ stats.reservations_pending }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card stats-card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle fa-2x mb-2"></i>
+                    <div class="stats-title">{% translate "Approved" %}</div>
+                    <div class="stats-value">{{ stats.reservations_approved }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card stats-card bg-danger text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-times-circle fa-2x mb-2"></i>
+                    <div class="stats-title">{% translate "Rejected" %}</div>
+                    <div class="stats-value">{{ stats.reservations_rejected }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card stats-card bg-secondary text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-ban fa-2x mb-2"></i>
+                    <div class="stats-title">{% translate "Cancelled" %}</div>
+                    <div class="stats-value">{{ stats.reservations_cancelled }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card stats-card bg-dark text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-friends fa-2x mb-2"></i>
+                    <div class="stats-title">{% translate "Unique Clients" %}</div>
+                    <div class="stats-value">{{ stats.unique_clients_count }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <div class="section-title mb-4"><i class="fas fa-chart-pie"></i> {% translate "Agency Graphs" %}</div>
+    <div class="row justify-content-center">
+        <div class="col-md-6 mb-4">
+            <div class="card chart-card">
+                <div class="card-body">
+                    <h5 class="card-title text-center">{% translate "Reservations by Status" %}</h5>
+                    <canvas id="statusPieChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card chart-card">
+                <div class="card-body">
+                    <h5 class="card-title text-center">{% translate "Monthly Reservations" %}</h5>
+                    <canvas id="monthlyBarChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card chart-card">
+                <div class="card-body">
+                    <h5 class="card-title text-center">{% translate "Monthly Unique Clients" %}</h5>
+                    <canvas id="monthlyClientsBarChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock bodyContent %}
 
 {% block headerJSContent %}
 {{ block.super }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-$(document).ready(function() {
+    // Pie Chart - Répartition des statuts
+    const statusPieCtx = document.getElementById('statusPieChart').getContext('2d');
+    new Chart(statusPieCtx, {
+        type: 'doughnut',
+        data: {
+            labels: [
+                '{% translate "Pending" %}',
+                '{% translate "Approved" %}',
+                '{% translate "Rejected" %}',
+                '{% translate "Cancelled" %}'
+            ],
+            datasets: [{
+                data: [
+                    {{ stats.reservations_pending }},
+                    {{ stats.reservations_approved }},
+                    {{ stats.reservations_rejected }},
+                    {{ stats.reservations_cancelled }}
+                ],
+                backgroundColor: [
+                    'rgba(255,193,7,0.85)', // Pending
+                    'rgba(40,167,69,0.85)', // Approved
+                    'rgba(220,53,69,0.85)', // Rejected
+                    'rgba(108,117,125,0.85)'  // Cancelled
+                ],
+                borderColor: [
+                    '#fff', '#fff', '#fff', '#fff'
+                ],
+                borderWidth: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        font: { size: 15, weight: 'bold' },
+                        color: '#333',
+                        padding: 18
+                    }
+                },
+                tooltip: {
+                    backgroundColor: '#fff',
+                    titleColor: '#222',
+                    bodyColor: '#222',
+                    borderColor: '#007bff',
+                    borderWidth: 1,
+                    padding: 12
+                }
+            }
+        }
+    });
+
+    // Bar Chart - Réservations mensuelles
+    const monthlyBarCtx = document.getElementById('monthlyBarChart').getContext('2d');
+    new Chart(monthlyBarCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ stats.monthly_labels|safe }},
+            datasets: [{
+                label: '{% translate "Reservations" %}',
+                data: {{ stats.monthly_counts|safe }},
+                backgroundColor: 'rgba(0,123,255,0.85)',
+                borderRadius: 12,
+                maxBarThickness: 36
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#fff',
+                    titleColor: '#222',
+                    bodyColor: '#222',
+                    borderColor: '#007bff',
+                    borderWidth: 1,
+                    padding: 12
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1, color: '#333', font: { size: 14 } },
+                    grid: { color: '#e3e9f7' }
+                },
+                x: {
+                    ticks: { color: '#333', font: { size: 13 } },
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+
+    // Bar Chart - Clients uniques mensuels
+    const monthlyClientsBarCtx = document.getElementById('monthlyClientsBarChart').getContext('2d');
+    new Chart(monthlyClientsBarCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ stats.monthly_labels|safe }},
+            datasets: [{
+                label: '{% translate "Unique Clients" %}',
+                data: {{ stats.monthly_clients_counts|safe }},
+                backgroundColor: 'rgba(52,58,64,0.85)',
+                borderRadius: 12,
+                maxBarThickness: 36
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#fff',
+                    titleColor: '#222',
+                    bodyColor: '#222',
+                    borderColor: '#343a40',
+                    borderWidth: 1,
+                    padding: 12
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1, color: '#333', font: { size: 14 } },
+                    grid: { color: '#e3e9f7' }
+                },
+                x: {
+                    ticks: { color: '#333', font: { size: 13 } },
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+
     $('#autoApproveToggle').change(function() {
         const agencyId = $(this).data('agency-id');
         const isChecked = $(this).prop('checked');
@@ -113,6 +395,5 @@ $(document).ready(function() {
             }
         });
     });
-});
 </script>
 {% endblock %}

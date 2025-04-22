@@ -96,11 +96,10 @@ def send_mail_verification_agency(request, agence):
     email.send()
 
 def send_car_rental_notification(reservation, notification_type, **kwargs):
-    """
-    Send HTML email notifications for car rental events
-    notification_type can be: 'request', 'approved', 'cancelled'
-    """
     current_site = kwargs.get('request') and get_current_site(kwargs['request']) or None
+    domain = current_site and current_site.domain or 'localhost:8000'
+    scheme = kwargs.get('request') and kwargs['request'].scheme or 'http'
+    
     templates = {
         'request': 'email/rental_request.html',
         'approved': 'email/rental_approved.html',
@@ -113,11 +112,12 @@ def send_car_rental_notification(reservation, notification_type, **kwargs):
         'cancelled': _('Car Rental Reservation Cancelled')
     }
 
-    # Determine recipient based on notification type
     recipient = reservation.car.agence.email if notification_type == 'request' else reservation.user.email
 
-    # Base context with all necessary information
+    # Base context avec tous les paramètres nécessaires
     context = {
+        'scheme': scheme,
+        'domain': domain,
         'user_name': reservation.user.get_full_name() or reservation.user.username,
         'car_info': f"{reservation.car.brand.name} {reservation.car.car_model.name}",
         'car_image': reservation.car.image.url if reservation.car.image else None,
@@ -128,38 +128,36 @@ def send_car_rental_notification(reservation, notification_type, **kwargs):
         'currency': 'TND',
         'status': reservation.status,
         'status_text': dict(reservation.STATUS_CHOICES)[reservation.status],
-        'scheme': kwargs.get('request', None) and kwargs['request'].scheme or 'http',
-        'domain': current_site and current_site.domain or 'localhost:8000'
     }
 
-    # Add specific context based on notification type
+    # Ajout de contexte spécifique selon le type de notification
     if notification_type == 'request':
         context.update({
-            'admin_url': f"{context['scheme']}://{context['domain']}/admin/cars/carreservation/{reservation.id}/change/"
+            'admin_url': f"{scheme}://{domain}/admin/cars/carreservation/{reservation.id}/change/"
         })
     elif notification_type == 'approved':
         context.update({
             'security_deposit': reservation.car.security_deposit,
-            'payment_url': f"{context['scheme']}://{context['domain']}/reservations/{reservation.id}/pay/"
+            'payment_url': f"{scheme}://{domain}/reservations/{reservation.id}/pay/"
         })
     elif notification_type == 'cancelled':
         context.update({
             'cancellation_reason': kwargs.get('cancellation_reason'),
-            'support_url': f"{context['scheme']}://{context['domain']}/contact/",
-            'search_url': f"{context['scheme']}://{context['domain']}/cars/search/"
+            'support_url': f"{scheme}://{domain}/contact/",
+            'search_url': f"{scheme}://{domain}/cars/search/"
         })
 
-    # Render HTML version
+    # Rendu du template HTML
     html_message = render_to_string(templates[notification_type], context)
     
-    # Create the email message
+    # Création du message email
     email = EmailMultiAlternatives(
         subject=subjects[notification_type],
-        body=strip_tags(html_message),  # Plain text version
+        body=strip_tags(html_message),  # Version texte
         from_email=settings.DEFAULT_FROM_EMAIL,
         to=[recipient]
     )
     
-    # Attach HTML version
+    # Ajout de la version HTML
     email.attach_alternative(html_message, "text/html")
     email.send()

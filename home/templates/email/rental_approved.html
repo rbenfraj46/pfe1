@@ -6,31 +6,64 @@
 {% block header_title %}{% trans "Great News!" %}{% endblock %}
 
 {% block main_content %}
-<div class="details-card" style="background-color: #e8f5e9; border-color: #43a047;">
-    <div style="text-align: center; margin-bottom: 20px;">
-        <i class="fas fa-check-circle" style="font-size: 48px; color: var(--success-color);"></i>
-    </div>
-    <h3 style="color: var(--success-color); text-align: center;">{% trans "Your Rental Request is Approved!" %}</h3>
-    <p>{% trans "Your car rental request has been approved. To confirm your reservation, please proceed with the security deposit payment." %}</p>
+<div class="notification-icon">
+    <i class="fas fa-check-circle" style="color: var(--success-color);"></i>
+</div>
+
+<div class="details-card" style="background: linear-gradient(145deg, #e8f5e9, #c8e6c9);">
+    <h3 style="text-align: center; color: var(--success-color); margin-bottom: 25px;">
+        {% trans "Your Rental Request is Approved!" %}
+    </h3>
     
-    <div style="background: white; padding: 15px; border-radius: 8px; margin-top: 20px;">
+    <p style="text-align: center; font-size: 16px;">
+        {% trans "Your car rental request has been approved. To confirm your reservation, please proceed with the security deposit payment." %}
+    </p>
+    
+    <div class="alert-box success">
         <div class="detail-row">
-            <span class="detail-label">{% trans "Security Deposit" %}</span>
-            <span class="price-tag">{{ security_deposit }} {{ currency }}</span>
+            <span class="detail-label">
+                <i class="fas fa-shield-alt"></i>
+                {% trans "Security Deposit" %}
+            </span>
+            <span class="price-tag">
+                {{ security_deposit }} {{ currency }}
+            </span>
+        </div>
+        
+        <div style="margin-top: 15px;">
+            <p style="margin: 0; color: var(--success-color);">
+                <i class="fas fa-info-circle"></i>
+                {% trans "This deposit will be fully refunded after the car is returned in good condition." %}
+            </p>
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block action_buttons %}
-<div style="text-align: center;">
-    <a href="{{ payment_url }}" class="button" style="background-color: var(--success-color);">
-        <i class="fas fa-lock"></i> {% trans "Pay Security Deposit" %}
+<div class="btn-group">
+    <a href="{{ payment_url }}" class="button" style="background: var(--gradient-success);">
+        <i class="fas fa-lock"></i> 
+        {% trans "Secure Payment" %}
     </a>
-    
-    <p style="margin-top: 20px; color: #666;">
-        <i class="fas fa-info-circle"></i> 
-        {% trans "Please note: Your reservation will be confirmed once the security deposit is received." %}
+</div>
+
+<div class="timeline">
+    <div class="timeline-item">
+        <strong>{% trans "Complete the security deposit payment" %}</strong>
+    </div>
+    <div class="timeline-item">
+        <strong>{% trans "Receive your booking confirmation" %}</strong>
+    </div>
+    <div class="timeline-item">
+        <strong>{% trans "Present your ID and payment card at pickup" %}</strong>
+    </div>
+</div>
+
+<div class="alert-box warning">
+    <p style="margin: 0;">
+        <i class="fas fa-clock"></i>
+        {% trans "Please complete the payment within 24 hours to secure your reservation." %}
     </p>
 </div>
 {% endblock %}

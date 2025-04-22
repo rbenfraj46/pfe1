@@ -11,6 +11,9 @@ from django.conf import settings
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 import logging
 from datetime import datetime
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+import json
 
 from cars.models import (
     AgencyCar, 
@@ -49,10 +52,25 @@ class CarManagementMixin:
 
 class CarRentalRequestView(LoginRequiredMixin, View):
     template_name = 'car/rental_request.html'
-    login_url = '/login.php'  # URL de connexion correcte
+    login_url = '/login.php'
 
     def get(self, request, car_id):
         car = get_object_or_404(AgencyCar, id=car_id)
+        
+        # Si c'est une requête AJAX pour calculer le total
+        if request.GET.get('calculate_total'):
+            start_date = request.GET.get('start_date')
+            end_date = request.GET.get('end_date')
+            total_info = car.calculate_total_price(start_date, end_date)
+            
+            return JsonResponse({
+                'success': True,
+                'total': total_info
+            } if total_info else {
+                'success': False,
+                'error': _('Invalid dates')
+            })
+        
         context = {
             'car': car,
             'start_date': request.GET.get('start_date'),
@@ -437,3 +455,102 @@ class CancelReservationView(LoginRequiredMixin, View):
                 'success': False,
                 'message': _('Failed to cancel reservation.')
             }, status=500)
+
+class CarDetailView(DetailView):
+    """Vue pour afficher les détails détaillés d'une voiture"""
+    model = AgencyCar
+    template_name = 'car/car_detail.html'
+    context_object_name = 'car'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        car = self.get_object()
+        context.update({
+            'is_available': car.is_available(
+                self.request.GET.get('start_date'), 
+                self.request.GET.get('end_date')
+            ) if self.request.GET.get('start_date') and self.request.GET.get('end_date') else True,
+        })
+        return context
+
+@method_decorator(csrf_exempt, name='dispatch')
+class CalculateRentalTotalView(View):
+    def get(self, request):
+        try:
+            car_id = request.GET.get('car_id')
+            start_date = request.GET.get('start_date')
+            end_date = request.GET.get('end_date')
+            
+            if not all([car_id, start_date, end_date]):
+                return JsonResponse({
+                    'success': False,
+                    'error': _('Missing required parameters')
+                })
+                
+            car = get_object_or_404(AgencyCar, id=car_id)
+            start = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end = datetime.strptime(end_date, '%Y-%m-%d').date()
+            
+            days = (end - start).days
+            if days <= 0:
+                return JsonResponse({
+                    'success': False,
+                    'error': _('End date must be after start date')
+                })
+                
+            total_price = car.price_per_day * days
+            
+            return JsonResponse({
+                'success': True,
+                'days': days,
+                'price_per_day': float(car.price_per_day),
+                'security_deposit': float(car.security_deposit),
+                'total_price': float(total_price)
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            })
+
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+            car_id = data.get('car_id')
+            start_date = data.get('start_date')
+            end_date = data.get('end_date')
+            
+            if not all([car_id, start_date, end_date]):
+                return JsonResponse({
+                    'success': False,
+                    'error': _('Missing required parameters')
+                })
+                
+            car = get_object_or_404(AgencyCar, id=car_id)
+            total_info = car.calculate_total_price(start_date, end_date)
+            
+            if total_info:
+                return JsonResponse({
+                    'success': True,
+                    'days': total_info['days'],
+                    'price_per_day': total_info['price_per_day'],
+                    'security_deposit': total_info['security_deposit'],
+                    'total_price': total_info['total_price']
+                })
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'error': _('Invalid dates')
+                })
+            
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'success': False,
+                'error': _('Invalid JSON data')
+            })
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            })

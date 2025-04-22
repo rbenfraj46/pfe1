@@ -1,0 +1,441 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block headerContent %}
+<link rel="stylesheet" href="{% static 'assets/css/car-detail.css' %}" />
+<style>
+    .car-detail-container {
+        margin-top: 170px;
+        padding: 50px 0;
+    }
+
+    .car-detail-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    .car-header {
+        background: linear-gradient(45deg, #ff7043, #ff5722);
+        color: white;
+        padding: 40px;
+        position: relative;
+    }
+
+    .car-title {
+        font-size: 2.5em;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .car-agency {
+        display: flex;
+        align-items: center;
+        margin-top: 20px;
+    }
+
+    .agency-logo {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-right: 15px;
+        background: white;
+        padding: 5px;
+    }
+
+    .car-image-container {
+        position: relative;
+        height: 400px;
+        overflow: hidden;
+    }
+
+    .car-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .car-details {
+        padding: 40px;
+    }
+
+    .detail-section {
+        margin-bottom: 30px;
+    }
+
+    .detail-section h3 {
+        font-size: 1.5em;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .specs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+    }
+
+    .spec-item {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+
+    .spec-item i {
+        font-size: 1.2em;
+        margin-right: 10px;
+        color: #ff7043;
+    }
+
+    .price-section {
+        background: #f8f9fa;
+        padding: 30px;
+        border-radius: 15px;
+        margin-top: 30px;
+    }
+
+    .price-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        font-size: 1.1em;
+    }
+
+    .total-price {
+        font-size: 1.5em;
+        font-weight: 700;
+        color: #ff7043;
+        border-top: 2px dashed #dee2e6;
+        padding-top: 15px;
+        margin-top: 15px;
+    }
+
+    .booking-section {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-top: 30px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    .date-inputs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .action-buttons {
+        margin-top: 30px;
+    }
+
+    .btn-rent {
+        background: #ff7043;
+        color: white;
+        padding: 15px 40px;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-rent:hover {
+        background: #ff5722;
+        transform: translateY(-2px);
+    }
+
+    .btn-rent:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .availability-badge {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        border-radius: 50px;
+        font-weight: 600;
+    }
+
+    .availability-badge.available {
+        background: #28a745;
+        color: white;
+    }
+
+    .availability-badge.unavailable {
+        background: #dc3545;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block bodyContent %}
+<div class="car-detail-container">
+    <div class="container">
+        <div class="car-detail-card">
+            <div class="car-header">
+                <div class="car-title">
+                    {{ car.brand.name }} {{ car.car_model.name }}
+                </div>
+                <div class="price-tag">
+                    {{ car.price_per_day }} TND<small>/{% translate "day" %}</small>
+                </div>
+                <div class="car-agency">
+                    <img src="{{ car.agence.logo.url|default:'default-agency-logo.png' }}" class="agency-logo" alt="Agency logo">
+                    <div>
+                        <div class="agency-name">{{ car.agence.agency_name }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="car-image-container">
+                <img src="{{ car.image.url|default:'default-car.jpg' }}" 
+                     alt="{{ car.brand.name }} {{ car.car_model.name }}"
+                     class="car-image">
+                {% if is_available %}
+                    <div class="availability-badge available">
+                        <i class="fas fa-check"></i> {% translate "Available" %}
+                    </div>
+                {% else %}
+                    <div class="availability-badge unavailable">
+                        <i class="fas fa-times"></i> {% translate "Unavailable" %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="car-details">
+                <div class="detail-section">
+                    <h3><i class="fas fa-info-circle"></i> {% translate "Car Specifications" %}</h3>
+                    <div class="specs-grid">
+                        <!-- Infos de base -->
+                        <div class="spec-item">
+                            <i class="fas fa-cog"></i>
+                            <span>{{ car.gear_type.name }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <i class="fas fa-gas-pump"></i>
+                            <span>{{ car.fuel_policy }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <i class="fas fa-id-card"></i>
+                            <span>{{ car.minimum_license_age }} {% translate "years min" %}</span>
+                        </div>
+
+                        <!-- Catégorie -->
+                        {% if car.car_model.category %}
+                        <div class="spec-item">
+                            <i class="fas fa-car"></i>
+                            <span>{{ car.car_model.category }}</span>
+                        </div>
+                        {% endif %}
+
+                        <!-- Transmission -->
+                        {% if car.car_model.transmission %}
+                        <div class="spec-item">
+                            <i class="fas fa-exchange-alt"></i>
+                            <span>{{ car.car_model.transmission }}{% if car.car_model.gear_nbr %} - {{ car.car_model.gear_nbr }} {% translate "speeds" %}{% endif %}</span>
+                        </div>
+                        {% endif %}
+
+                        <!-- Moteur -->
+                        {% if car.car_model.cylinder or car.car_model.horse_power %}
+                        <div class="spec-item">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>
+                                {% if car.car_model.cylinder %}{{ car.car_model.cylinder }}L{% endif %}
+                                {% if car.car_model.horse_power %} - {{ car.car_model.horse_power }}ch{% endif %}
+                            </span>
+                        </div>
+                        {% endif %}
+
+                        <!-- Capacité -->
+                        {% if car.car_model.doors_nbr %}
+                        <div class="spec-item">
+                            <i class="fas fa-door-open"></i>
+                            <span>{{ car.car_model.doors_nbr }} {% translate "doors" %}</span>
+                        </div>
+                        {% endif %}
+                        {% if car.car_model.place_nbr %}
+                        <div class="spec-item">
+                            <i class="fas fa-users"></i>
+                            <span>{{ car.car_model.place_nbr }} {% translate "seats" %}</span>
+                        </div>
+                        {% endif %}
+
+                        <!-- Vitesse max -->
+                        {% if car.car_model.max_speed %}
+                        <div class="spec-item">
+                            <i class="fas fa-gauge-high"></i>
+                            <span>{{ car.car_model.max_speed }} km/h</span>
+                        </div>
+                        {% endif %}
+
+                        <!-- Consommation -->
+                        {% if car.car_model.urban_consumption or car.car_model.extra_urban_consumption or car.car_model.mixte_consumption %}
+                        <div class="spec-item">
+                            <i class="fas fa-gas-pump"></i>
+                            <span>
+                                {% if car.car_model.urban_consumption %}{% translate "Urban" %}: {{ car.car_model.urban_consumption }}L/100km{% endif %}
+                                {% if car.car_model.extra_urban_consumption %} | {% translate "Extra urban" %}: {{ car.car_model.extra_urban_consumption }}L/100km{% endif %}
+                                {% if car.car_model.mixte_consumption %} | {% translate "Mixed" %}: {{ car.car_model.mixte_consumption }}L/100km{% endif %}
+                            </span>
+                        </div>
+                        {% endif %}
+
+                        <!-- Dimensions -->
+                        {% if car.car_model.length or car.car_model.width or car.car_model.height %}
+                        <div class="spec-item">
+                            <i class="fas fa-rulers"></i>
+                            <span>
+                                {% if car.car_model.length %}L: {{ car.car_model.length }}m{% endif %}
+                                {% if car.car_model.width %} | l: {{ car.car_model.width }}m{% endif %}
+                                {% if car.car_model.height %} | h: {{ car.car_model.height }}m{% endif %}
+                            </span>
+                        </div>
+                        {% endif %}
+
+                        <!-- Volume du coffre -->
+                        {% if car.car_model.trunk_volume %}
+                        <div class="spec-item">
+                            <i class="fas fa-box"></i>
+                            <span>{{ car.car_model.trunk_volume }}L {% translate "trunk" %}</span>
+                        </div>
+                        {% endif %}
+
+                        <!-- Climatisation -->
+                        {% if car.car_model.air_conditioner %}
+                        <div class="spec-item">
+                            <i class="fas fa-snowflake"></i>
+                            <span>{{ car.car_model.air_conditioner }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if car.car_model.description %}
+                <div class="detail-section">
+                    <h3><i class="fas fa-align-left"></i> {% translate "Description" %}</h3>
+                    <p>{{ car.car_model.description }}</p>
+                </div>
+                {% endif %}
+
+                <div class="price-section">
+                    <h3><i class="fas fa-tag"></i> {% translate "Pricing Details" %}</h3>
+                    <div class="price-item">
+                        <span>{% translate "Daily Rate" %}</span>
+                        <span>{{ car.price_per_day }} TND</span>
+                    </div>
+                    <div class="price-item">
+                        <span>{% translate "Security Deposit" %}</span>
+                        <span>{{ car.security_deposit }} TND</span>
+                    </div>
+                </div>
+
+                <div class="booking-section">
+                    <h3><i class="fas fa-calendar-alt"></i> {% translate "Book this car" %}</h3>
+                    <form action="{% url 'rental_request' car.id %}" method="GET">
+                        <div class="date-inputs">
+                            <div class="form-group">
+                                <label>{% translate "Start Date" %}</label>
+                                <input type="date" name="start_date" class="form-control" required 
+                                       min="{{ today|date:'Y-m-d' }}"
+                                       value="{{ request.GET.start_date }}">
+                            </div>
+                            <div class="form-group">
+                                <label>{% translate "End Date" %}</label>
+                                <input type="date" name="end_date" class="form-control" required 
+                                       min="{{ today|date:'Y-m-d' }}"
+                                       value="{{ request.GET.end_date }}">
+                            </div>
+                        </div>
+                        <div class="action-buttons text-center">
+                            <button type="submit" class="btn btn-rent" {% if not is_available %}disabled{% endif %}>
+                                <i class="fas fa-calendar-check"></i> 
+                                {% translate "Continue to Booking" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block footerContent %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Gestionnaire pour les dates
+    const startDateInput = document.querySelector('input[name="start_date"]');
+    const endDateInput = document.querySelector('input[name="end_date"]');
+    
+    startDateInput.addEventListener('change', function() {
+        endDateInput.min = this.value;
+        if (endDateInput.value && endDateInput.value < this.value) {
+            endDateInput.value = this.value;
+        }
+    });
+
+    // Zoom sur l'image de la voiture
+    const carImage = document.querySelector('.car-image');
+    carImage.addEventListener('click', function() {
+        const modal = document.createElement('div');
+        modal.classList.add('image-modal');
+        
+        const modalOverlay = document.createElement('div');
+        modalOverlay.classList.add('modal-overlay');
+        
+        const zoomedImage = document.createElement('img');
+        zoomedImage.src = this.src;
+        zoomedImage.classList.add('zoomed-image');
+        
+        modal.appendChild(zoomedImage);
+        document.body.appendChild(modalOverlay);
+        document.body.appendChild(modal);
+        
+        modalOverlay.addEventListener('click', function() {
+            modal.remove();
+            modalOverlay.remove();
+        });
+    });
+});
+</script>
+
+<style>
+.image-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1050;
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1040;
+    backdrop-filter: blur(5px);
+}
+
+.zoomed-image {
+    max-width: 90vw;
+    max-height: 90vh;
+    display: block;
+}
+</style>
+{% endblock %}

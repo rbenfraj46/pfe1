@@ -96,6 +96,46 @@ class ManageAgenceView(LoginRequiredMixin, TemplateView):
         agency_id = self.kwargs.get('agency_id')
         agence = get_object_or_404(self.request.user.agences_set, id=agency_id, is_active=True)
         context['agence'] = agence
+
+        # Statistiques
+        from cars.models import AgencyCar, CarReservation
+        cars_count = AgencyCar.objects.filter(agence=agence, is_active=True).count()
+        reservations = CarReservation.objects.filter(car__agence=agence)
+        reservations_total = reservations.count()
+        reservations_pending = reservations.filter(status='pending').count()
+        reservations_approved = reservations.filter(status='approved').count()
+        reservations_rejected = reservations.filter(status='rejected').count()
+        reservations_cancelled = reservations.filter(status='cancelled').count()
+
+        # Statistiques mensuelles (12 derniers mois)
+        from django.db.models.functions import TruncMonth
+        from django.db.models import Count
+        import datetime
+        today = datetime.date.today()
+        months = [(today.replace(day=1) - datetime.timedelta(days=30*i)).strftime('%Y-%m') for i in range(11, -1, -1)]
+        monthly_data = reservations.annotate(month=TruncMonth('created_at')).values('month').annotate(count=Count('id')).order_by('month')
+        monthly_dict = {m['month'].strftime('%Y-%m'): m['count'] for m in monthly_data}
+        monthly_counts = [monthly_dict.get(month, 0) for month in months]
+
+        # Statistiques clients (uniques)
+        unique_clients_count = reservations.values('user').distinct().count()
+        # Statistiques mensuelles clients (12 derniers mois)
+        monthly_clients_data = reservations.annotate(month=TruncMonth('created_at')).values('month').annotate(clients=Count('user', distinct=True)).order_by('month')
+        monthly_clients_dict = {m['month'].strftime('%Y-%m'): m['clients'] for m in monthly_clients_data}
+        monthly_clients_counts = [monthly_clients_dict.get(month, 0) for month in months]
+
+        context['stats'] = {
+            'cars_count': cars_count,
+            'reservations_total': reservations_total,
+            'reservations_pending': reservations_pending,
+            'reservations_approved': reservations_approved,
+            'reservations_rejected': reservations_rejected,
+            'reservations_cancelled': reservations_cancelled,
+            'monthly_labels': months,
+            'monthly_counts': monthly_counts,
+            'unique_clients_count': unique_clients_count,
+            'monthly_clients_counts': monthly_clients_counts,
+        }
         return context
 
 class PendingAgenceView(LoginRequiredMixin, TemplateView):

@@ -210,16 +210,22 @@
                             {% endif %}
                             
                             <div class="car-img-wrapper">
-                                <img src="{{ car.image.url|default:'default-car.jpg' }}" 
-                                    class="car-img" 
-                                    alt="{{ car.brand.name }} {{ car.car_model.name }}">
-                                <div class="car-badge">
-                                    <i class="fas fa-car"></i> {{ car.brand.name }}
-                                </div>
+                                <a href="{% url 'car_detail' car.id %}">
+                                    <img src="{{ car.image.url|default:'default-car.jpg' }}" 
+                                        class="car-img" 
+                                        alt="{{ car.brand.name }} {{ car.car_model.name }}">
+                                    <div class="car-badge">
+                                        <i class="fas fa-car"></i> {{ car.brand.name }}
+                                    </div>
+                                </a>
                             </div>
                             
                             <div class="card-body car-info">
-                                <h5 class="card-title car-title">{{ car.brand.name }} {{ car.car_model.name }}</h5>
+                                <h5 class="card-title car-title">
+                                    <a href="{% url 'car_detail' car.id %}" class="text-decoration-none text-dark">
+                                        {{ car.brand.name }} {{ car.car_model.name }}
+                                    </a>
+                                </h5>
                                 <div class="car-specs">
                                     <div class="spec-item">
                                         <i class="fas fa-cog"></i> {{ car.gear_type.name }}

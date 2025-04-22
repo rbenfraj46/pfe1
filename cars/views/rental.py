@@ -8,64 +8,52 @@ from django.views.generic import ListView
 from django.db.models import Count, Q
 from django.core.exceptions import PermissionDenied
 
-from cars.models import CarReservation, RentalStatusChange
+from cars.models import CarReservation
 from home.models import Agences
 from home.views.agences import has_agency_permission
 
 class RentalStatusUpdateView(LoginRequiredMixin, View):
     def get(self, request, reservation_id):
-        # Get the reservation to find the agency ID
         reservation = get_object_or_404(CarReservation, id=reservation_id)
         return redirect('agency_rentals', agency_id=reservation.car.agence.id)
 
     def post(self, request, reservation_id):
-        # Get the reservation and check permissions
+        if not request.user.is_authenticated:
+            return JsonResponse({
+                'success': False,
+                'message': _('Authentication required')
+            }, status=401)
         reservation = get_object_or_404(CarReservation, id=reservation_id)
         agency = reservation.car.agence
-        
-        # Check if user has permission to update this rental
-        if not (agency.creator == request.user or 
-                has_agency_permission(request.user, agency.id, 'edit')):
+        if not (agency.creator == request.user or has_agency_permission(request.user, agency.id, 'edit')):
             return JsonResponse({
                 'success': False,
                 'message': _('You do not have permission to update this rental')
             }, status=403)
-        
         requested_status = request.POST.get('status')
         reason = request.POST.get('reason')
-        
         if not requested_status or not reason:
             return JsonResponse({
                 'success': False,
                 'message': _('Status and reason are required')
             }, status=400)
-            
         try:
-            status_change = reservation.request_status_change(
-                requested_status=requested_status,
-                reason=reason,
-                requested_by=request.user
-            )
-            
-            if status_change.status == 'approved':
-                messages.success(request, _('Rental status updated successfully'))
-                return JsonResponse({
-                    'success': True,
-                    'status': requested_status,
-                    'auto_approved': True
-                })
-            else:
-                messages.info(
-                    request, 
-                    _('Status change request submitted for admin review')
-                )
-                return JsonResponse({
-                    'success': True,
-                    'status': reservation.status,
-                    'auto_approved': False,
-                    'pending_review': True
-                })
-                
+            reservation.update_status(requested_status, reason, request.user)
+            # Ne pas utiliser messages.success ici pour AJAX
+            return JsonResponse({
+                'success': True,
+                'status': requested_status,
+                'auto_approved': agency.auto_approve_rental
+            })
+        except PermissionError as e:
+            # Ne pas utiliser messages.info ici pour AJAX
+            return JsonResponse({
+                'success': True,
+                'status': reservation.status,
+                'auto_approved': False,
+                'pending_review': True,
+                'message': str(e)
+            })
         except Exception as e:
             return JsonResponse({
                 'success': False,
@@ -92,8 +80,6 @@ class AgencyRentalsView(LoginRequiredMixin, ListView):
             'car__car_model',
             'car__agence',
             'user'
-        ).prefetch_related(
-            'status_changes'
         ).order_by('-created_at')
 
     def get_context_data(self, **kwargs):
