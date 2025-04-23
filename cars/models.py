@@ -221,8 +221,17 @@ class CarReservation(models.Model):
     STATUS_CHOICES = (
         ('pending', _('Pending')),
         ('approved', _('Approved')),
-        ('rejected', _('Rejected')),
+        ('ongoing', _('Ongoing')),
+        ('completed', _('Completed')),
         ('cancelled', _('Cancelled')),
+        ('rejected', _('Rejected')),
+    )
+    
+    PAYMENT_STATUS_CHOICES = (
+        ('unpaid', _('Unpaid')),
+        ('partial', _('Partially Paid')),
+        ('full', _('Fully Paid')),
+        ('refunded', _('Refunded')),
     )
 
     car = models.ForeignKey(AgencyCar, on_delete=models.CASCADE, related_name='reservations')
@@ -236,6 +245,17 @@ class CarReservation(models.Model):
     deposit_paid = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    payment_status = models.CharField(
+        max_length=20, 
+        choices=PAYMENT_STATUS_CHOICES, 
+        default='unpaid'
+    )
+    amount_paid = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0
+    )
+    last_payment_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'car_reservation'
@@ -362,3 +382,41 @@ class CarReservation(models.Model):
             logger.info(f"Demande de changement de statut pour réservation {self.id} à '{requested_status}' par {requested_by.email}. Raison: {reason}")
             # TODO: envoyer un email à l'admin si besoin
             raise PermissionError("Seul un administrateur peut valider ce changement de statut pour cette agence.")
+
+    def update_payment_status(self, amount_paid):
+        """Update payment status based on amount paid"""
+        self.amount_paid = amount_paid
+        self.last_payment_date = timezone.now()
+        
+        if amount_paid >= self.total_price:
+            self.payment_status = 'full'
+            if self.status == 'approved':
+                self.status = 'ongoing'
+        elif amount_paid > 0:
+            self.payment_status = 'partial'
+        else:
+            self.payment_status = 'unpaid'
+        
+        self.save()
+
+    def auto_complete(self):
+        """Automatically check and update status to completed if conditions are met"""
+        if (self.status == 'ongoing' and 
+            self.payment_status in ['full', 'partial'] and 
+            timezone.now().date() > self.end_date):
+            self.status = 'completed'
+            self.save()
+            return True
+        return False
+
+    def can_transition_to(self, new_status):
+        """Check if status transition is valid"""
+        valid_transitions = {
+            'pending': ['approved', 'rejected', 'cancelled'],
+            'approved': ['ongoing', 'cancelled'],
+            'ongoing': ['completed', 'cancelled'],
+            'completed': [],
+            'cancelled': [],
+            'rejected': []
+        }
+        return new_status in valid_transitions.get(self.status, [])

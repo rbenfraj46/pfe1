@@ -7,6 +7,10 @@ from django.http import JsonResponse
 from django.views.generic import ListView
 from django.db.models import Count, Q
 from django.core.exceptions import PermissionDenied
+import decimal
+import logging
+
+logger = logging.getLogger(__name__)
 
 from cars.models import CarReservation
 from home.models import Agences
@@ -18,46 +22,93 @@ class RentalStatusUpdateView(LoginRequiredMixin, View):
         return redirect('agency_rentals', agency_id=reservation.car.agence.id)
 
     def post(self, request, reservation_id):
-        if not request.user.is_authenticated:
-            return JsonResponse({
-                'success': False,
-                'message': _('Authentication required')
-            }, status=401)
-        reservation = get_object_or_404(CarReservation, id=reservation_id)
-        agency = reservation.car.agence
-        if not (agency.creator == request.user or has_agency_permission(request.user, agency.id, 'edit')):
-            return JsonResponse({
-                'success': False,
-                'message': _('You do not have permission to update this rental')
-            }, status=403)
-        requested_status = request.POST.get('status')
-        reason = request.POST.get('reason')
-        if not requested_status or not reason:
-            return JsonResponse({
-                'success': False,
-                'message': _('Status and reason are required')
-            }, status=400)
         try:
-            reservation.update_status(requested_status, reason, request.user)
-            # Ne pas utiliser messages.success ici pour AJAX
-            return JsonResponse({
-                'success': True,
-                'status': requested_status,
-                'auto_approved': agency.auto_approve_rental
-            })
-        except PermissionError as e:
-            # Ne pas utiliser messages.info ici pour AJAX
+            # Vérification de l'authentification
+            if not request.user.is_authenticated:
+                return JsonResponse({
+                    'success': False, 
+                    'message': _('Authentication required')
+                }, status=401)
+            
+            # Récupération et validation de la réservation
+            try:
+                reservation = CarReservation.objects.select_related(
+                    'car__agence'
+                ).get(id=reservation_id)
+            except CarReservation.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'message': _('Reservation not found')
+                }, status=404)
+            
+            # Vérification des permissions
+            if not (reservation.car.agence.creator == request.user or 
+                    has_agency_permission(request.user, reservation.car.agence.id, 'edit')):
+                return JsonResponse({
+                    'success': False,
+                    'message': _('You do not have permission to update this rental')
+                }, status=403)
+
+            # Validation des données reçues
+            requested_status = request.POST.get('status')
+            reason = request.POST.get('reason')
+            payment_amount = request.POST.get('payment_amount')
+
+            if not requested_status or not reason:
+                return JsonResponse({
+                    'success': False,
+                    'message': _('Status and reason are required')
+                }, status=400)
+
+            # Validation de la transition de statut
+            if not reservation.can_transition_to(requested_status):
+                return JsonResponse({
+                    'success': False,
+                    'message': _('Invalid status transition from {current} to {requested}').format(
+                        current=reservation.status,
+                        requested=requested_status
+                    )
+                }, status=400)
+
+            # Traitement du paiement si fourni
+            if payment_amount:
+                try:
+                    payment_amount = decimal.Decimal(payment_amount)
+                    if payment_amount < 0:
+                        raise ValueError(_('Payment amount cannot be negative'))
+                    reservation.update_payment_status(payment_amount)
+                except (decimal.InvalidOperation, ValueError) as e:
+                    return JsonResponse({
+                        'success': False,
+                        'message': str(e) or _('Invalid payment amount')
+                    }, status=400)
+
+            # Mise à jour du statut
+            reservation.status = requested_status
+            reservation.rejection_reason = reason
+            reservation.save()
+
+            # Envoi des notifications
+            try:
+                from home.mail_util import send_car_rental_notification
+                send_car_rental_notification(reservation, requested_status, reason)
+            except Exception as e:
+                logger.warning(f"Failed to send notification email: {str(e)}")
+
             return JsonResponse({
                 'success': True,
                 'status': reservation.status,
-                'auto_approved': False,
-                'pending_review': True,
-                'message': str(e)
+                'payment_status': reservation.payment_status,
+                'amount_paid': float(reservation.amount_paid),
+                'total_price': float(reservation.total_price),
+                'message': _('Status updated successfully')
             })
+
         except Exception as e:
+            logger.error(f"Error updating rental status: {str(e)}", exc_info=True)
             return JsonResponse({
                 'success': False,
-                'message': str(e)
+                'message': _('An unexpected error occurred. Please try again.')
             }, status=500)
 
 class AgencyRentalsView(LoginRequiredMixin, ListView):

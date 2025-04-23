@@ -73,11 +73,17 @@
                         <button type="button" class="btn btn-outline-warning filter-btn" data-filter="pending">
                             {% translate "Pending" %}
                         </button>
-                        <button type="button" class="btn btn-outline-success filter-btn" data-filter="approved">
+                        <button type="button" class="btn btn-outline-info filter-btn" data-filter="approved">
                             {% translate "Approved" %}
                         </button>
-                        <button type="button" class="btn btn-outline-danger filter-btn" data-filter="rejected">
-                            {% translate "Rejected" %}
+                        <button type="button" class="btn btn-outline-success filter-btn" data-filter="ongoing">
+                            {% translate "Ongoing" %}
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary filter-btn" data-filter="completed">
+                            {% translate "Completed" %}
+                        </button>
+                        <button type="button" class="btn btn-outline-danger filter-btn" data-filter="cancelled">
+                            {% translate "Cancelled" %}
                         </button>
                     </div>
                 </div>
@@ -91,12 +97,13 @@
                                 <th>{% translate "Dates" %}</th>
                                 <th>{% translate "Total Price" %}</th>
                                 <th>{% translate "Status" %}</th>
+                                <th>{% translate "Payment Status" %}</th>
                                 <th>{% translate "Actions" %}</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for rental in rentals %}
-                            <tr class="rental-row" data-status="{{ rental.status }}">
+                            <tr class="rental-row" data-status="{{ rental.status }}" data-rental-id="{{ rental.id }}">
                                 <td>
                                     <div class="d-flex align-items-center">
                                         {% if rental.car.image %}
@@ -120,6 +127,16 @@
                                     <span class="badge {% if rental.status == 'approved' %}bg-success{% elif rental.status == 'pending' %}bg-warning{% elif rental.status == 'rejected' %}bg-danger{% else %}bg-secondary{% endif %}">
                                         {% translate rental.status|title %}
                                     </span>
+                                </td>
+                                <td>
+                                    <div class="payment-status">
+                                        <span class="badge {% if rental.payment_status == 'full' %}bg-success{% elif rental.payment_status == 'partial' %}bg-warning{% else %}bg-danger{% endif %}">
+                                            {% translate rental.payment_status|title %}
+                                        </span>
+                                        {% if rental.amount_paid %}
+                                            <small class="d-block">{{ rental.amount_paid }} / {{ rental.total_price }} {{ devise.unit }}</small>
+                                        {% endif %}
+                                    </div>
                                 </td>
                                 <td>
                                     {% if rental.status == 'pending' or rental.status == 'approved' %}
@@ -178,9 +195,16 @@
                         <label for="newStatus" class="form-label">{% translate "New Status" %}</label>
                         <select class="form-select" id="newStatus" name="status" required>
                             <option value="approved">{% translate "Approved" %}</option>
+                            <option value="ongoing">{% translate "Ongoing" %}</option>
+                            <option value="completed">{% translate "Completed" %}</option>
                             <option value="rejected">{% translate "Rejected" %}</option>
                             <option value="cancelled">{% translate "Cancelled" %}</option>
                         </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="paymentAmount" class="form-label">{% translate "Payment Amount" %}</label>
+                        <input type="number" class="form-control" id="paymentAmount" name="payment_amount" step="0.01">
+                        <small class="text-muted">{% translate "Leave empty if no payment is made" %}</small>
                     </div>
                     <div class="mb-3">
                         <label for="statusReason" class="form-label">{% translate "Reason" %}</label>
@@ -252,30 +276,140 @@ $(document).ready(function() {
     });
     $('#submitStatusUpdate').click(function() {
         const form = $('#statusUpdateForm');
+        const data = new FormData();
+        
+        // Récupérer et valider les données
         const status = form.find('[name="status"]').val();
         const reason = form.find('[name="reason"]').val();
+        const paymentAmount = form.find('[name="payment_amount"]').val();
+
         if (!status || !reason) {
-            alert("{% translate 'Please fill in all fields' %}");
+            toastr.error("{% translate 'Please fill in all required fields' %}");
             return;
         }
+
+        // Construction des données
+        data.append('status', status);
+        data.append('reason', reason);
+        data.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+        
+        if (paymentAmount) {
+            data.append('payment_amount', paymentAmount);
+        }
+
+        // Animation de chargement
+        const submitButton = $('#submitStatusUpdate');
+        submitButton.prop('disabled', true);
+        submitButton.html('<i class="fas fa-spinner fa-spin"></i> {% translate "Processing..." %}');
+
+        // Requête AJAX
         $.ajax({
-            url: `/rentals/${currentRentalId}/update-status/`,
+            url: `/fr/rentals/${currentRentalId}/update-status/`,
             method: 'POST',
-            data: {
-                status: status,
-                reason: reason,
-                csrfmiddlewaretoken: '{{ csrf_token }}'
-            },
+            data: data,
+            processData: false,
+            contentType: false,
             success: function(response) {
                 if (response.success) {
-                    window.location.href = `/agency/{{ agency.id }}/rentals/`;
+                    updateUIAfterStatusChange(currentRentalId, response);
+                    toastr.success(response.message || "{% translate 'Status updated successfully' %}");
+                    $('#statusUpdateModal').modal('hide');
                 } else {
-                    alert(response.message || "{% translate 'An error occurred' %}");
+                    toastr.error(response.message || "{% translate 'An error occurred' %}");
                 }
             },
             error: function(xhr) {
-                alert(xhr.responseJSON?.message || "{% translate 'An error occurred' %}");
+                const errorMsg = xhr.responseJSON?.message || "{% translate 'An error occurred' %}";
+                toastr.error(errorMsg);
+            },
+            complete: function() {
+                submitButton.prop('disabled', false);
+                submitButton.html("{% translate 'Update Status' %}");
             }
+        });
+    });
+
+    function updateUIAfterStatusChange(rentalId, response) {
+        const row = $(`.rental-row[data-rental-id="${rentalId}"]`);
+        
+        // Mise à jour du statut
+        const statusBadge = row.find('.badge').first();
+        statusBadge.removeClass().addClass(`badge ${getStatusClass(response.status)}`);
+        statusBadge.text(capitalizeFirst(response.status));
+        
+        // Mise à jour du bouton selon le nouveau statut
+        const actionCell = row.find('td:last-child');
+        if (!['pending', 'approved'].includes(response.status)) {
+            actionCell.html('<span class="text-muted">{% translate "No actions available" %}</span>');
+        }
+        
+        // Mise à jour du statut de paiement
+        if (response.payment_status) {
+            const paymentBadge = row.find('.payment-status .badge');
+            paymentBadge.removeClass().addClass(`badge ${getPaymentStatusClass(response.payment_status)}`);
+            paymentBadge.text(capitalizeFirst(response.payment_status));
+            
+            if (response.amount_paid !== undefined) {
+                row.find('.payment-status small').text(
+                    `${response.amount_paid} / ${response.total_price} {{ devise.unit }}`
+                );
+            }
+        }
+
+        // Mise à jour du data-status pour le filtrage
+        row.attr('data-status', response.status);
+    }
+
+    // Fonctions utilitaires
+    function getStatusClass(status) {
+        const statusClasses = {
+            'approved': 'bg-success',
+            'pending': 'bg-warning',
+            'rejected': 'bg-danger',
+            'ongoing': 'bg-primary',
+            'completed': 'bg-secondary',
+            'cancelled': 'bg-danger'
+        };
+        return statusClasses[status] || 'bg-secondary';
+    }
+
+    function getPaymentStatusClass(status) {
+        const statusClasses = {
+            'full': 'bg-success',
+            'partial': 'bg-warning',
+            'unpaid': 'bg-danger',
+            'refunded': 'bg-info'
+        };
+        return statusClasses[status] || 'bg-secondary';
+    }
+
+    function capitalizeFirst(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    // Mise à jour dynamique des options de statut en fonction du statut actuel
+    $('.update-status').click(function() {
+        const currentStatus = $(this).data('current-status');
+        const statusSelect = $('#newStatus');
+        statusSelect.empty();
+
+        // Définir les transitions possibles en fonction du statut actuel
+        const transitions = {
+            'pending': ['approved', 'rejected', 'cancelled'],
+            'approved': ['ongoing', 'cancelled'],
+            'ongoing': ['completed', 'cancelled'],
+            'completed': [],
+            'cancelled': [],
+            'rejected': []
+        };
+
+        // Ajouter les options disponibles
+        transitions[currentStatus].forEach(status => {
+            statusSelect.append(
+                $('<option></option>').val(status).text(
+                    status.charAt(0).toUpperCase() + status.slice(1)
+                )
+            );
         });
     });
 });
