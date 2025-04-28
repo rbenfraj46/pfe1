@@ -1754,3 +1754,39 @@ msgstr ""
 #: home/views/search.py:84 home/views/search.py:145
 msgid "Missing search parameters"
 msgstr ""
+
+msgid "With Driver"
+msgstr "Avec Chauffeur"
+
+msgid "Driver Name"
+msgstr "Nom du Chauffeur"
+
+msgid "Driver Phone"
+msgstr "Téléphone du Chauffeur"
+
+msgid "Driver License Number"
+msgstr "Numéro de Permis du Chauffeur"
+
+msgid "Driver Experience (Years)"
+msgstr "Expérience du Chauffeur (Années)"
+
+msgid "Driver Languages"
+msgstr "Langues Parlées"
+
+msgid "This field is required for cars with driver"
+msgstr "Ce champ est obligatoire pour les voitures avec chauffeur"
+
+msgid "With Professional Driver"
+msgstr "Avec Chauffeur Professionnel"
+
+msgid "years exp."
+msgstr "ans d'exp."
+
+msgid "Languages"
+msgstr "Langues"
+
+msgid "Configure driver information for cars with chauffeur service."
+msgstr "Configurer les informations du chauffeur pour les voitures avec service de chauffeur."
+
+msgid "Ex: French, English, Arabic"
+msgstr "Ex: Français, Anglais, Arabe"

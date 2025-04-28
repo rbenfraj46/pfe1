@@ -1,0 +1,34 @@
+.driver-info {
+    padding: 10px;
+    margin: 10px 0;
+    border-left: 4px solid #ff7043;
+}
+
+.driver-info.collapsed {
+    display: none;
+}
+
+.driver-info .description {
+    color: #666;
+    font-style: italic;
+    margin-bottom: 15px;
+}
+
+.form-row.field-driver_experience_years input[type="number"] {
+    width: 100px;
+}
+
+.form-row.field-driver_languages input[type="text"] {
+    width: 100%;
+}
+
+/* Style spécifique pour les champs requis */
+.form-row.required label {
+    font-weight: bold;
+}
+
+.form-row.required label:after {
+    content: '*';
+    color: #ba2121;
+    margin-left: 3px;
+}

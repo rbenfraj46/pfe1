@@ -81,6 +81,9 @@ class CarSearchMixin:
                 security_deposit__gte=filters.get('min_deposit'),
                 security_deposit__lte=filters.get('max_deposit')
             )
+        if filters.get('with_driver') is not None:
+            queryset = queryset.filter(with_driver=filters.get('with_driver'))
+            
         min_price = int(filters.get('min_price') or 40)
         max_price = int(filters.get('max_price') or 4000)
         return queryset.filter(price_per_day__gte=min_price, price_per_day__lte=max_price)

@@ -53,7 +53,7 @@ CSRF_TRUSTED_ORIGINS = [
 # Application definition
 if DEBUG:
     INSTALLED_APPS = [
-        'jazzmin',  # Doit être avant django.contrib.admin
+        'jazzmin',  
         'django.contrib.admin',
         'django.contrib.auth',
         'django.contrib.contenttypes',

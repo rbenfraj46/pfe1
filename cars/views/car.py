@@ -208,6 +208,21 @@ class UpdateCarView(LoginRequiredMixin, CarManagementMixin, View):
             car.available = request.POST.get('available') == 'on'
             car.gear_type_id = request.POST.get('gear_type')
             
+            # Gestion des informations du chauffeur
+            car.with_driver = request.POST.get('with_driver') == 'on'
+            if car.with_driver:
+                car.driver_name = request.POST.get('driver_name')
+                car.driver_phone = request.POST.get('driver_phone')
+                car.driver_license_number = request.POST.get('driver_license_number')
+                car.driver_experience_years = request.POST.get('driver_experience_years')
+                car.driver_languages = request.POST.get('driver_languages')
+            else:
+                car.driver_name = None
+                car.driver_phone = None
+                car.driver_license_number = None
+                car.driver_experience_years = None
+                car.driver_languages = None
+            
             if request.FILES.get('image'):
                 car.image = request.FILES.get('image')
                 
@@ -321,8 +336,17 @@ class RegisterCarView(LoginRequiredMixin, CarManagementMixin, View):
                 price_per_day=request.POST.get('price_per_day'),
                 is_active=agency.is_auto,
                 available=request.POST.get('available') == 'on',
-                gear_type_id=request.POST.get('gear_type')
+                gear_type_id=request.POST.get('gear_type'),
+                with_driver=request.POST.get('with_driver') == 'on'
             )
+            
+            # Gestion des informations du chauffeur si la voiture est avec chauffeur
+            if car.with_driver:
+                car.driver_name = request.POST.get('driver_name')
+                car.driver_phone = request.POST.get('driver_phone')
+                car.driver_license_number = request.POST.get('driver_license_number')
+                car.driver_experience_years = request.POST.get('driver_experience_years')
+                car.driver_languages = request.POST.get('driver_languages')
             
             if request.FILES.get('image'):
                 car.image = request.FILES['image']

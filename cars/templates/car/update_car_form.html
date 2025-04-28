@@ -188,6 +188,93 @@
                         </div>
                     </div>
 
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <div class="driver-section border rounded p-3 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input type="checkbox" name="with_driver" id="with_driver" class="form-check-input" 
+                                               {% if car.with_driver %}checked{% endif %}>
+                                        <label class="form-check-label" for="with_driver">
+                                            <i class="fas fa-user-tie"></i> {% translate "With Professional Driver" %}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="driver-section" class="{% if not car.with_driver %}d-none{% endif %} border rounded p-3 bg-light">
+                        <h4 class="mb-3">
+                            <i class="fas fa-id-card"></i> 
+                            {% translate "Driver Information" %}
+                        </h4>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="driver_name" class="form-label">{% translate "Driver Name" %} *</label>
+                                    <input type="text" name="driver_name" id="driver_name" class="form-control"
+                                           value="{{ car.driver_name|default:'' }}"
+                                           placeholder="{% translate 'Enter driver full name' %}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="driver_phone" class="form-label">{% translate "Driver Phone" %} *</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                        <input type="tel" name="driver_phone" id="driver_phone" class="form-control"
+                                               value="{{ car.driver_phone|default:'' }}"
+                                               placeholder="{% translate 'Enter driver phone number' %}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="driver_license_number" class="form-label">{% translate "Professional License Number" %} *</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-id-badge"></i></span>
+                                        <input type="text" name="driver_license_number" id="driver_license_number" class="form-control"
+                                               value="{{ car.driver_license_number|default:'' }}"
+                                               placeholder="{% translate 'Enter professional license number' %}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="driver_experience_years" class="form-label">{% translate "Years of Experience" %} *</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-history"></i></span>
+                                        <input type="number" name="driver_experience_years" id="driver_experience_years" class="form-control"
+                                               value="{{ car.driver_experience_years|default:'' }}"
+                                               min="1" step="1"
+                                               placeholder="{% translate 'Enter years of experience' %}">
+                                        <span class="input-group-text">{% translate "years" %}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="driver_languages" class="form-label">{% translate "Languages Spoken" %}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-language"></i></span>
+                                        <input type="text" name="driver_languages" id="driver_languages" class="form-control"
+                                               value="{{ car.driver_languages|default:'' }}"
+                                               placeholder="{% translate 'Ex: French, English, Arabic' %}">
+                                    </div>
+                                    <small class="text-muted">{% translate "Separate languages with commas" %}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="d-grid mt-4">
                         <button type="submit" class="btn btn-primary btn-lg">{% translate "Submit" %}</button>
                     </div>
@@ -237,6 +324,23 @@
         button.addEventListener('click', function () {
             button.parentElement.remove();
         });
+    });
+
+    // Gestion de l'affichage des champs du chauffeur
+    document.getElementById('with_driver').addEventListener('change', function() {
+        const driverSection = document.getElementById('driver-section');
+        const driverFields = driverSection.querySelectorAll('input[type="text"], input[type="number"]');
+        
+        if (this.checked) {
+            driverSection.style.display = 'block';
+            driverFields.forEach(field => field.setAttribute('required', 'required'));
+        } else {
+            driverSection.style.display = 'none';
+            driverFields.forEach(field => {
+                field.removeAttribute('required');
+                field.value = '';
+            });
+        }
     });
 </script>
 {% endblock bodyContent %}

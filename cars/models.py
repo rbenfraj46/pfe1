@@ -96,10 +96,10 @@ class CarModel(models.Model):
         db_table = "car_model"
 
 class AgencyCar(models.Model):
-    agence = models.ForeignKey('home.Agences', on_delete=models.SET_NULL, null=True)  # Référence à l'agence
+    agence = models.ForeignKey('home.Agences', on_delete=models.SET_NULL, null=True)
     brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True)
     car_model = models.ForeignKey(CarModel, on_delete=models.SET_NULL, null=True)
-    gear_type = models.ForeignKey(GearType, on_delete=models.SET_NULL, verbose_name=_("Gear Type"), null=True)  # Add gear_type field
+    gear_type = models.ForeignKey(GearType, on_delete=models.SET_NULL, verbose_name=_("Gear Type"), null=True)
 
     image = models.ImageField(upload_to='cars', null=True, blank=True)
     fuel_policy = models.CharField(max_length=255)
@@ -109,7 +109,15 @@ class AgencyCar(models.Model):
     is_active = models.BooleanField(default=True)
     available = models.BooleanField(default=True)
     created = models.DateTimeField(auto_now_add=True)
-    
+
+    # Champs pour les voitures avec chauffeur
+    with_driver = models.BooleanField(default=False, verbose_name=_("With Driver"))
+    driver_name = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("Driver Name"))
+    driver_phone = models.CharField(max_length=20, null=True, blank=True, verbose_name=_("Driver Phone"))
+    driver_license_number = models.CharField(max_length=50, null=True, blank=True, verbose_name=_("Driver License Number"))
+    driver_experience_years = models.IntegerField(null=True, blank=True, verbose_name=_("Driver Experience (Years)"))
+    driver_languages = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("Driver Languages"))
+
     def is_available(self, start_date, end_date):
         overlapping = self.unavailability_periods.filter(
             start_date__lte=end_date,
@@ -146,6 +154,51 @@ class AgencyCar(models.Model):
                 'total_price': float(total)
             }
         return None
+
+    def clean(self):
+        super().clean()
+        if self.with_driver:
+            if not all([self.driver_name, self.driver_phone, self.driver_license_number, self.driver_experience_years]):
+                raise ValidationError(_('All driver information fields are required when car is registered with driver'))
+            
+            if self.driver_experience_years and self.driver_experience_years < 1:
+                raise ValidationError(_('Driver must have at least 1 year of experience'))
+
+    def get_driver_info(self):
+        """Retourner un dictionnaire avec les informations formatées du chauffeur"""
+        if not self.with_driver:
+            return None
+            
+        return {
+            'name': self.driver_name,
+            'phone': self.driver_phone,
+            'license': self.driver_license_number,
+            'experience_years': self.driver_experience_years,
+            'languages': self.driver_languages.split(',') if self.driver_languages else [],
+            'experience_level': self.get_driver_experience_level()
+        }
+    
+    def get_driver_experience_level(self):
+        """Retourner le niveau d'expérience du chauffeur basé sur ses années d'expérience"""
+        if not self.with_driver or not self.driver_experience_years:
+            return None
+            
+        if self.driver_experience_years < 3:
+            return _('Junior')
+        elif self.driver_experience_years < 7:
+            return _('Intermediate')
+        else:
+            return _('Senior')
+            
+    def has_multilingual_driver(self):
+        """Vérifier si le chauffeur parle plusieurs langues"""
+        if not self.with_driver or not self.driver_languages:
+            return False
+        return len(self.driver_languages.split(',')) > 1
+        
+    class Meta:
+        db_table = "agency_car"
+
 
 class CarUnavailability(models.Model):
     car = models.ForeignKey(AgencyCar, on_delete=models.CASCADE, related_name="unavailability_periods")

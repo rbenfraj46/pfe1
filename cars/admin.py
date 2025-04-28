@@ -87,21 +87,46 @@ class CarAdmin(admin.ModelAdmin):
 
 @admin.register(AgencyCar)
 class AgencyCarAdmin(admin.ModelAdmin):
-    list_display = ('get_car_info', 'agence', 'price_per_day', 'is_active', 'available', 'get_car_image')
-    list_filter = ('is_active', 'available', 'agence', 'brand', 'gear_type')
-    search_fields = ('brand__name', 'car_model__name', 'agence__agency_name')
+    list_display = ('get_car_info', 'agence', 'price_per_day', 'is_active', 'available', 'with_driver', 'get_driver_info', 'get_car_image')
+    list_filter = ('is_active', 'available', 'with_driver', 'agence', 'brand', 'gear_type')
+    search_fields = ('brand__name', 'car_model__name', 'agence__agency_name', 'driver_name', 'driver_phone')
     ordering = ('-created',)
     list_editable = ('is_active', 'available', 'price_per_day')
+    fieldsets = (
+        (_('Basic Information'), {
+            'fields': ('agence', 'brand', 'car_model', 'gear_type', 'image')
+        }),
+        (_('Pricing and Availability'), {
+            'fields': ('price_per_day', 'security_deposit', 'minimum_license_age', 'fuel_policy', 'is_active', 'available')
+        }),
+        (_('Driver Information'), {
+            'fields': ('with_driver', 'driver_name', 'driver_phone', 'driver_license_number', 'driver_experience_years', 'driver_languages'),
+            'classes': ('driver-info',),
+            'description': _('Configure driver information for cars with chauffeur service.')
+        })
+    )
     
     def get_car_info(self, obj):
         return f"{obj.brand} {obj.car_model}" if obj.brand and obj.car_model else "-"
     get_car_info.short_description = _("Car")
+    
+    def get_driver_info(self, obj):
+        if obj.with_driver and obj.driver_name:
+            return f"{obj.driver_name} ({obj.driver_experience_years} {_('years exp.')})"
+        return "-"
+    get_driver_info.short_description = _("Driver")
     
     def get_car_image(self, obj):
         if obj.image:
             return format_html('<img src="{}" style="max-height: 50px;" />', obj.image.url)
         return "-"
     get_car_image.short_description = _("Image")
+
+    class Media:
+        js = ('admin/js/driver_fields.js',)
+        css = {
+            'all': ('admin/css/driver_fields.css',)
+        }
 
 @admin.register(CarUnavailability)
 class CarUnavailabilityAdmin(admin.ModelAdmin):

@@ -3,60 +3,52 @@
 {% load i18n %}
 
 {% block headerContent %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.6.3/nouislider.min.css">
 <link rel="stylesheet" href="{% static 'assets/css/car-search-res.css' %}" />
 {% endblock %}
 
 {% block bodyContent %}
 <div class="main-container">
-    <div class="container mt-5">
-        <div class="row">
-            <!-- Filters Sidebar -->
-            <div class="col-lg-3 col-md-4">
-                <form method="GET" action="{% url 'car_search_filter' %}" id="filterForm">
-                    <!-- Preserve search parameters -->
-                    <input type="hidden" name="latitude" value="{{ search_params.latitude }}">
-                    <input type="hidden" name="longitude" value="{{ search_params.longitude }}">
-                    <input type="hidden" name="start_date" value="{{ search_params.start_date }}">
-                    <input type="hidden" name="end_date" value="{{ search_params.end_date }}">
-                    <input type="hidden" name="radius" value="{{ search_params.radius }}">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Filtres -->
+            <div class="col-lg-3">
+                <div class="filters-section">
+                    <div class="filter-header">
+                        <h4><i class="fas fa-sliders-h"></i>{% translate "Filters" %}</h4>
+                    </div>
 
-                    <div class="filters-section">
-                        <div class="filter-header">
-                            <h4>{% translate "Filters" %}</h4>
-                        </div>
-                        
-                        <!-- Price Range Filter -->
+                    <form method="GET" action="{% url 'car_search_filter' %}" id="filterForm">
+                        <!-- Champs cachés pour les paramètres de recherche -->
+                        <input type="hidden" name="latitude" value="{{ search_params.latitude }}">
+                        <input type="hidden" name="longitude" value="{{ search_params.longitude }}">
+                        <input type="hidden" name="start_date" value="{{ search_params.start_date }}">
+                        <input type="hidden" name="end_date" value="{{ search_params.end_date }}">
+
+                        <!-- Filtre de prix -->
                         <div class="filter-group">
-                            <label class="filter-label">{% translate "Price Range" %}</label>
+                            <label class="filter-label">
+                                <i class="fas fa-tag"></i>
+                                {% translate "Price Range" %}
+                            </label>
                             <div class="price-slider-container">
-                                <div id="priceRangeSlider"></div>
+                                <div id="priceRangeSlider" class="mb-3"></div>
                                 <div class="price-range-display">
-                                    <span id="minPriceValue">40</span> - <span id="maxPriceValue">4000</span> TND
+                                    <span id="minPriceValue"></span> - <span id="maxPriceValue"></span> TND
                                 </div>
                                 <input type="hidden" name="min_price" id="minPrice" value="{{ filters.min_price|default:40 }}">
                                 <input type="hidden" name="max_price" id="maxPrice" value="{{ filters.max_price|default:4000 }}">
                             </div>
                         </div>
 
-                        <!-- Security Deposit Filter -->
+                        <!-- Filtre de marque -->
                         <div class="filter-group">
-                            <label class="filter-label">{% translate "Security Deposit Range" %}</label>
-                            <div class="deposit-slider-container">
-                                <div id="depositRangeSlider"></div>
-                                <div class="deposit-range-display">
-                                    <span id="minDepositValue">100</span> - <span id="maxDepositValue">5000</span> TND
-                                </div>
-                                <input type="hidden" name="min_deposit" id="minDeposit" value="{{ filters.min_deposit|default:100 }}">
-                                <input type="hidden" name="max_deposit" id="maxDeposit" value="{{ filters.max_deposit|default:5000 }}">
-                            </div>
-                        </div>
-
-                        <!-- Brand Filter -->
-                        <div class="filter-group">
-                            <label class="filter-label">{% translate "Brand" %}</label>
-                            <select class="form-control brand-select" name="brand">
+                            <label class="filter-label">
+                                <i class="fas fa-car"></i>
+                                {% translate "Brand" %}
+                            </label>
+                            <select class="form-select" name="brand">
                                 <option value="">{% translate "All Brands" %}</option>
                                 {% for brand in brands %}
                                 <option value="{{ brand.id }}" {% if brand.id|stringformat:"s" == filters.brand %}selected{% endif %}>
@@ -66,7 +58,7 @@
                             </select>
                         </div>
 
-                        <!-- Gear Type Filter -->
+                        <!-- Autres filtres existants... -->
                         <div class="filter-group">
                             <label class="filter-label">{% translate "Gear Type" %}</label>
                             <div class="gear-type-options">
@@ -161,25 +153,58 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="btn apply-filters-btn w-100">
-                            <i class="fas fa-filter"></i> {% translate "Apply Filters" %}
+                        <div class="filter-section mb-4">
+                            <h5>{% translate "Car Type" %}</h5>
+                            <div class="form-check">
+                                <input type="radio" class="form-check-input" id="all_cars" name="with_driver" value="" 
+                                       {% if filters.with_driver is None %}checked{% endif %}>
+                                <label class="form-check-label" for="all_cars">
+                                    {% translate "All Cars" %}
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input type="radio" class="form-check-input" id="with_driver" name="with_driver" value="1"
+                                       {% if filters.with_driver == '1' %}checked{% endif %}>
+                                <label class="form-check-label" for="with_driver">
+                                    {% translate "With Driver" %}
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input type="radio" class="form-check-input" id="without_driver" name="with_driver" value="0"
+                                       {% if filters.with_driver == '0' %}checked{% endif %}>
+                                <label class="form-check-label" for="without_driver">
+                                    {% translate "Without Driver" %}
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn rent-now-btn w-100 mt-4">
+                            <i class="fas fa-filter"></i>
+                            {% translate "Apply Filters" %}
                         </button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
 
-            <!-- Results Section -->
-            <div class="col-lg-9 col-md-8">
+            <!-- Résultats -->
+            <div class="col-lg-9">
                 <div class="sort-section">
                     <div class="row align-items-center">
-                        <div class="col-md-7">
-                            <h2>{% translate "Available Cars" %} <span class="badge badge-primary">{{ cars|length }}</span></h2>
-                            <p class="search-dates"><i class="far fa-calendar-alt"></i> {% translate "From" %} {{ search_params.start_date }} {% translate "to" %} {{ search_params.end_date }}</p>
+                        <div class="col-lg-8">
+                            <h2>
+                                <i class="fas fa-car-side"></i>
+                                {% translate "Available Cars" %}
+                                <span class="badge">{{ cars|length }}</span>
+                            </h2>
+                            <p class="text-muted mb-0">
+                                <i class="far fa-calendar-alt me-2"></i>
+                                {% translate "From" %} {{ search_params.start_date }} {% translate "to" %} {{ search_params.end_date }}
+                            </p>
                         </div>
-                        <div class="col-md-5 text-md-right">
-                            <select class="form-control sort-select" id="sortSelect">
+                        <div class="col-lg-4">
+                            <select class="sort-select" id="sortSelect">
                                 <option value="distance" {% if sort == 'distance' %}selected{% endif %}>
-                                    {% translate "Distance" %}
+                                    {% translate "Sort by Distance" %}
                                 </option>
                                 <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>
                                     {% translate "Price: Low to High" %}
@@ -192,73 +217,83 @@
                     </div>
                 </div>
 
-                <!-- Results Grid -->
-                <div class="row" id="carsList">
+                <!-- Grille de voitures -->
+                <div class="row g-4">
                     {% for car in cars %}
-                    <div class="col-lg-4 col-md-6">
-                        <div class="card card-car">
-                            {% if comparison_enabled %}
-                            <div class="form-check comparison-container">
-                                <input type="checkbox" class="form-check-input comparison-checkbox" 
-                                    id="compare_{{ car.id }}"
-                                    data-car-id="{{ car.id }}" 
-                                    onchange="handleComparisonChange(this)">
-                                <label class="form-check-label" for="compare_{{ car.id }}">
-                                    <span class="sr-only">{% translate "Compare" %}</span>
-                                </label>
-                            </div>
-                            {% endif %}
-                            
-                            <div class="car-img-wrapper">
-                                <a href="{% url 'car_detail' car.id %}">
+                    <div class="col-xl-6">
+                        <a href="{% url 'car_detail' car.id %}" class="text-decoration-none">
+                            <div class="card card-car">
+                                {% if comparison_enabled %}
+                                <div class="comparison-container position-absolute top-0 end-0 m-3 z-1">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" 
+                                               id="compare_{{ car.id }}"
+                                               data-car-id="{{ car.id }}" 
+                                               onchange="handleComparisonChange(this)">
+                                        <label class="form-check-label" for="compare_{{ car.id }}">
+                                            <span class="sr-only">{% translate "Compare" %}</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                <div class="car-img-wrapper">
                                     <img src="{{ car.image.url|default:'default-car.jpg' }}" 
-                                        class="car-img" 
-                                        alt="{{ car.brand.name }} {{ car.car_model.name }}">
-                                    <div class="car-badge">
-                                        <i class="fas fa-car"></i> {{ car.brand.name }}
+                                         class="car-img" 
+                                         alt="{{ car.brand.name }} {{ car.car_model.name }}">
+                                </div>
+                                
+                                <div class="car-info">
+                                    <h3 class="car-title">{{ car.brand.name }} {{ car.car_model.name }}</h3>
+                                    
+                                    {% if car.with_driver %}
+                                    <div class="driver-info-badge">
+                                        <i class="fas fa-user-tie"></i>
+                                        <span>{% translate "With Professional Driver" %}</span>
                                     </div>
-                                </a>
-                            </div>
-                            
-                            <div class="card-body car-info">
-                                <h5 class="card-title car-title">
-                                    <a href="{% url 'car_detail' car.id %}" class="text-decoration-none text-dark">
-                                        {{ car.brand.name }} {{ car.car_model.name }}
-                                    </a>
-                                </h5>
-                                <div class="car-specs">
-                                    <div class="spec-item">
-                                        <i class="fas fa-cog"></i> {{ car.gear_type.name }}
+                                    {% endif %}
+                                    
+                                    <div class="car-specs">
+                                        <div class="spec-item">
+                                            <i class="fas fa-cog"></i>
+                                            <span>{{ car.gear_type.name }}</span>
+                                        </div>
+                                        <div class="spec-item">
+                                            <i class="fas fa-gas-pump"></i>
+                                            <span>{{ car.fuel_policy }}</span>
+                                        </div>
+                                        <div class="spec-item">
+                                            <i class="fas fa-building"></i>
+                                            <span>{{ car.agence.agency_name|truncatechars:20 }}</span>
+                                        </div>
+                                        <div class="spec-item">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            <span>{{ car.distance.km|floatformat:1 }} km</span>
+                                        </div>
                                     </div>
-                                    <div class="spec-item">
-                                        <i class="fas fa-gas-pump"></i> {{ car.fuel_policy }}
-                                    </div>
-                                    <div class="spec-item">
-                                        <i class="fas fa-id-card"></i> {{ car.minimum_license_age }} {% translate "years" %}
-                                    </div>
-                                    <div class="spec-item">
-                                        <i class="fas fa-building"></i> {{ car.agence.agency_name|truncatechars:15 }}
+                                    
+                                    <div class="car-actions">
+                                        <div class="price-tag">
+                                            {{ car.price_per_day }}
+                                            <small>TND/{% translate "day" %}</small>
+                                        </div>
+                                        <a href="{% url 'rental_request' car.id %}" class="rent-now-btn">
+                                            <i class="fas fa-key"></i>
+                                            {% translate "Rent Now" %}
+                                        </a>
                                     </div>
                                 </div>
-                                <div class="car-actions">
-                                    <div class="price-tag">
-                                        {{ car.price_per_day }} TND<small>/{% translate "day" %}</small>
-                                    </div>
-                                    <div class="distance-badge">
-                                        <i class="fas fa-map-marker-alt"></i> {{ car.distance.km|floatformat:1 }} km
-                                    </div>
-                                </div>
-                                <a href="{% url 'rental_request' car.id %}" class="btn btn-block rent-now-btn">
-                                    <i class="fas fa-key"></i> {% translate "Rent Now" %}
-                                </a>
                             </div>
-                        </div>
+                        </a>
                     </div>
                     {% empty %}
                     <div class="col-12">
                         <div class="alert alert-info">
-                            <i class="fas fa-info-circle"></i> {% translate "No cars available for the selected criteria" %}
-                            <p class="mt-2 mb-0">{% translate "Try adjusting your filters or search dates to see more results." %}</p>
+                            <i class="fas fa-info-circle me-2"></i>
+                            {% translate "No cars available for the selected criteria" %}
+                            <p class="mt-2 mb-0">
+                                {% translate "Try adjusting your filters or search dates to see more results." %}
+                            </p>
                         </div>
                     </div>
                     {% endfor %}
@@ -266,64 +301,65 @@
 
                 <!-- Pagination -->
                 {% if cars.paginator.num_pages > 1 %}
-                <div class="pagination-container">
-                    <nav aria-label="Page navigation">
-                        <ul class="pagination">
-                            {% if cars.has_previous %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page=1{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.gear_types %}&gear_types={{ request.GET.gear_types }}{% endif %}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}" aria-label="First">
-                                        <i class="fas fa-angle-double-left"></i>
-                                    </a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ cars.previous_page_number }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.gear_types %}&gear_types={{ request.GET.gear_types }}{% endif %}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}" aria-label="Previous">
-                                        <i class="fas fa-angle-left"></i>
-                                    </a>
-                                </li>
-                            {% endif %}
+                <nav class="pagination-container" aria-label="Page navigation">
+                    <ul class="pagination">
+                        {% if cars.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1" aria-label="First">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ cars.previous_page_number }}" aria-label="Previous">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                        </li>
+                        {% endif %}
 
-                            {% for num in cars.paginator.page_range %}
-                                {% if num == cars.number %}
-                                    <li class="page-item active">
-                                        <span class="page-link">{{ num }}</span>
-                                    </li>
-                                {% elif num > cars.number|add:'-3' and num < cars.number|add:'3' %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ num }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.gear_types %}&gear_types={{ request.GET.gear_types }}{% endif %}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}">{{ num }}</a>
-                                    </li>
-                                {% endif %}
-                            {% endfor %}
+                        {% for num in cars.paginator.page_range %}
+                        {% if num == cars.number %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% elif num > cars.number|add:'-3' and num < cars.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
 
-                            {% if cars.has_next %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ cars.next_page_number }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.gear_types %}&gear_types={{ request.GET.gear_types }}{% endif %}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}" aria-label="Next">
-                                        <i class="fas fa-angle-right"></i>
-                                    </a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ cars.paginator.num_pages }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.gear_types %}&gear_types={{ request.GET.gear_types }}{% endif %}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}" aria-label="Last">
-                                        <i class="fas fa-angle-double-right"></i>
-                                    </a>
-                                </li>
-                            {% endif %}
-                        </ul>
-                    </nav>
-                </div>
+                        {% if cars.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ cars.next_page_number }}" aria-label="Next">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ cars.paginator.num_pages }}" aria-label="Last">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
                 {% endif %}
             </div>
         </div>
     </div>
 </div>
 
-<!-- Comparison Bar -->
-<div id="compareBar" class="text-center">
+<!-- Barre de comparaison -->
+<div id="compareBar">
     <div class="container">
-        <div class="row align-items-center">
+        <div class="row align-items-center justify-content-between">
             <div class="col">
-                <i class="fas fa-balance-scale mr-2"></i>
+                <i class="fas fa-balance-scale me-2"></i>
                 <span id="selectedCount">0</span> {% translate "cars selected" %}
-                <button class="btn compare-btn" onclick="compareSelected()">
-                    <i class="fas fa-exchange-alt mr-1"></i> {% translate "Compare Cars" %}
+            </div>
+            <div class="col-auto">
+                <button class="compare-btn" onclick="compareSelected()">
+                    <i class="fas fa-exchange-alt me-2"></i>
+                    {% translate "Compare Cars" %}
                 </button>
             </div>
         </div>

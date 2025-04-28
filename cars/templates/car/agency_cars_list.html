@@ -18,20 +18,27 @@
             <form method="GET" action="">
                 {% csrf_token %}
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <select name="brand" class="form-control">
                             <option value="">{% translate "All Brands" %}</option>
                             {% for brand in brands %}
-                                <option value="{{ brand.name }}">{{ brand.name }}</option>
+                                <option value="{{ brand.name }}" {% if request.GET.brand == brand.name %}selected{% endif %}>{{ brand.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <select name="gear_type" class="form-control">
                             <option value="">{% translate "All Gear Types" %}</option>
                             {% for gear_type in gear_types %}
-                                <option value="{{ gear_type.name }}">{{ gear_type.name }}</option>
+                                <option value="{{ gear_type.name }}" {% if request.GET.gear_type == gear_type.name %}selected{% endif %}>{{ gear_type.name }}</option>
                             {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <select name="with_driver" class="form-control">
+                            <option value="">{% translate "All Cars" %}</option>
+                            <option value="1" {% if request.GET.with_driver == '1' %}selected{% endif %}>{% translate "With Driver" %}</option>
+                            <option value="0" {% if request.GET.with_driver == '0' %}selected{% endif %}>{% translate "Without Driver" %}</option>
                         </select>
                     </div>
                 </div>
@@ -49,6 +56,7 @@
                 <th>{% translate "Brand" %}</th>
                 <th>{% translate "Model" %}</th>
                 <th>{% translate "Gear Type" %}</th>
+                <th>{% translate "With Driver" %}</th>
                 <th>{% translate "Price per Day" %}</th>
                 <th>{% translate "Actions" %}</th>
             </tr>
@@ -59,6 +67,15 @@
                 <td>{{ car.brand.name }}</td>
                 <td>{{ car.car_model.name }}</td>
                 <td>{{ car.gear_type.name }}</td>
+                <td>
+                    {% if car.with_driver %}
+                        <span class="badge bg-success">
+                            <i class="fas fa-user-tie"></i> {% translate "Yes" %}
+                        </span>
+                    {% else %}
+                        <span class="badge bg-secondary">{% translate "No" %}</span>
+                    {% endif %}
+                </td>
                 <td>{{ car.price_per_day }}</td>
                 <td>
                     {% if can_edit %}
