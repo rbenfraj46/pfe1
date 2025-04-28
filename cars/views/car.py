@@ -267,40 +267,62 @@ class DeleteCarView(LoginRequiredMixin, View):
             messages.error(request, f'Error deleting car: {str(e)}')
             return JsonResponse({'success': False, 'error': str(e)})
 
-class AgencyCarsListView(LoginRequiredMixin, ListView):
+class AgencyCarListView(LoginRequiredMixin, View):
     template_name = 'car/agency_cars_list.html'
-    context_object_name = 'agency_cars'
-    paginate_by = 10
+    items_per_page = 10
 
-    def get_queryset(self):
-        agency_id = self.kwargs.get('agency_id')
-        agency = get_object_or_404(Agences, id=agency_id)
+    def get(self, request, agency_id):
+        user = request.user
+        selected_agency = get_object_or_404(Agences, id=agency_id)
         
-        if agency.creator == self.request.user:
-            return AgencyCar.objects.filter(agence_id=agency_id, is_active=True)
-        
-        if has_agency_permission(self.request.user, agency_id, 'view'):
-            return AgencyCar.objects.filter(agence_id=agency_id, is_active=True)
-        
-        raise PermissionDenied
+        # Vérifier si l'utilisateur est le créateur ou a la permission de voir
+        if not (selected_agency.creator == user or has_agency_permission(user, agency_id, 'view')):
+            raise PermissionDenied
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        agency_id = self.kwargs.get('agency_id')
-        agency = get_object_or_404(Agences, id=agency_id)
+        # Vérifier les permissions spécifiques
+        can_add = selected_agency.creator == user or has_agency_permission(user, agency_id, 'add')
+        can_edit = selected_agency.creator == user or has_agency_permission(user, agency_id, 'edit')
+        can_delete = selected_agency.creator == user or has_agency_permission(user, agency_id, 'delete')
         
-        context.update({
-            'can_add': (agency.creator == self.request.user or 
-                       has_agency_permission(self.request.user, agency_id, 'add')),
-            'can_edit': (agency.creator == self.request.user or 
-                        has_agency_permission(self.request.user, agency_id, 'edit')),
-            'can_delete': (agency.creator == self.request.user or 
-                          has_agency_permission(self.request.user, agency_id, 'delete')),
-            'selected_agency': agency,
-            'brands': Brand.objects.filter(is_active=True),
-            'gear_types': GearType.objects.filter(is_active=True)
-        })
-        return context
+        # Filtrer pour ne montrer que les voitures actives
+        queryset = AgencyCar.objects.filter(agence=selected_agency, is_active=True)
+        
+        # Appliquer les filtres
+        brand = request.GET.get('brand')
+        gear_type = request.GET.get('gear_type')
+        with_driver = request.GET.get('with_driver')
+
+        if brand:
+            queryset = queryset.filter(brand__name=brand)
+        if gear_type:
+            queryset = queryset.filter(gear_type__name=gear_type)
+        if with_driver:
+            queryset = queryset.filter(with_driver=with_driver == '1')
+
+        # Pagination
+        paginator = Paginator(queryset, self.items_per_page)
+        page = request.GET.get('page', 1)
+        
+        try:
+            agency_cars = paginator.page(page)
+        except PageNotAnInteger:
+            agency_cars = paginator.page(1)
+        except EmptyPage:
+            agency_cars = paginator.page(paginator.num_pages)
+
+        context = {
+            'selected_agency': selected_agency,
+            'agency_cars': agency_cars,
+            'page_obj': agency_cars,
+            'paginator': paginator,
+            'brands': Brand.objects.all(),
+            'gear_types': GearType.objects.all(),
+            'can_add': can_add,
+            'can_edit': can_edit,
+            'can_delete': can_delete
+        }
+        
+        return render(request, self.template_name, context)
 
 class RegisterCarView(LoginRequiredMixin, CarManagementMixin, View):
     template_name = "car/car_form.html"
@@ -426,58 +448,43 @@ class UserReservationsView(LoginRequiredMixin, ListView):
 
 class CancelReservationView(LoginRequiredMixin, View):
     def post(self, request, reservation_id):
-        reservation = get_object_or_404(
-            CarReservation, 
-            id=reservation_id,
-            user=request.user
-        )
-        
-        if reservation.status != 'pending':
-            return JsonResponse({
-                'success': False,
-                'message': _('Only pending reservations can be cancelled.')
-            }, status=400)
-            
         try:
+            reservation = get_object_or_404(
+                CarReservation.objects.select_related('car__agence'), 
+                id=reservation_id,
+                user=request.user
+            )
+            
+            if reservation.status != 'pending':
+                return JsonResponse({
+                    'success': False,
+                    'message': _('Only pending reservations can be cancelled.')
+                }, status=400)
+                
             reservation.status = 'cancelled'
             reservation.save()
             
             # Send notification email to agency
-            subject = _('Reservation Cancelled')
-            message = _('''A reservation has been cancelled by the customer:
-                Car: {car}
-                Customer: {user}
-                From: {start}
-                To: {end}
-                Booking Reference: {id}
-            ''').format(
-                car=reservation.car,
-                user=request.user.get_full_name() or request.user.username,
-                start=reservation.start_date,
-                end=reservation.end_date,
-                id=reservation.id
-            )
-            
             try:
-                send_mail(
-                    subject,
-                    message,
-                    settings.DEFAULT_FROM_EMAIL,
-                    [reservation.car.agence.email],
-                    fail_silently=True
-                )
+                send_car_rental_notification(reservation, 'cancelled')
             except Exception as e:
-                logger.error(f"Failed to send cancellation email to agency: {str(e)}")
+                logger.error(f"Failed to send cancellation email: {str(e)}")
 
             return JsonResponse({
                 'success': True,
                 'message': _('Reservation cancelled successfully.')
             })
-        except Exception as e:
-            logger.error(f"Error cancelling reservation: {str(e)}")
+            
+        except CarReservation.DoesNotExist:
             return JsonResponse({
                 'success': False,
-                'message': _('Failed to cancel reservation.')
+                'message': _('Reservation not found.')
+            }, status=404)
+        except Exception as e:
+            logger.error(f"Error cancelling reservation {reservation_id}: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'message': _('Failed to cancel reservation. Please try again.')
             }, status=500)
 
 class CarDetailView(DetailView):

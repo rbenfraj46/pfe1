@@ -7,7 +7,7 @@ from .views.car import (
     CarModelRequestHistoryView,
     UpdateCarView,
     DeleteCarView,
-    AgencyCarsListView,
+    AgencyCarListView,
     RegisterCarView,
     CarModelsJsonView,
     CarModelDetailsView,
@@ -33,7 +33,7 @@ urlpatterns = [
     path('rentals/<int:reservation_id>/update-status/', RentalStatusUpdateView.as_view(), name='update_rental_status'),
     
     # Gestion des voitures d'agence
-    path('agency/cars/<int:agency_id>/', AgencyCarsListView.as_view(), name='agency_cars_list'),
+    path('agency/cars/<int:agency_id>/', AgencyCarListView.as_view(), name='agency_cars_list'),
     path('agency/car/add/<int:agency_id>/', RegisterCarView.as_view(), name='car_add'),
     path('agency/car/update/<int:pk>/', UpdateCarView.as_view(), name='car_update'),
     path('agency/car/delete/<int:pk>/', DeleteCarView.as_view(), name='car_delete'),

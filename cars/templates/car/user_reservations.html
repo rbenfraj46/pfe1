@@ -164,15 +164,18 @@ $(document).ready(function() {
     $('.cancel-reservation').click(function() {
         const reservationId = $(this).data('reservation-id');
         if (confirm("{% translate 'Are you sure you want to cancel this reservation?' %}")) {
-            // TODO: Add cancel reservation functionality
-            $.post(`/api/reservations/${reservationId}/cancel/`, {
+            $.post(`{% url 'cancel_reservation' reservation_id=0 %}`.replace('0', reservationId), {
                 csrfmiddlewaretoken: '{{ csrf_token }}'
             })
-            .done(function() {
-                location.reload();
+            .done(function(response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert(response.message || "{% translate 'Failed to cancel reservation. Please try again.' %}");
+                }
             })
-            .fail(function() {
-                alert("{% translate 'Failed to cancel reservation. Please try again.' %}");
+            .fail(function(xhr) {
+                alert(xhr.responseJSON?.message || "{% translate 'Failed to cancel reservation. Please try again.' %}");
             });
         }
     });

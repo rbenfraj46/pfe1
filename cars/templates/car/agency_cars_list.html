@@ -7,8 +7,10 @@
     <div class="row mb-3">
         <div class="col-md-6">
             <div class="btn-group">
-                {% if can_add %}
-                <a href="{% url 'car_add' selected_agency.id %}" class="btn btn-success">{% translate "Add Car" %}</a>
+                {% if selected_agency.creator == request.user or can_add %}
+                <a href="{% url 'car_add' selected_agency.id %}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> {% translate "Add Car" %}
+                </a>
                 {% endif %}
                 <a href="{% url 'request_car_model' %}?agency_id={{ selected_agency.id }}" class="btn btn-secondary">{% translate "Request New Car Model" %}</a>
                 <a href="{% url 'car_model_requests_history' %}?agency_id={{ selected_agency.id }}" class="btn btn-info">{% translate "View Requests History" %}</a>
@@ -90,46 +92,46 @@
         </tbody>
     </table>
     {% if paginator.num_pages > 1 %}
-    <nav aria-label="Page navigation" class="mt-4">
-        <ul class="pagination justify-content-center">
-            {% if page_obj.has_previous %}
+<nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="First">
+                    <span aria-hidden="true">&laquo;&laquo;</span>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+        {% endif %}
+
+        {% for i in paginator.page_range %}
+            {% if page_obj.number == i %}
+                <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+            {% elif i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}
                 <li class="page-item">
-                    <a class="page-link" href="?page=1{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.gear_type %}&gear_type={{ request.GET.gear_type }}{% endif %}" aria-label="First">
-                        <span aria-hidden="true">&laquo;&laquo;</span>
-                    </a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.gear_type %}&gear_type={{ request.GET.gear_type }}{% endif %}" aria-label="Previous">
-                        <span aria-hidden="true">&laquo;</span>
-                    </a>
+                    <a class="page-link" href="?page={{ i }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ i }}</a>
                 </li>
             {% endif %}
+        {% endfor %}
 
-            {% for i in paginator.page_range %}
-                {% if page_obj.number == i %}
-                    <li class="page-item active"><span class="page-link">{{ i }}</span></li>
-                {% elif i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ i }}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.gear_type %}&gear_type={{ request.GET.gear_type }}{% endif %}">{{ i }}</a>
-                    </li>
-                {% endif %}
-            {% endfor %}
-
-            {% if page_obj.has_next %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.gear_type %}&gear_type={{ request.GET.gear_type }}{% endif %}" aria-label="Next">
-                        <span aria-hidden="true">&raquo;</span>
-                    </a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ paginator.num_pages }}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.gear_type %}&gear_type={{ request.GET.gear_type }}{% endif %}" aria-label="Last">
-                        <span aria-hidden="true">&raquo;&raquo;</span>
-                    </a>
-                </li>
-            {% endif %}
-        </ul>
-    </nav>
-    {% endif %}
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ paginator.num_pages }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Last">
+                    <span aria-hidden="true">&raquo;&raquo;</span>
+                </a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
     <div class="text-center mt-2">
         <small class="text-muted">
             {% translate "Showing" %} {{ page_obj.start_index }}-{{ page_obj.end_index }} {% translate "of" %} {{ paginator.count }} {% translate "entries" %}

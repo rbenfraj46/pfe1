@@ -55,7 +55,7 @@ class CarSearchMixin:
                     unavailability_periods__end_date__gte=search_params['start_date']
                 ) |
                 Q(
-                    reservations__status='approved',
+                    reservations__status__in=['approved', 'ongoing', 'completed'],
                     reservations__start_date__lte=search_params['end_date'],
                     reservations__end_date__gte=search_params['start_date']
                 )
@@ -130,7 +130,9 @@ class CarSearchResultsView(CarSearchMixin, View):
         except PageNotAnInteger:
             return paginator.page(1)
         except EmptyPage:
-            return paginator.page(paginator.num_pages)
+            if int(page) > paginator.num_pages and paginator.num_pages > 0:
+                return paginator.page(paginator.num_pages)
+            return paginator.page(1)
     def get_context_data(self, **kwargs):
         context = kwargs
         context.update({
@@ -234,7 +236,7 @@ class CarSearchDebugView(CarSearchMixin, View):
             )
             unavailable_cars.update(
                 AgencyCar.objects.filter(
-                    reservations__status='approved',
+                    reservations__status__in=['approved', 'ongoing', 'completed'],
                     reservations__start_date__lte=search_params['end_date'],
                     reservations__end_date__gte=search_params['start_date']
                 ).values_list('id', flat=True)
