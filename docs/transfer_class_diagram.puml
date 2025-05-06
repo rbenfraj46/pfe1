@@ -1,0 +1,57 @@
+@startuml TransferManagement
+
+skinparam class {
+    BackgroundColor white
+    ArrowColor black
+    BorderColor black
+}
+
+class TransferVehicle {
+    -id: Long
+    -type: String
+    -model: String
+    -capacity: Integer
+    -hourlyRate: Decimal
+    -available: Boolean
+    -agency: Agency
+    +isAvailable(): Boolean
+    +calculatePrice(): Decimal
+}
+
+class Agency {
+    -id: Long
+    -name: String
+    -location: Point
+    -contactInfo: String
+    +addVehicle()
+    +manageVehicles()
+}
+
+class TransferBooking {
+    -id: Long
+    -vehicle: TransferVehicle
+    -startTime: DateTime
+    -endTime: DateTime
+    -pickupLocation: Point
+    -dropoffLocation: Point
+    -status: String
+    -totalPrice: Decimal
+    +confirm()
+    +cancel()
+    +calculateTotalPrice()
+}
+
+class Customer {
+    -id: Long
+    -name: String
+    -email: String
+    -phone: String
+    +requestTransfer()
+    +viewBookings()
+}
+
+TransferVehicle "*" -- "1" Agency : belongs to >
+TransferBooking "0..*" -- "1" TransferVehicle : uses >
+TransferBooking "*" -- "1" Customer : books >
+
+@enduml

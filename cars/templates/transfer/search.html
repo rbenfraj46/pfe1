@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block headerContent %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<link rel="stylesheet" href="{% static 'assets/css/transfer-search.css' %}" />
+<style>
+    .hero-section {
+        background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url("{% static 'images/transfer-hero.jpg' %}");
+        background-size: cover;
+        background-position: center;
+        padding: 100px 0;
+        margin-top: 60px;
+        color: white;
+    }
+    .search-form {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        margin-top: -50px;
+        position: relative;
+        z-index: 1000;
+    }
+    .map-container {
+        height: 300px;
+        border-radius: 8px;
+        overflow: hidden;
+        margin: 20px 0;
+    }
+    .info-section {
+        padding: 60px 0;
+        background: #f8f9fa;
+    }
+    .feature-card {
+        text-align: center;
+        padding: 20px;
+        border-radius: 8px;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+    }
+    .feature-card:hover {
+        transform: translateY(-5px);
+    }
+    .feature-icon {
+        font-size: 2.5rem;
+        color: #ff7043;
+        margin-bottom: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block bodyContent %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 mx-auto text-center">
+                <h1 class="display-4 mb-4">{% translate "Professional Transfer Service" %}</h1>
+                <p class="lead">{% translate "Safe and comfortable transfers with professional drivers" %}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Form -->
+<div class="container">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="search-form">
+                <form action="{% url 'transfer_search_results' %}" method="GET" id="transferSearchForm">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label><i class="fas fa-map-marker-alt text-danger"></i> {% translate "Pickup Location" %}</label>
+                                <input type="text" id="pickupLocation" class="form-control" placeholder="{% translate 'Enter pickup address' %}" required>
+                                <input type="hidden" name="pickup_address" id="pickupAddress">
+                                <input type="hidden" name="pickup_lat" id="pickupLat">
+                                <input type="hidden" name="pickup_lng" id="pickupLng">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label><i class="fas fa-map-marker text-success"></i> {% translate "Drop-off Location" %}</label>
+                                <input type="text" id="dropoffLocation" class="form-control" placeholder="{% translate 'Enter destination address' %}" required>
+                                <input type="hidden" name="dropoff_address" id="dropoffAddress">
+                                <input type="hidden" name="dropoff_lat" id="dropoffLat">
+                                <input type="hidden" name="dropoff_lng" id="dropoffLng">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="map-container">
+                        <div id="map" style="height: 100%;"></div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label><i class="fas fa-calendar-alt"></i> {% translate "Pickup Date & Time" %}</label>
+                                <input type="datetime-local" name="pickup_date" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label><i class="fas fa-users"></i> {% translate "Number of Passengers" %}</label>
+                                <input type="number" name="passengers" class="form-control" min="1" value="1" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label><i class="fas fa-suitcase"></i> {% translate "Luggage" %}</label>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <input type="number" name="luggage_pieces" class="form-control" placeholder="{% translate 'Pieces' %}" min="0" value="0">
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="number" name="luggage_weight" class="form-control" placeholder="{% translate 'kg' %}" min="0" value="0">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="distance" id="distance">
+
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-search"></i> {% translate "Search Available Vehicles" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="info-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <h4>{% translate "Professional Drivers" %}</h4>
+                    <p>{% translate "Experienced and multilingual drivers at your service" %}</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-car"></i>
+                    </div>
+                    <h4>{% translate "Comfortable Vehicles" %}</h4>
+                    <p>{% translate "Modern and well-maintained vehicles for your comfort" %}</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h4>{% translate "24/7 Service" %}</h4>
+                    <p>{% translate "Available anytime for your transfer needs" %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script>
+    let map, pickupMarker, dropoffMarker, routeLine;
+    const searchDelay = 500; // ms delay for search
+    let searchTimeout;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialiser la carte
+        map = L.map('map').setView([36.8065, 10.1815], 7);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Fonction pour rechercher une adresse
+        async function searchAddress(query, isPickup) {
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+            const results = await response.json();
+            
+            if (results.length > 0) {
+                const location = results[0];
+                const latlng = L.latLng(location.lat, location.lng);
+                
+                if (isPickup) {
+                    document.getElementById('pickupLat').value = location.lat;
+                    document.getElementById('pickupLng').value = location.lon;
+                    document.getElementById('pickupAddress').value = location.display_name;
+                    
+                    if (pickupMarker) {
+                        pickupMarker.setLatLng(latlng);
+                    } else {
+                        pickupMarker = L.marker(latlng, {
+                            icon: L.divIcon({
+                                html: '<i class="fas fa-map-marker-alt fa-2x" style="color: #dc3545;"></i>',
+                                iconSize: [20, 20],
+                                className: 'map-icon'
+                            })
+                        }).addTo(map);
+                    }
+                } else {
+                    document.getElementById('dropoffLat').value = location.lat;
+                    document.getElementById('dropoffLng').value = location.lon;
+                    document.getElementById('dropoffAddress').value = location.display_name;
+                    
+                    if (dropoffMarker) {
+                        dropoffMarker.setLatLng(latlng);
+                    } else {
+                        dropoffMarker = L.marker(latlng, {
+                            icon: L.divIcon({
+                                html: '<i class="fas fa-map-marker fa-2x" style="color: #198754;"></i>',
+                                iconSize: [20, 20],
+                                className: 'map-icon'
+                            })
+                        }).addTo(map);
+                    }
+                }
+
+                // Mettre à jour la ligne de route si les deux points existent
+                if (pickupMarker && dropoffMarker) {
+                    drawRoute();
+                }
+            }
+        }
+
+        // Gestionnaires d'événements pour les champs de recherche
+        document.getElementById('pickupLocation').addEventListener('input', function(e) {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => searchAddress(e.target.value, true), searchDelay);
+        });
+
+        document.getElementById('dropoffLocation').addEventListener('input', function(e) {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => searchAddress(e.target.value, false), searchDelay);
+        });
+
+        // Fonction pour dessiner la route et calculer la distance
+        function drawRoute() {
+            const pickup = pickupMarker.getLatLng();
+            const dropoff = dropoffMarker.getLatLng();
+            
+            // Supprimer l'ancienne ligne si elle existe
+            if (routeLine) {
+                map.removeLayer(routeLine);
+            }
+            
+            // Dessiner la nouvelle ligne
+            routeLine = L.polyline([pickup, dropoff], {
+                color: '#ff7043',
+                weight: 3,
+                opacity: 0.8
+            }).addTo(map);
+            
+            // Ajuster la vue de la carte
+            map.fitBounds(routeLine.getBounds(), {
+                padding: [50, 50]
+            });
+            
+            // Calculer la distance approximative en kilomètres
+            const distance = pickup.distanceTo(dropoff) / 1000;
+            document.getElementById('distance').value = distance.toFixed(1);
+        }
+
+        // Validation du formulaire
+        document.getElementById('transferSearchForm').addEventListener('submit', function(e) {
+            if (!pickupMarker || !dropoffMarker) {
+                e.preventDefault();
+                alert("{% translate 'Please select both pickup and drop-off locations' %}");
+            }
+        });
+    });
+</script>
+{% endblock %}

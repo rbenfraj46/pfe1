@@ -23,7 +23,8 @@ class CarSearchMixin:
             'end_date': request.GET.get('end_date'),
             'latitude': request.GET.get('latitude'),
             'longitude': request.GET.get('longitude'),
-            'radius': request.GET.get('radius', 10)
+            'radius': request.GET.get('radius', 10),
+            'include_transfer': request.GET.get('include_transfer', False)
         }
 
     def get_point_from_coords(self, latitude, longitude):
@@ -39,8 +40,14 @@ class CarSearchMixin:
         base_query = AgencyCar.objects.filter(
             is_active=True,
             available=True,
-            agence__is_active=True
+            agence__is_active=True,
+            for_transfer=False
         )
+        
+        # Exclure les voitures marquées uniquement pour le transfert des résultats de location
+        if not search_params.get('include_transfer', False):
+            base_query = base_query.exclude(for_transfer=True, price_per_day__isnull=True)
+            
         if point:
             radius_km = float(search_params.get('radius', 10))
             base_query = base_query.filter(

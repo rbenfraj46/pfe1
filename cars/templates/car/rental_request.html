@@ -280,8 +280,43 @@
         box-shadow: 0 8px 20px rgba(255,112,67,0.4);
     }
 
+    .submit-btn:disabled {
+        background: #ccc;
+        transform: none;
+        box-shadow: none;
+        cursor: not-allowed;
+    }
+
     .submit-btn i {
         margin-right: 10px;
+    }
+
+    .alert {
+        border-radius: 15px;
+        padding: 15px 20px;
+        margin-bottom: 20px;
+        border: none;
+    }
+
+    .alert-danger {
+        background: #ffe5e8;
+        color: #d63031;
+        border-left: 4px solid #d63031;
+    }
+
+    .minimum-days-alert {
+        background: rgba(255,112,67,0.1);
+        color: #ff5722;
+        border-radius: 12px;
+        padding: 15px;
+        margin-top: 15px;
+        display: flex;
+        align-items: center;
+    }
+
+    .minimum-days-alert i {
+        margin-right: 10px;
+        font-size: 1.2em;
     }
 
     @media (max-width: 992px) {
@@ -358,19 +393,26 @@
                             <i class="far fa-calendar-alt"></i>
                             {% translate "Rental Period" %}
                         </div>
+                        <div class="minimum-days-alert">
+                            <i class="fas fa-info-circle"></i>
+                            {% translate "Minimum rental period is" %} {{ car.minimum_rental_days }} {% translate "days" %}
+                        </div>
                         <div class="date-inputs">
                             <div>
                                 <label>{% translate "Start Date" %}</label>
                                 <input type="date" name="start_date" class="form-control custom-input" 
-                                       value="{{ start_date }}" required>
+                                       min="{{ today|date:'Y-m-d' }}" value="{{ start_date }}" required>
                             </div>
                             <div>
                                 <label>{% translate "End Date" %}</label>
                                 <input type="date" name="end_date" class="form-control custom-input" 
-                                       value="{{ end_date }}" required>
+                                       min="{{ today|date:'Y-m-d' }}" value="{{ end_date }}" required>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Alerte d'erreur pour les dates -->
+                    <div class="alert alert-danger" id="dateError" style="display: none;"></div>
 
                     <div class="features-grid">
                         <div class="feature-item">
@@ -386,8 +428,8 @@
                             {{ car.security_deposit }} TND {% translate "deposit" %}
                         </div>
                         <div class="feature-item">
-                            <i class="fas fa-id-card"></i>
-                            {{ car.minimum_license_age }} {% translate "years min" %}
+                            <i class="fas fa-calendar"></i>
+                            {{ car.minimum_rental_days }} {% translate "days minimum" %}
                         </div>
                     </div>
 
@@ -399,28 +441,10 @@
                         </div>
                         <div class="driver-details">
                             <div class="row">
-                                <div class="col-md-6">
-                                    <div class="driver-detail-item">
-                                        <i class="fas fa-user"></i>
-                                        <span class="label">{% translate "Name" %}:</span>
-                                        <span class="value">{{ car.driver_name }}</span>
-                                    </div>
+                                <div class="col-md-12">
                                     <div class="driver-detail-item">
                                         <i class="fas fa-history"></i>
-                                        <span class="label">{% translate "Experience" %}:</span>
-                                        <span class="value">{{ car.driver_experience_years }} {% translate "years" %}</span>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="driver-detail-item">
-                                        <i class="fas fa-language"></i>
-                                        <span class="label">{% translate "Languages" %}:</span>
-                                        <span class="value">{{ car.driver_languages }}</span>
-                                    </div>
-                                    <div class="driver-detail-item">
-                                        <i class="fas fa-id-badge"></i>
-                                        <span class="label">{% translate "License" %}:</span>
-                                        <span class="value">{{ car.driver_license_number }}</span>
+                                        <span class="ms-2">{{ car.driver_experience_years }} {% translate "years experience" %}</span>
                                     </div>
                                 </div>
                             </div>
@@ -434,7 +458,7 @@
                             {% translate "Additional Information" %}
                         </div>
                         <textarea name="notes" class="form-control custom-input" rows="4" 
-                                  placeholder="{% translate 'Special requests or notes...' %}"></textarea>
+                                  placeholder="{% translate 'Special requests or notes...' %}">{{ notes }}</textarea>
                     </div>
 
                     <div class="summary-section">
@@ -447,18 +471,22 @@
                             <span>{{ car.price_per_day }} TND</span>
                         </div>
                         <div class="summary-item">
+                            <span>{% translate "Number of Days" %}</span>
+                            <span id="numberOfDays">-</span>
+                        </div>
+                        <div class="summary-item">
                             <span>{% translate "Security deposit" %}</span>
                             <span>{{ car.security_deposit }} TND</span>
                         </div>
                         <div class="summary-total">
                             <div class="summary-item">
                                 <span>{% translate "Total" %}</span>
-                                <span>{{ car.price_per_day }} TND</span>
+                                <span id="totalPrice">-</span>
                             </div>
                         </div>
                     </div>
 
-                    <button type="submit" class="submit-btn">
+                    <button type="submit" class="submit-btn" id="submitBtn">
                         <i class="fas fa-check-circle"></i>
                         {% translate "Confirm Rental Request" %}
                     </button>
@@ -472,62 +500,86 @@
 {% block footerContent %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const startDate = document.querySelector('input[name="start_date"]');
-        const endDate = document.querySelector('input[name="end_date"]');
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        
-        function updateTotal() {
-            if (startDate.value && endDate.value) {
-                const data = {
-                    car_id: "{{ car.id }}",
-                    start_date: startDate.value,
-                    end_date: endDate.value
-                };
+        const startDateInput = document.querySelector('input[name="start_date"]');
+        const endDateInput = document.querySelector('input[name="end_date"]');
+        const submitBtn = document.getElementById('submitBtn');
+        const dateError = document.getElementById('dateError');
+        const numberOfDaysElement = document.getElementById('numberOfDays');
+        const totalPriceElement = document.getElementById('totalPrice');
+        const minRentalDays = {{ car.minimum_rental_days }};
 
-                fetch('/api/calculate-rental-total/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken
-                    },
-                    body: JSON.stringify(data)
-                })
+        function calculateTotal() {
+            if (!startDateInput.value || !endDateInput.value) {
+                numberOfDaysElement.textContent = '-';
+                totalPriceElement.textContent = '-';
+                return;
+            }
+
+            const start = new Date(startDateInput.value);
+            const end = new Date(endDateInput.value);
+
+            // Vérification basique côté client
+            if (end <= start) {
+                dateError.textContent = "{% translate 'End date must be after start date' %}";
+                dateError.style.display = 'block';
+                numberOfDaysElement.textContent = '-';
+                totalPriceElement.textContent = '-';
+                return;
+            }
+
+            const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+            
+            if (days < minRentalDays) {
+                dateError.textContent = `{% translate 'Minimum rental period is' %} ${minRentalDays} {% translate 'days' %}`;
+                dateError.style.display = 'block';
+                numberOfDaysElement.textContent = '-';
+                totalPriceElement.textContent = '-';
+                return;
+            }
+
+            // Appel AJAX pour calculer le total
+            fetch(`{% url 'calculate_rental_total' %}?car_id={{ car.id }}&start_date=${startDateInput.value}&end_date=${endDateInput.value}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        document.querySelector('.summary-item:first-child span:last-child').textContent = 
-                            data.price_per_day + " TND × " + data.days + " {% translate 'days' %}";
-                        document.querySelector('.summary-item:nth-child(2) span:last-child').textContent = 
-                            data.security_deposit + " TND";
-                        document.querySelector('.summary-total .summary-item span:last-child').textContent = 
-                            data.total_price + " TND";
+                        numberOfDaysElement.textContent = data.days;
+                        totalPriceElement.textContent = `${data.total_price} TND`;
+                        dateError.style.display = 'none';
+                    } else {
+                        dateError.textContent = data.error || "{% translate 'Error calculating total' %}";
+                        dateError.style.display = 'block';
+                        numberOfDaysElement.textContent = '-';
+                        totalPriceElement.textContent = '-';
                     }
                 })
                 .catch(error => {
-                    console.error('Erreur lors du calcul du total:', error);
+                    console.error('Error:', error);
+                    dateError.textContent = "{% translate 'Error calculating total' %}";
+                    dateError.style.display = 'block';
+                    numberOfDaysElement.textContent = '-';
+                    totalPriceElement.textContent = '-';
                 });
-            }
         }
 
-        // Initialiser la date minimale à aujourd'hui
+        // Initialisation
         const today = new Date().toISOString().split('T')[0];
-        startDate.min = today;
-        
-        // Gérer les changements de date de début
-        startDate.addEventListener('change', function() {
-            endDate.min = this.value;
-            if (endDate.value && endDate.value < this.value) {
-                endDate.value = this.value;
+        startDateInput.min = today;
+        endDateInput.min = today;
+
+        // Gestionnaires d'événements
+        startDateInput.addEventListener('change', function() {
+            endDateInput.min = this.value;
+            if (endDateInput.value && endDateInput.value < this.value) {
+                endDateInput.value = this.value;
             }
-            updateTotal();
+            calculateTotal();
         });
 
-        // Gérer les changements de date de fin
-        endDate.addEventListener('change', updateTotal);
-        
-        // Calculer le total initial si les dates sont déjà remplies
-        if (startDate.value && endDate.value) {
-            updateTotal();
+        endDateInput.addEventListener('change', calculateTotal);
+
+        // Calcul initial si des dates sont déjà définies
+        if (startDateInput.value && endDateInput.value) {
+            calculateTotal();
         }
     });
 </script>

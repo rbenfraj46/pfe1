@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block headerContent %}
+<link rel="stylesheet" href="{% static 'assets/css/transfer-search-res.css' %}" />
+<style>
+    .vehicle-card {
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+    }
+    .vehicle-card:hover {
+        transform: translateY(-5px);
+    }
+    .price-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: #ff7043;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: bold;
+    }
+    .driver-info {
+        border-left: 4px solid #ff7043;
+        padding-left: 15px;
+        margin: 10px 0;
+    }
+    .journey-details {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block bodyContent %}
+<div class="container" style="margin-top: 120px;">
+    <!-- Résumé de la recherche -->
+    <div class="journey-details mb-4">
+        <h4 class="mb-3">{% translate "Journey Details" %}</h4>
+        <div class="row">
+            <div class="col-md-6">
+                <p><i class="fas fa-map-marker-alt text-danger"></i> {% translate "From" %}: {{ search_params.pickup_address }}</p>
+                <p><i class="fas fa-map-marker text-success"></i> {% translate "To" %}: {{ search_params.dropoff_address }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><i class="fas fa-calendar-alt"></i> {% translate "Date" %}: {{ search_params.pickup_date }}</p>
+                <p><i class="fas fa-users"></i> {% translate "Passengers" %}: {{ search_params.passengers }}</p>
+                <p><i class="fas fa-suitcase"></i> {% translate "Luggage" %}: {{ search_params.luggage_pieces }} {% translate "pieces" %} ({{ search_params.luggage_weight }}kg)</p>
+                <p><i class="fas fa-route"></i> {% translate "Distance" %}: {{ search_params.distance|floatformat:1 }}km</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Résultats -->
+    <h3 class="mb-4">{% translate "Available Vehicles" %}</h3>
+    
+    {% if not vehicles %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> {% translate "No vehicles available for your criteria. Try adjusting your search parameters." %}
+        </div>
+    {% else %}
+        <div class="row">
+            {% for vehicle in vehicles %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="vehicle-card">
+                        <div class="card h-100">
+                            <div class="position-relative">
+                                {% if vehicle.image %}
+                                    <img src="{{ vehicle.image.url }}" class="card-img-top" alt="{{ vehicle.brand }} {{ vehicle.car_model }}" style="height: 200px; object-fit: cover;">
+                                {% else %}
+                                    <img src="{% static 'images/default-car.jpg' %}" class="card-img-top" alt="Default vehicle image" style="height: 200px; object-fit: cover;">
+                                {% endif %}
+                                <span class="price-badge">
+                                    {{ vehicle.total_price|floatformat:2 }} TND
+                                </span>
+                            </div>
+                            
+                            <div class="card-body">
+                                <h5 class="card-title">{{ vehicle.brand.name }} {{ vehicle.car_model.name }}</h5>
+                                <p class="card-text text-muted">{{ vehicle.agence.agency_name }}</p>
+                                
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span><i class="fas fa-users"></i> {{ vehicle.max_passengers }} {% translate "seats" %}</span>
+                                    <span><i class="fas fa-suitcase"></i> {{ vehicle.max_luggage_pieces }} {% translate "bags" %}</span>
+                                    <span><i class="fas fa-weight-hanging"></i> {{ vehicle.max_luggage_weight }}kg</span>
+                                </div>
+
+                                <div class="driver-info">
+                                    <h6><i class="fas fa-user-tie"></i> {% translate "Driver Information" %}</h6>
+                                    <p class="mb-1">{{ vehicle.driver_name }}</p>
+                                    <p class="mb-1">{% translate "Experience" %}: {{ vehicle.driver_experience_years }} {% translate "years" %}</p>
+                                    {% if vehicle.driver_languages %}
+                                        <p class="mb-1">{% translate "Languages" %}: {{ vehicle.driver_languages }}</p>
+                                    {% endif %}
+                                </div>
+
+                                <div class="price-details mt-3">
+                                    <h6>{% translate "Price Details" %}</h6>
+                                    <p class="mb-1">{% translate "By Distance" %}: {{ vehicle.price_details.by_distance|floatformat:2 }} TND</p>
+                                    <p class="mb-1">{% translate "By Duration" %} ({{ vehicle.price_details.duration|floatformat:1 }}h): {{ vehicle.price_details.by_hour|floatformat:2 }} TND</p>
+                                    <p class="mb-0"><strong>{% translate "Final Price" %}: {{ vehicle.price_details.final_price|floatformat:2 }} TND</strong></p>
+                                </div>
+
+                                <div class="mt-3">
+                                    <form method="GET" action="{% url 'transfer_booking' vehicle.id %}" class="d-grid">
+                                        <input type="hidden" name="pickup_address" value="{{ search_params.pickup_address }}">
+                                        <input type="hidden" name="dropoff_address" value="{{ search_params.dropoff_address }}">
+                                        <input type="hidden" name="pickup_date" value="{{ search_params.pickup_date }}">
+                                        <input type="hidden" name="passengers" value="{{ search_params.passengers }}">
+                                        <input type="hidden" name="duration" value="{{ vehicle.estimated_duration }}">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-check-circle"></i> {% translate "Book Now" %}
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if vehicles.has_other_pages %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if vehicles.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ vehicles.previous_page_number }}&{{ request.GET.urlencode }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% for i in vehicles.paginator.page_range %}
+                    {% if vehicles.number == i %}
+                        <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                    {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ i }}&{{ request.GET.urlencode }}">{{ i }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if vehicles.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ vehicles.next_page_number }}&{{ request.GET.urlencode }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    {% endif %}
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animation des cartes au chargement
+        const cards = document.querySelectorAll('.vehicle-card');
+        cards.forEach((card, index) => {
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    });
+</script>
+{% endblock %}

@@ -11,7 +11,8 @@ from home.views import (
     connection_views,
     registration,
     agences,
-    contact
+    contact,
+    AboutView
 )
 
 from home.models import State
@@ -19,6 +20,7 @@ from home.models import State
 urlpatterns = [
     # Pages générales
     path('', index.IndexView.as_view(), name='index'),
+    path('about/', AboutView.as_view(), name='about'),
     path('index.php', index.IndexView.as_view(), name='index'),
     path('setDevice.php', index.DeviseView.as_view(), name='set_devise'),
     path('contact.php', contact.ContactView.as_view(), name='contact'),

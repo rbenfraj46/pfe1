@@ -9,6 +9,7 @@ from django.http import JsonResponse
 from django.core.mail import send_mail
 from django.conf import settings
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.utils import timezone
 import logging
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
@@ -74,7 +75,8 @@ class CarRentalRequestView(LoginRequiredMixin, View):
         context = {
             'car': car,
             'start_date': request.GET.get('start_date'),
-            'end_date': request.GET.get('end_date')
+            'end_date': request.GET.get('end_date'),
+            'today': timezone.now().date()
         }
         return render(request, self.template_name, context)
 
@@ -204,6 +206,7 @@ class UpdateCarView(LoginRequiredMixin, CarManagementMixin, View):
             car.fuel_policy = request.POST.get('fuel_policy')
             car.security_deposit = request.POST.get('security_deposit')
             car.minimum_license_age = request.POST.get('minimum_license_age')
+            car.minimum_rental_days = request.POST.get('minimum_rental_days')
             car.price_per_day = request.POST.get('price_per_day')
             car.available = request.POST.get('available') == 'on'
             car.gear_type_id = request.POST.get('gear_type')
@@ -355,6 +358,7 @@ class RegisterCarView(LoginRequiredMixin, CarManagementMixin, View):
                 fuel_policy=request.POST.get('fuel_policy'),
                 security_deposit=request.POST.get('security_deposit'),
                 minimum_license_age=request.POST.get('minimum_license_age'),
+                minimum_rental_days=request.POST.get('minimum_rental_days'),
                 price_per_day=request.POST.get('price_per_day'),
                 is_active=agency.is_auto,
                 available=request.POST.get('available') == 'on',
@@ -519,67 +523,20 @@ class CalculateRentalTotalView(View):
                 })
                 
             car = get_object_or_404(AgencyCar, id=car_id)
-            start = datetime.strptime(start_date, '%Y-%m-%d').date()
-            end = datetime.strptime(end_date, '%Y-%m-%d').date()
-            
-            days = (end - start).days
-            if days <= 0:
-                return JsonResponse({
-                    'success': False,
-                    'error': _('End date must be after start date')
-                })
-                
-            total_price = car.price_per_day * days
-            
-            return JsonResponse({
-                'success': True,
-                'days': days,
-                'price_per_day': float(car.price_per_day),
-                'security_deposit': float(car.security_deposit),
-                'total_price': float(total_price)
-            })
-            
-        except Exception as e:
-            return JsonResponse({
-                'success': False,
-                'error': str(e)
-            })
-
-    def post(self, request):
-        try:
-            data = json.loads(request.body)
-            car_id = data.get('car_id')
-            start_date = data.get('start_date')
-            end_date = data.get('end_date')
-            
-            if not all([car_id, start_date, end_date]):
-                return JsonResponse({
-                    'success': False,
-                    'error': _('Missing required parameters')
-                })
-                
-            car = get_object_or_404(AgencyCar, id=car_id)
             total_info = car.calculate_total_price(start_date, end_date)
             
             if total_info:
                 return JsonResponse({
                     'success': True,
                     'days': total_info['days'],
-                    'price_per_day': total_info['price_per_day'],
-                    'security_deposit': total_info['security_deposit'],
                     'total_price': total_info['total_price']
                 })
             else:
                 return JsonResponse({
                     'success': False,
-                    'error': _('Invalid dates')
+                    'error': _('Invalid dates') 
                 })
             
-        except json.JSONDecodeError:
-            return JsonResponse({
-                'success': False,
-                'error': _('Invalid JSON data')
-            })
         except Exception as e:
             return JsonResponse({
                 'success': False,

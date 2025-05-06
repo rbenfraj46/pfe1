@@ -5,6 +5,7 @@ from django.utils import timezone
 from datetime import datetime
 from django.conf import settings
 from django.contrib.gis.db import models as gis_models
+from django.core.validators import MinValueValidator
 import logging
 
 logger = logging.getLogger(__name__)
@@ -118,6 +119,16 @@ class AgencyCar(models.Model):
     driver_experience_years = models.IntegerField(null=True, blank=True, verbose_name=_("Driver Experience (Years)"))
     driver_languages = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("Driver Languages"))
 
+    minimum_rental_days = models.IntegerField(default=1, verbose_name=_("Minimum Rental Days"))
+
+    # Champs pour les transferts
+    for_transfer = models.BooleanField(default=False, verbose_name=_("Available for Transfer"))
+    price_per_km = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name=_("Price per Kilometer"))
+    price_per_hour = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name=_("Price per Hour"))
+    max_passengers = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("Maximum Passengers"))
+    max_luggage_pieces = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("Maximum Luggage Pieces"))
+    max_luggage_weight = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True, verbose_name=_("Maximum Luggage Weight (kg)"))
+
     def is_available(self, start_date, end_date):
         overlapping = self.unavailability_periods.filter(
             start_date__lte=end_date,
@@ -146,12 +157,18 @@ class AgencyCar(models.Model):
             
         if start_date and end_date and end_date > start_date:
             days = (end_date - start_date).days
+            
+            # Vérification du nombre minimum de jours
+            if days < self.minimum_rental_days:
+                return None
+                
             total = self.price_per_day * days
             return {
                 'days': days,
                 'price_per_day': float(self.price_per_day),
                 'security_deposit': float(self.security_deposit),
-                'total_price': float(total)
+                'total_price': float(total),
+                'minimum_rental_days': self.minimum_rental_days
             }
         return None
 
@@ -336,6 +353,15 @@ class CarReservation(models.Model):
         
         if self.end_date <= self.start_date:
             raise ValidationError(_('End date must be after start date'))
+            
+        # Vérification du nombre minimum de jours
+        rental_days = (self.end_date - self.start_date).days
+        if rental_days < self.car.minimum_rental_days:
+            raise ValidationError({
+                'end_date': _('The rental period must be at least %(days)d days for this car') % {
+                    'days': self.car.minimum_rental_days
+                }
+            })
 
         # Check for overlapping reservations
         overlapping = CarReservation.objects.filter(
@@ -473,3 +499,78 @@ class CarReservation(models.Model):
             'rejected': []
         }
         return new_status in valid_transitions.get(self.status, [])
+
+
+class TransferVehicle(models.Model):
+    VEHICLE_TYPES = (
+        ('car', _('Car')),
+        ('van', _('Van')),
+        ('minibus', _('Minibus')),
+        ('bus', _('Bus')),
+    )
+
+    agence = models.ForeignKey('home.Agences', on_delete=models.SET_NULL, null=True)
+    vehicle_type = models.CharField(max_length=20, choices=VEHICLE_TYPES)
+    brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True)
+    model = models.CharField(max_length=255)
+    capacity = models.IntegerField(verbose_name=_("Passenger Capacity"))
+    hourly_rate = models.DecimalField(max_digits=10, decimal_places=2, verbose_name=_("Hourly Rate"))
+    minimum_hours = models.IntegerField(default=1, verbose_name=_("Minimum Rental Hours"))
+    with_driver = models.BooleanField(default=True, verbose_name=_("With Driver"))
+    
+    # Driver Information
+    driver_name = models.CharField(max_length=255, verbose_name=_("Driver Name"))
+    driver_phone = models.CharField(max_length=20, verbose_name=_("Driver Phone"))
+    driver_license_number = models.CharField(max_length=50, verbose_name=_("Driver License Number"))
+    driver_experience_years = models.IntegerField(verbose_name=_("Driver Experience (Years)"))
+    driver_languages = models.CharField(max_length=255, verbose_name=_("Driver Languages"))
+
+    image = models.ImageField(upload_to='transfers', null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    available = models.BooleanField(default=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.get_vehicle_type_display()} - {self.brand} {self.model}"
+
+    class Meta:
+        db_table = "transfer_vehicle"
+        verbose_name = _("Transfer Vehicle")
+        verbose_name_plural = _("Transfer Vehicles")
+
+class TransferBooking(models.Model):
+    STATUS_CHOICES = (
+        ('pending', _('Pending')),
+        ('confirmed', _('Confirmed')), 
+        ('ongoing', _('Ongoing')),
+        ('completed', _('Completed')),
+        ('cancelled', _('Cancelled')),
+    )
+
+    vehicle = models.ForeignKey(TransferVehicle, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    pickup_location = gis_models.PointField(verbose_name=_("Pickup Location"))
+    dropoff_location = gis_models.PointField(verbose_name=_("Drop-off Location"))
+    pickup_address = models.CharField(max_length=255, verbose_name=_("Pickup Address"))
+    dropoff_address = models.CharField(max_length=255, verbose_name=_("Drop-off Address"))
+    pickup_date = models.DateTimeField(verbose_name=_("Pickup Date and Time"))
+    estimated_duration = models.IntegerField(verbose_name=_("Estimated Duration (hours)"))
+    passengers_count = models.IntegerField(verbose_name=_("Number of Passengers"))
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    notes = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if not self.total_price:
+            self.total_price = self.vehicle.hourly_rate * self.estimated_duration
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Transfer {self.id} - {self.pickup_date}"
+
+    class Meta:
+        db_table = "transfer_booking"
+        verbose_name = _("Transfer Booking")
+        verbose_name_plural = _("Transfer Bookings")

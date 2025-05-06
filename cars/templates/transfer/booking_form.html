@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block headerContent %}
+<link rel="stylesheet" href="{% static 'assets/css/transfer-booking.css' %}" />
+<style>
+    .booking-form {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .vehicle-info {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    .driver-info {
+        border-left: 4px solid #ff7043;
+        padding-left: 15px;
+        margin: 15px 0;
+    }
+    .price-info {
+        background: #fff8f6;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block bodyContent %}
+<div class="container" style="margin-top: 120px; margin-bottom: 40px;">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="booking-form">
+                <h3 class="mb-4">{% translate "Transfer Booking" %}</h3>
+
+                <!-- Information sur le véhicule -->
+                <div class="vehicle-info">
+                    <div class="row">
+                        <div class="col-md-4">
+                            {% if vehicle.image %}
+                                <img src="{{ vehicle.image.url }}" alt="{{ vehicle.brand }} {{ vehicle.model }}" class="img-fluid rounded">
+                            {% else %}
+                                <img src="{% static 'images/default-car.jpg' %}" alt="Default vehicle" class="img-fluid rounded">
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <h4>{{ vehicle.brand }} {{ vehicle.model }}</h4>
+                            <p class="text-muted">{{ vehicle.agence.agency_name }}</p>
+                            
+                            <div class="driver-info">
+                                <h5><i class="fas fa-user-tie"></i> {% translate "Your Driver" %}</h5>
+                                <p class="mb-1">{{ vehicle.driver_name }}</p>
+                                <p class="mb-1">{% translate "Experience" %}: {{ vehicle.driver_experience_years }} {% translate "years" %}</p>
+                                {% if vehicle.driver_languages %}
+                                    <p class="mb-0">{% translate "Languages" %}: {{ vehicle.driver_languages }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formulaire de réservation -->
+                <form method="POST" action="{% url 'transfer_booking' vehicle.id %}">
+                    {% csrf_token %}
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label><i class="fas fa-map-marker-alt text-danger"></i> {% translate "Pickup Location" %}</label>
+                                <input type="text" name="pickup_address" class="form-control" value="{{ pickup_address }}" readonly>
+                                <input type="hidden" name="pickup_lat" value="{{ pickup_lat }}">
+                                <input type="hidden" name="pickup_lng" value="{{ pickup_lng }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label><i class="fas fa-map-marker text-success"></i> {% translate "Drop-off Location" %}</label>
+                                <input type="text" name="dropoff_address" class="form-control" value="{{ dropoff_address }}" readonly>
+                                <input type="hidden" name="dropoff_lat" value="{{ dropoff_lat }}">
+                                <input type="hidden" name="dropoff_lng" value="{{ dropoff_lng }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label><i class="fas fa-calendar-alt"></i> {% translate "Pickup Date & Time" %}</label>
+                                <input type="datetime-local" name="pickup_date" class="form-control" value="{{ pickup_date }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label><i class="fas fa-users"></i> {% translate "Number of Passengers" %}</label>
+                                <input type="number" name="passengers" class="form-control" value="{{ passengers }}" min="1" max="{{ vehicle.capacity }}" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label><i class="fas fa-comment"></i> {% translate "Special Requests or Notes" %}</label>
+                        <textarea name="notes" class="form-control" rows="3" placeholder="{% translate 'Any special requirements or requests?' %}"></textarea>
+                    </div>
+
+                    <input type="hidden" name="duration" value="{{ duration }}">
+
+                    <!-- Informations sur le prix -->
+                    <div class="price-info">
+                        <h5>{% translate "Price Details" %}</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p>{% translate "Duration" %}: {{ duration }} {% translate "hours" %}</p>
+                                <p>{% translate "Rate per Hour" %}: {{ vehicle.hourly_rate }} TND</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h4 class="text-end">
+                                    {% translate "Total Price" %}: {{ total_price|default:vehicle.hourly_rate|floatformat:2 }} TND
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-check-circle"></i> {% translate "Confirm Booking" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Calcul automatique du prix total
+    const durationInput = document.querySelector('input[name="duration"]');
+    const ratePerHour = {{ vehicle.hourly_rate }};
+    
+    function updateTotalPrice() {
+        const duration = parseFloat(durationInput.value) || 0;
+        const total = duration * ratePerHour;
+        document.querySelector('.price-info h4').textContent = 
+            `{% translate "Total Price" %}: ${total.toFixed(2)} TND`;
+    }
+
+    // Mise à jour du prix lors du chargement
+    updateTotalPrice();
+});
+</script>
+{% endblock %}

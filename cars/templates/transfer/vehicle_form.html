@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block headerContent %}
+<link rel="stylesheet" href="{% static 'assets/css/vehicle-form.css' %}" />
+{% endblock %}
+
+{% block bodyContent %}
+<div class="vehicle-form-container">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="form-wrapper">
+                    <h2>{% if vehicle %}{% translate "Edit Transfer Vehicle" %}{% else %}{% translate "Add New Transfer Vehicle" %}{% endif %}</h2>
+                    
+                    <form method="POST" enctype="multipart/form-data" class="vehicle-form">
+                        {% csrf_token %}
+                        
+                        {% if messages %}
+                        <div class="messages mb-4">
+                            {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="form-section">
+                            <h4>{% translate "Vehicle Information" %}</h4>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>{% translate "Vehicle Type" %}</label>
+                                        <select name="vehicle_type" class="form-control" required>
+                                            <option value="">{% translate "Select vehicle type" %}</option>
+                                            <option value="car" {% if vehicle.vehicle_type == 'car' %}selected{% endif %}>
+                                                {% translate "Car" %}
+                                            </option>
+                                            <option value="van" {% if vehicle.vehicle_type == 'van' %}selected{% endif %}>
+                                                {% translate "Van" %}
+                                            </option>
+                                            <option value="minibus" {% if vehicle.vehicle_type == 'minibus' %}selected{% endif %}>
+                                                {% translate "Minibus" %}
+                                            </option>
+                                            <option value="bus" {% if vehicle.vehicle_type == 'bus' %}selected{% endif %}>
+                                                {% translate "Bus" %}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>{% translate "Brand" %}</label>
+                                        <select name="brand" class="form-control" required>
+                                            <option value="">{% translate "Select brand" %}</option>
+                                            {% for brand in brands %}
+                                            <option value="{{ brand.id }}" {% if vehicle.brand_id == brand.id %}selected{% endif %}>
+                                                {{ brand.name }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>{% translate "Model" %}</label>
+                                        <input type="text" name="model" class="form-control" value="{{ vehicle.model }}" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>{% translate "Passenger Capacity" %}</label>
+                                        <input type="number" name="capacity" class="form-control" min="1" value="{{ vehicle.capacity }}" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>{% translate "Hourly Rate (TND)" %}</label>
+                                        <input type="number" name="hourly_rate" class="form-control" min="0" step="0.1" value="{{ vehicle.hourly_rate }}" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>{% translate "Minimum Rental Hours" %}</label>
+                                        <input type="number" name="minimum_hours" class="form-control" min="1" value="{{ vehicle.minimum_hours|default:1 }}" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>{% translate "Vehicle Image" %}</label>
+                                {% if vehicle.image %}
+                                <div class="current-image mb-2">
+                                    <img src="{{ vehicle.image.url }}" alt="{{ vehicle }}" class="img-thumbnail">
+                                </div>
+                                {% endif %}
+                                <input type="file" name="image" class="form-control" accept="image/*">
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <h4>{% translate "Driver Information" %}</h4>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>{% translate "Driver Name" %}</label>
+                                        <input type="text" name="driver_name" class="form-control" value="{{ vehicle.driver_name }}" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>{% translate "Driver Phone" %}</label>
+                                        <input type="tel" name="driver_phone" class="form-control" value="{{ vehicle.driver_phone }}" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>{% translate "Driver License Number" %}</label>
+                                        <input type="text" name="driver_license_number" class="form-control" value="{{ vehicle.driver_license_number }}" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>{% translate "Years of Experience" %}</label>
+                                        <input type="number" name="driver_experience_years" class="form-control" min="1" value="{{ vehicle.driver_experience_years }}" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>{% translate "Languages Spoken" %}</label>
+                                <input type="text" name="driver_languages" class="form-control" value="{{ vehicle.driver_languages }}" 
+                                       placeholder="{% translate 'e.g. English, French, Arabic' %}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                {% if vehicle %}{% translate "Update Vehicle" %}{% else %}{% translate "Add Vehicle" %}{% endif %}
+                            </button>
+                            <a href="{% url 'agency_transfer_vehicles' agency.id %}" class="btn btn-secondary">
+                                {% translate "Cancel" %}
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

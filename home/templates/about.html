@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% translate "About Us" %} - {{ block.super }}{% endblock %}
+{% block description %}{% translate "Learn more about Tunisian Rent Car, your trusted car rental service in Tunisia" %}{% endblock %}
+
+{% block bodyContent %}
+<div class="wheel-start3">
+    <img src="{% static 'images/bg3.jpg' %}" alt="" class="wheel-img">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12 padd-lr0">
+                <div class="wheel-header text-center">
+                    <h1>{% translate "About Us" %}</h1>
+                    <div class="wheel-breadcrumbs">
+                        <a href="{% url 'index' %}">{% translate "Home" %}</a>
+                        <span>{% translate "About Us" %}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="wheel-content">
+    <section class="about-story">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="wheel-story-img">
+                        <img src="{% static 'images/about1.jpg' %}" alt="Notre histoire" class="img-fluid">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="wheel-story-text">
+                        <h2>{% translate "Our Story" %}</h2>
+                        <p>{% translate "Founded in 2023, Tunisian Rent Car has quickly become one of Tunisia's leading car rental platforms. Our mission is to provide an easy and reliable way for both tourists and locals to rent vehicles across Tunisia." %}</p>
+                        <p>{% translate "We work with carefully selected local agencies to ensure high-quality service and competitive prices for our customers." %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="wheel-bg2 wheel-values">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-12">
+                    <h2 class="mb-5">{% translate "Our Values" %}</h2>
+                </div>
+                <div class="col-md-4">
+                    <div class="value-box">
+                        <i class="fa fa-shield-alt fa-3x mb-3"></i>
+                        <h3>{% translate "Safety" %}</h3>
+                        <p>{% translate "All our vehicles undergo regular maintenance and safety checks" %}</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="value-box">
+                        <i class="fa fa-handshake fa-3x mb-3"></i>
+                        <h3>{% translate "Trust" %}</h3>
+                        <p>{% translate "Transparency and honesty in all our dealings" %}</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="value-box">
+                        <i class="fa fa-star fa-3x mb-3"></i>
+                        <h3>{% translate "Quality" %}</h3>
+                        <p>{% translate "Premium service and customer satisfaction guaranteed" %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="wheel-stats">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-3 col-sm-6">
+                    <div class="wheel-counter">
+                        <div class="counter-number">
+                            <span class="wheel-counter-number" data-to="1500" data-speed="2000">0</span>
+                            <span class="wheel-counter-plus">+</span>
+                        </div>
+                        <h6>{% translate "Happy Clients" %}</h6>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="wheel-counter">
+                        <div class="counter-number">
+                            <span class="wheel-counter-number" data-to="100" data-speed="2000">0</span>
+                            <span class="wheel-counter-plus">+</span>
+                        </div>
+                        <h6>{% translate "Rental Locations" %}</h6>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="wheel-counter">
+                        <div class="counter-number">
+                            <span class="wheel-counter-number" data-to="500" data-speed="2000">0</span>
+                            <span class="wheel-counter-plus">+</span>
+                        </div>
+                        <h6>{% translate "Quality Vehicles" %}</h6>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="wheel-counter">
+                        <div class="counter-number">
+                            <span class="wheel-counter-number" data-to="24" data-speed="2000">0</span>
+                            <span class="wheel-counter-plus">/7</span>
+                        </div>
+                        <h6>{% translate "Support" %}</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="wheel-team">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-12">
+                    <h2 class="mb-5">{% translate "Our Team" %}</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="team-member">
+                        <img src="{% static 'images/team1.jpg' %}" alt="Team Member" class="img-fluid">
+                        <h4>{% translate "Alaeddine MELLITI" %}</h4>
+                        <p>{% translate "Founder & CEO" %}</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="team-member">
+                        <img src="{% static 'images/team2.jpg' %}" alt="Team Member" class="img-fluid">
+                        <h4>{% translate "Sarah Ben Ali" %}</h4>
+                        <p>{% translate "Customer Relations Manager" %}</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="team-member">
+                        <img src="{% static 'images/team3.jpg' %}" alt="Team Member" class="img-fluid">
+                        <h4>{% translate "Mohamed Karray" %}</h4>
+                        <p>{% translate "Technical Director" %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+.wheel-content {
+    margin-top: 180px;
+}
+
+.wheel-values {
+    padding: 80px 0;
+    background-color: #f8f9fa;
+}
+
+.value-box {
+    padding: 30px;
+    margin-bottom: 30px;
+    transition: all 0.3s ease;
+}
+
+.value-box:hover {
+    transform: translateY(-10px);
+}
+
+.wheel-stats {
+    padding: 60px 0;
+    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url("{% static 'images/stats-bg.jpg' %}") center/cover;
+    color: white;
+}
+
+.wheel-counter {
+    margin-bottom: 30px;
+}
+
+.counter-number {
+    font-size: 3em;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.wheel-team {
+    padding: 80px 0;
+}
+
+.team-member {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.team-member img {
+    border-radius: 50%;
+    margin-bottom: 20px;
+    max-width: 200px;
+}
+
+.team-member h4 {
+    margin-bottom: 5px;
+}
+
+.about-story {
+    padding: 80px 0;
+}
+
+.wheel-story-img img {
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.wheel-story-text {
+    padding: 30px;
+}
+
+.wheel-story-text h2 {
+    margin-bottom: 30px;
+}
+</style>
+{% endblock %}

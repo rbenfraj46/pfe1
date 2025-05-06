@@ -1,0 +1,166 @@
+\chapter{Analyse des Besoins}
+\label{chap:AnalysedesBesoins}
+
+\section{Introduction}
+L'analyse des besoins est une étape cruciale dans le développement de toute application ou plateforme. Elle permet de bien comprendre les attentes des utilisateurs, les exigences fonctionnelles et non fonctionnelles, ainsi que l'ensemble des contraintes à prendre en compte pour la mise en œuvre du projet. Ce chapitre présente l'analyse des besoins pour la plateforme de mise en relation entre agences de location de voitures et particuliers.
+
+\section{Besoins Fonctionnels}
+Les besoins fonctionnels décrivent les actions et fonctionnalités spécifiques que le système doit pouvoir réaliser. Ces besoins sont essentiels pour le bon fonctionnement de la plateforme. Voici les principaux besoins fonctionnels identifiés pour cette plateforme :
+\begin{itemize}
+    \item \textbf{Gestion des Utilisateurs :}
+    \begin{itemize}
+        \item Inscription d’un utilisateur
+        \item Connexion et authentification
+        \item Mise à jour du profil
+        \item Réinitialisation du mot de passe
+    \end{itemize}
+    \item \textbf{Gestion des Agences :}
+    \begin{itemize}
+        \item Inscription d’une agence par un client
+        \item Validation de l’agence par l’admin
+        \item Suspension d’une agence en cas de fraude
+        \item Réactivation d’une agence
+        \item Mise à jour d’une agence
+    \end{itemize}
+    \item \textbf{Gestion des Véhicules :}
+    \begin{itemize}
+        \item Ajout et modification d’un véhicule
+        \item Suppression d’un véhicule (Le statut du véhicule sera simplement modifié et il ne sera plus visible pour le chef d’agence, mais ne sera pas supprimé de la base de données pour assurer la transparence des informations)
+        \item Vérification de la disponibilité des voitures
+        \item Consultation des détails d’un véhicule
+        \item Demande pour une nouvelle marque ou un nouveau modèle de voiture
+    \end{itemize}
+    \item \textbf{Recherche et Filtrage :}
+    \begin{itemize}
+        \item Recherche et filtrage des véhicules
+    \end{itemize}
+    \item \textbf{Gestion des Réservations :}
+    \begin{itemize}
+        \item Réservation d’un véhicule
+        \item Confirmation de la réservation
+        \item Suivi de l’état des réservations
+        \item Annulation d’une réservation
+        \item Notification de confirmation
+        \item Envoi du contrat de réservation
+        \item Historique des réservations / filtrage
+    \end{itemize}
+    \item \textbf{Gestion des Paiements :}
+    \begin{itemize}
+        \item Envoi de preuve de paiements
+    \end{itemize}
+    \item \textbf{Gestion des Promotions :}
+    \begin{itemize}
+        \item Création de promotions
+        \item Application d’un code promo
+        \item Suivi de l’utilisation des promotions
+    \end{itemize}
+\end{itemize}
+
+\section{Besoins Non Fonctionnels}
+Les besoins non fonctionnels décrivent les critères de performance et de qualité du système. Ils assurent que la plateforme répond à des exigences de fiabilité, de sécurité, et d’ergonomie. Parmi les besoins non fonctionnels, on retrouve :
+\begin{itemize}
+    \item Sécurité des données et confidentialité des utilisateurs.
+    \item Performance et rapidité du système, surtout lors de la recherche de véhicules ou de la gestion des réservations.
+    \item Accessibilité sur plusieurs types de supports (ordinateurs, smartphones).
+    \item Disponibilité continue de la plateforme.
+
+\end{itemize}
+
+\section{Acteurs Identifiés}
+Les principaux acteurs de la plateforme sont :
+\begin{itemize}
+    \item \textbf{Les Utilisateurs :} Les particuliers qui souhaitent louer des véhicules.
+    \item \textbf{Les Agences de Location :} Les entreprises qui proposent des véhicules à la location.
+    \item \textbf{Les Administrateurs :} Les personnes responsables de la gestion et de la supervision des activités sur la plateforme.
+\end{itemize}
+
+\section{Spécifications Techniques}
+Les spécifications techniques définissent l'ensemble des exigences techniques nécessaires pour mettre en œuvre la plateforme :
+
+\subsection{Architecture Technique}
+\begin{itemize}
+    \item \textbf{Backend} :
+    \begin{itemize}
+        \item Framework Django avec Python 3.12
+        \item Django REST Framework pour l'API
+        \item Système de templates DTL pour le rendu des vues
+        \item Gestion des sessions et authentification personnalisée
+    \end{itemize}
+    
+    \item \textbf{Base de données} :
+    \begin{itemize}
+        \item PostgreSQL avec extension PostGIS
+        \item Modèles de données optimisés pour les requêtes géospatiales
+        \item Indexation spatiale pour les performances de recherche
+    \end{itemize}
+    
+    \item \textbf{Gestion des médias} :
+    \begin{itemize}
+        \item Stockage optimisé des images de véhicules
+        \item Gestion des documents administratifs
+        \item Compression et redimensionnement automatique des images
+    \end{itemize}
+\end{itemize}
+
+\subsection{Internationalisation}
+La plateforme prend en charge plusieurs langues :
+\begin{itemize}
+    \item Interface en français et en arabe
+    \item Messages système multilingues
+    \item Adaptation aux formats de date et monnaie locaux
+\end{itemize}
+
+\subsection{Sécurité}
+\begin{itemize}
+    \item \textbf{Authentification} :
+    \begin{itemize}
+        \item Système de tokens sécurisés
+        \item Gestion des sessions avec expiration
+        \item Protection contre les attaques par force brute
+    \end{itemize}
+    
+    \item \textbf{Protection des données} :
+    \begin{itemize}
+        \item Chiffrement des données sensibles
+        \item Validation des entrées utilisateur
+        \item Protection CSRF
+        \item En-têtes de sécurité HTTP
+    \end{itemize}
+    
+    \item \textbf{Gestion des permissions} :
+    \begin{itemize}
+        \item Contrôle d'accès basé sur les rôles
+        \item Isolation des données par agence
+        \item Journalisation des actions sensibles
+    \end{itemize}
+\end{itemize}
+
+\section{Contraintes Techniques}
+Les contraintes techniques identifiées sont :
+
+\begin{itemize}
+    \item \textbf{Performance} :
+    \begin{itemize}
+        \item Temps de réponse inférieur à 2 secondes pour les recherches
+        \item Support de charge jusqu'à 1000 utilisateurs simultanés
+        \item Optimisation des requêtes géospatiales
+    \end{itemize}
+    
+    \item \textbf{Compatibilité} :
+    \begin{itemize}
+        \item Support des navigateurs modernes (Chrome, Firefox, Safari)
+        \item Design responsive pour mobiles et tablettes
+        \item Compatibilité avec les systèmes de paiement locaux
+    \end{itemize}
+    
+    \item \textbf{Maintenance} :
+    \begin{itemize}
+        \item Documentation technique complète
+        \item Tests automatisés pour les fonctionnalités critiques
+        \item Système de sauvegarde automatique
+        \item Monitoring des performances
+    \end{itemize}
+\end{itemize}
+
+\section{Conclusion}
+L'analyse des besoins permet de bien cerner les exigences fonctionnelles et non fonctionnelles de la plateforme. Cette phase est essentielle pour s’assurer que la plateforme répondra aux attentes des utilisateurs et aux contraintes techniques du projet. Les besoins identifiés guideront le développement de la plateforme pour garantir sa réussite et sa performance.

@@ -227,6 +227,10 @@
                             <i class="fas fa-id-card"></i>
                             <span>{{ car.minimum_license_age }} {% translate "years min" %}</span>
                         </div>
+                        <div class="spec-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>{{ car.minimum_rental_days }} {% translate "days minimum" %}</span>
+                        </div>
 
                         <!-- Catégorie -->
                         {% if car.car_model.category %}
@@ -332,41 +336,12 @@
                         <h3><i class="fas fa-user-tie"></i> {% translate "Professional Driver" %}</h3>
                     </div>
                     <div class="driver-profile">
-                        <div class="driver-info-header">
-                            <div class="driver-avatar">
-                                <i class="fas fa-user-circle"></i>
-                            </div>
-                            <div class="driver-basic-info">
-                                <h4>{{ car.driver_name }}</h4>
-                                <span class="experience-badge">
-                                    <i class="fas fa-history"></i>
-                                    {{ car.driver_experience_years }} {% translate "years of experience" %}
-                                </span>
-                            </div>
-                        </div>
-                        
                         <div class="driver-details-grid">
                             <div class="driver-detail-item">
-                                <i class="fas fa-phone"></i>
+                                <i class="fas fa-history"></i>
                                 <div class="detail-content">
-                                    <label>{% translate "Contact" %}</label>
-                                    <span>{{ car.driver_phone }}</span>
-                                </div>
-                            </div>
-                            
-                            <div class="driver-detail-item">
-                                <i class="fas fa-id-card"></i>
-                                <div class="detail-content">
-                                    <label>{% translate "License" %}</label>
-                                    <span>{{ car.driver_license_number }}</span>
-                                </div>
-                            </div>
-                            
-                            <div class="driver-detail-item">
-                                <i class="fas fa-language"></i>
-                                <div class="detail-content">
-                                    <label>{% translate "Languages" %}</label>
-                                    <span>{{ car.driver_languages }}</span>
+                                    <label>{% translate "Experience" %}</label>
+                                    <span>{{ car.driver_experience_years }} {% translate "years of experience" %}</span>
                                 </div>
                             </div>
                         </div>
@@ -380,52 +355,6 @@
                         padding: 30px;
                         margin-top: 30px;
                         border-left: 4px solid #ff7043;
-                    }
-
-                    .driver-profile {
-                        margin-top: 20px;
-                    }
-
-                    .driver-info-header {
-                        display: flex;
-                        align-items: center;
-                        margin-bottom: 25px;
-                    }
-
-                    .driver-avatar {
-                        width: 80px;
-                        height: 80px;
-                        background: #ff7043;
-                        border-radius: 50%;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        margin-right: 20px;
-                    }
-
-                    .driver-avatar i {
-                        font-size: 40px;
-                        color: white;
-                    }
-
-                    .driver-basic-info h4 {
-                        margin: 0;
-                        color: #2c3e50;
-                        font-size: 1.4em;
-                    }
-
-                    .experience-badge {
-                        display: inline-block;
-                        background: rgba(255, 112, 67, 0.1);
-                        color: #ff7043;
-                        padding: 5px 12px;
-                        border-radius: 20px;
-                        font-size: 0.9em;
-                        margin-top: 5px;
-                    }
-
-                    .experience-badge i {
-                        margin-right: 5px;
                     }
 
                     .driver-details-grid {
@@ -484,6 +413,14 @@
 
                 <div class="booking-section">
                     <h3><i class="fas fa-calendar-alt"></i> {% translate "Book this car" %}</h3>
+                    {% if car.minimum_rental_days > 1 %}
+                    <div class="alert alert-info mb-3">
+                        <i class="fas fa-info-circle"></i>
+                        {% blocktranslate with days=car.minimum_rental_days %}
+                        This car requires a minimum rental period of {{ days }} days
+                        {% endblocktranslate %}
+                    </div>
+                    {% endif %}
                     <form action="{% url 'rental_request' car.id %}" method="GET">
                         <div class="date-inputs">
                             <div class="form-group">
@@ -519,14 +456,35 @@ document.addEventListener('DOMContentLoaded', function() {
     // Gestionnaire pour les dates
     const startDateInput = document.querySelector('input[name="start_date"]');
     const endDateInput = document.querySelector('input[name="end_date"]');
+    const submitButton = document.querySelector('.btn-rent');
+    const minRentalDays = {{ car.minimum_rental_days }};
     
-    startDateInput.addEventListener('change', function() {
-        endDateInput.min = this.value;
-        if (endDateInput.value && endDateInput.value < this.value) {
-            endDateInput.value = this.value;
+    function validateDates() {
+        if (startDateInput.value && endDateInput.value) {
+            const start = new Date(startDateInput.value);
+            const end = new Date(endDateInput.value);
+            const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+            
+            if (days < minRentalDays) {
+                submitButton.disabled = true;
+                alert("{% blocktranslate %}The minimum rental period for this car is {{ car.minimum_rental_days }} days{% endblocktranslate %}");
+                return false;
+            }
+            submitButton.disabled = false;
+            return true;
+        }
+        return false;
+    }
+    
+    startDateInput.addEventListener('change', validateDates);
+    endDateInput.addEventListener('change', validateDates);
+    
+    document.querySelector('form').addEventListener('submit', function(e) {
+        if (!validateDates()) {
+            e.preventDefault();
         }
     });
-
+    
     // Zoom sur l'image de la voiture
     const carImage = document.querySelector('.car-image');
     carImage.addEventListener('click', function() {

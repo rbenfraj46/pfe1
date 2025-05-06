@@ -59,6 +59,7 @@
                 <th>{% translate "Model" %}</th>
                 <th>{% translate "Gear Type" %}</th>
                 <th>{% translate "With Driver" %}</th>
+                <th>{% translate "Transfer" %}</th>
                 <th>{% translate "Price per Day" %}</th>
                 <th>{% translate "Actions" %}</th>
             </tr>
@@ -78,7 +79,30 @@
                         <span class="badge bg-secondary">{% translate "No" %}</span>
                     {% endif %}
                 </td>
-                <td>{{ car.price_per_day }}</td>
+                <td>
+                    {% if car.for_transfer %}
+                        <span class="badge bg-success">
+                            <i class="fas fa-shuttle-van"></i> {% translate "Yes" %}
+                        </span>
+                        <br>
+                        <small class="text-muted">
+                            {% if car.price_per_km %}{{ car.price_per_km }} TND/km{% endif %}
+                            {% if car.price_per_hour %}
+                                {% if car.price_per_km %} • {% endif %}
+                                {{ car.price_per_hour }} TND/h
+                            {% endif %}
+                        </small>
+                    {% else %}
+                        <span class="badge bg-secondary">{% translate "No" %}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if car.price_per_day %}
+                        {{ car.price_per_day }} TND
+                    {% else %}
+                        <span class="text-muted">-</span>
+                    {% endif %}
+                </td>
                 <td>
                     {% if can_edit %}
                     <a href="{% url 'car_update' car.id %}" class="btn btn-primary">{% translate "Update" %}</a>

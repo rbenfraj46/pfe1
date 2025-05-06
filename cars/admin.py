@@ -13,7 +13,7 @@ import logging
 from cars.models import (
     Brand, GearType, CarModel, Transmission, 
     AgencyCar, CarUnavailability, CarModelRequest,
-    CarReservation
+    CarReservation, TransferVehicle, TransferBooking
 )
 from cars.forms import CarModelAdminForm, BrandAdminForm
 
@@ -301,5 +301,59 @@ class CarReservationAdmin(admin.ModelAdmin):
             return self.readonly_fields + ('car', 'user', 'start_date', 'end_date')
         return self.readonly_fields
 
+@admin.register(TransferVehicle)
+class TransferVehicleAdmin(admin.ModelAdmin):
+    list_display = ('get_vehicle_info', 'agence', 'capacity', 'hourly_rate', 'driver_name', 'is_active', 'available')
+    list_filter = ('vehicle_type', 'is_active', 'available', 'agence')
+    search_fields = ('model', 'driver_name', 'driver_phone', 'agence__agency_name')
+    ordering = ('-created',)
+    list_editable = ('is_active', 'available', 'hourly_rate')
+    
+    fieldsets = (
+        (_('Vehicle Information'), {
+            'fields': (
+                'agence', 'vehicle_type', 'brand', 'model', 'capacity',
+                'hourly_rate', 'minimum_hours', 'image'
+            )
+        }),
+        (_('Driver Information'), {
+            'fields': (
+                'driver_name', 'driver_phone', 'driver_license_number',
+                'driver_experience_years', 'driver_languages'
+            )
+        }),
+        (_('Status'), {
+            'fields': ('is_active', 'available')
+        })
+    )
+    
+    def get_vehicle_info(self, obj):
+        return f"{obj.get_vehicle_type_display()} - {obj.brand} {obj.model}"
+    get_vehicle_info.short_description = _("Vehicle")
 
-
+@admin.register(TransferBooking)
+class TransferBookingAdmin(admin.ModelAdmin):
+    list_display = ('id', 'get_vehicle_info', 'user', 'pickup_date', 'status', 'total_price', 'created_at')
+    list_filter = ('status', 'vehicle__vehicle_type', 'vehicle__agence', 'created_at')
+    search_fields = ('user__username', 'user__email', 'pickup_address', 'dropoff_address', 'notes')
+    ordering = ('-created_at',)
+    readonly_fields = ('created_at', 'updated_at', 'total_price')
+    
+    fieldsets = (
+        (_('Booking Information'), {
+            'fields': ('vehicle', 'user', 'status', 'total_price')
+        }),
+        (_('Journey Details'), {
+            'fields': (
+                'pickup_location', 'dropoff_location', 'pickup_address', 'dropoff_address',
+                'pickup_date', 'estimated_duration', 'passengers_count'
+            )
+        }),
+        (_('Additional Information'), {
+            'fields': ('notes', 'created_at', 'updated_at')
+        })
+    )
+    
+    def get_vehicle_info(self, obj):
+        return f"{obj.vehicle.get_vehicle_type_display()} - {obj.vehicle.brand} {obj.vehicle.model}"
+    get_vehicle_info.short_description = _("Vehicle")

@@ -152,6 +152,15 @@
                     <div class="row mt-3">
                         <div class="col-md-6">
                             <div class="form-group">
+                                <label for="minimum_rental_days" class="form-label">{% translate "Minimum Rental Days" %}</label>
+                                <div class="input-group">
+                                    <input type="number" name="minimum_rental_days" id="minimum_rental_days" class="form-control" value="{% if car %}{{ car.minimum_rental_days }}{% else %}1{% endif %}" min="1" required>
+                                    <span class="input-group-text">{% translate "days" %}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
                                 <label for="gear_type" class="form-label">{% translate "Gear Type" %}</label>
                                 <select name="gear_type" id="gear_type" class="form-select" required>
                                     <option value="">{% translate "Select a gear type" %}</option>
@@ -285,6 +294,97 @@
                         </div>
                     </div>
 
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <div class="transfer-section border rounded p-3 mb-3">
+                                <div class="form-check form-switch">
+                                    <input type="checkbox" name="for_transfer" id="for_transfer" class="form-check-input" 
+                                           {% if car.for_transfer %}checked{% endif %}>
+                                    <label class="form-check-label" for="for_transfer">
+                                        <i class="fas fa-shuttle-van"></i> {% translate "Available for Transfer Service" %}
+                                    </label>
+                                </div>
+                                <small class="text-muted d-block mt-2">
+                                    <i class="fas fa-info-circle"></i> 
+                                    {% translate "Enable this option if this car will be used for transfer services" %}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="transfer-section" class="{% if not car.for_transfer %}d-none{% endif %} border rounded p-3 bg-light">
+                        <h4 class="mb-3">
+                            <i class="fas fa-dollar-sign"></i> 
+                            {% translate "Transfer Service Information" %}
+                        </h4>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="price_per_km" class="form-label">{% translate "Price per Kilometer (TND)" %}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" step="0.01" name="price_per_km" id="price_per_km" class="form-control" 
+                                               value="{{ car.price_per_km|default:'' }}"
+                                               placeholder="{% translate 'Enter price per kilometer' %}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="price_per_hour" class="form-label">{% translate "Price per Hour (TND)" %}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" step="0.01" name="price_per_hour" id="price_per_hour" class="form-control" 
+                                               value="{{ car.price_per_hour|default:'' }}"
+                                               placeholder="{% translate 'Enter price per hour' %}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="max_passengers" class="form-label">{% translate "Maximum Passengers" %}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-users"></i></span>
+                                        <input type="number" name="max_passengers" id="max_passengers" class="form-control" 
+                                               value="{{ car.max_passengers|default:'' }}" min="1"
+                                               placeholder="{% translate 'Max passengers' %}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="max_luggage_pieces" class="form-label">{% translate "Maximum Luggage Pieces" %}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-suitcase"></i></span>
+                                        <input type="number" name="max_luggage_pieces" id="max_luggage_pieces" class="form-control" 
+                                               value="{{ car.max_luggage_pieces|default:'' }}" min="0"
+                                               placeholder="{% translate 'Max pieces' %}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="max_luggage_weight" class="form-label">{% translate "Maximum Luggage Weight (kg)" %}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-weight-hanging"></i></span>
+                                        <input type="number" step="0.1" name="max_luggage_weight" id="max_luggage_weight" class="form-control" 
+                                               value="{{ car.max_luggage_weight|default:'' }}" min="0"
+                                               placeholder="{% translate 'Max weight' %}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-info-circle"></i>
+                            {% translate "All fields are required when registering a car for transfer service" %}
+                        </div>
+                    </div>
+
                     <div class="d-grid mt-4">
                         <button type="submit" class="btn btn-primary btn-lg">{% translate "Submit" %}</button>
                     </div>
@@ -320,6 +420,7 @@
         const driverCheckbox = document.getElementById('with_driver');
         const driverSection = document.getElementById('driver-section');
         const driverFields = driverSection.querySelectorAll('input[type="text"], input[type="tel"], input[type="number"]');
+        const securityDepositInput = document.getElementById('security_deposit');
 
         function toggleDriverFields(isChecked) {
             if (isChecked) {
@@ -329,12 +430,24 @@
                         field.setAttribute('required', 'required');
                     }
                 });
+                // Set security deposit to 0 and disable it
+                securityDepositInput.value = '0';
+                securityDepositInput.setAttribute('readonly', 'readonly');
+                securityDepositInput.style.backgroundColor = '#e9ecef';
             } else {
                 driverSection.classList.add('d-none');
                 driverFields.forEach(field => {
                     field.removeAttribute('required');
                     field.value = '';
                 });
+                // Enable security deposit input
+                securityDepositInput.removeAttribute('readonly');
+                securityDepositInput.style.backgroundColor = '';
+                {% if car %}
+                securityDepositInput.value = '{{ car.security_deposit }}';
+                {% else %}
+                securityDepositInput.value = '';
+                {% endif %}
             }
         }
 
@@ -342,6 +455,32 @@
             toggleDriverFields(driverCheckbox.checked);
             driverCheckbox.addEventListener('change', function() {
                 toggleDriverFields(this.checked);
+            });
+        }
+
+        const transferCheckbox = document.getElementById('for_transfer');
+        const transferSection = document.getElementById('transfer-section');
+        const transferFields = transferSection.querySelectorAll('input[type="number"]');
+
+        function toggleTransferFields(isChecked) {
+            if (isChecked) {
+                transferSection.classList.remove('d-none');
+                transferFields.forEach(field => {
+                    field.setAttribute('required', 'required');
+                });
+            } else {
+                transferSection.classList.add('d-none');
+                transferFields.forEach(field => {
+                    field.removeAttribute('required');
+                    field.value = '';
+                });
+            }
+        }
+
+        if (transferCheckbox) {
+            toggleTransferFields(transferCheckbox.checked);
+            transferCheckbox.addEventListener('change', function() {
+                toggleTransferFields(this.checked);
             });
         }
 
@@ -363,6 +502,23 @@
                     alert("{% translate 'Please fill in all required driver information fields' %}");
                 }
             }
+
+            if (transferCheckbox.checked) {
+                let isValid = true;
+                transferFields.forEach(field => {
+                    if (field.hasAttribute('required') && !field.value) {
+                        isValid = false;
+                        field.classList.add('is-invalid');
+                    } else {
+                        field.classList.remove('is-invalid');
+                    }
+                });
+                
+                if (!isValid) {
+                    event.preventDefault();
+                    alert("{% translate 'Please fill in all required transfer service information fields' %}");
+                }
+            }
         });
     });
 </script>
@@ -382,6 +538,16 @@
     .form-check-input:checked {
         background-color: #ff7043;
         border-color: #ff7043;
+    }
+    .transfer-section {
+        background-color: #fff;
+        border-left: 4px solid #ff7043 !important;
+    }
+    #transfer-section {
+        border-left: 4px solid #ff7043 !important;
+    }
+    #transfer-section h4 {
+        color: #ff7043;
     }
 </style>
 {% endblock bodyContent %}

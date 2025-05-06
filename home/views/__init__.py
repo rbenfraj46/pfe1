@@ -1,1 +1,4 @@
-# Suppression des imports de car et search car ces fichiers n'existent plus
+from django.views.generic import TemplateView
+
+class AboutView(TemplateView):
+    template_name = 'about.html'

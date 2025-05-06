@@ -154,21 +154,32 @@
 											</li>
 											<li class="menu-item current-menu-item">
 												{% if user.is_authenticated %}
-										<a href="{% url 'user_agencies' %}" class="">{% translate "List of your agencies" %}</a>
-																					<li class="menu-item current-menu-item">
-										<a href="{% url 'agences_register' %}" class="">{% translate "Register your Agency" %}</a>
-
-											</li>
-
-							{% endif %}
+													<a href="{% url 'user_agencies' %}" class="">{% translate "List of your agencies" %}</a>
+													<li class="menu-item current-menu-item">
+														<a href="{% url 'agences_register' %}" class="">{% translate "Register your Agency" %}</a>
+													</li>
+												{% endif %}
 											</li>
 										</ul>
 									</li>
-									<li class="menu-item   ">
-										<a href="{% url 'user_reservations' %}">Reservation</a>
+									<li class="menu-item menu-item-has-children">
+										<a href="#">{% translate "Rentals" %}</a>
+										<ul class="sub-menu dl-submenu">
+											<li class="menu-item">
+												<a href="{% url 'user_reservations' %}">{% translate "Car Rentals" %}</a>
+											</li>
+											<li class="menu-item">
+												<a href="{% url 'transfer_search' %}">{% translate "Transfer Services" %}</a>
+											</li>
+											{% if user.is_authenticated %}
+											<li class="menu-item">
+												<a href="{% url 'my_transfer_bookings' %}">{% translate "My Transfer Bookings" %}</a>
+											</li>
+											{% endif %}
+										</ul>
 									</li>
 									<li class="menu-item menu-item-has-children">
-										<a href="about.html">About</a>
+										<a href="about">About</a>
 									</li>
 									<li class="menu-item {% block contact_active%}{% endblock contact_active %}">
 										<a href="{% url 'contact' %}">{% translate "Contact" %}</a>
@@ -216,53 +227,46 @@
 						<div class="wheel-address">
 							<div class="wheel-footer-logo"><a href=""><img src="{% static 'images/logo2.png' %}" alt=""></a></div>
 							<ul>
-								<li><span><i class="fa fa-map-marker"></i>121 King Street, Melbourne <br>
-									VIC 3000, Australia  </span>
-								</li>
-								<li><a href=""><span><i class="fa fa-phone"></i> +61 3 8376 6284</span></a></li>
-								<li><a href=""><span><i class="fa fa-envelope"></i>contact@wheel-rental.com</span></a></li>
+								<li><span><i class="fa fa-map-marker"></i>Tunisie</span></li>
+								<li><a href="tel:+21652220140"><span><i class="fa fa-phone"></i>(+216) 52 220 140</span></a></li>
+								<li><a href="mailto:melliti.aladin@gmail.com"><span><i class="fa fa-envelope"></i>melliti.aladin@gmail.com</span></a></li>
 							</ul>
 							<div class="wheel-soc">
 								<a href="" class="fa fa-twitter"></a>
 								<a href="" class="fa fa-facebook"></a>
 								<a href="" class="fa fa-linkedin"></a>
 								<a href="" class="fa fa-instagram"></a>
-								<a href="" class="fa fa-share-alt"></a>
 							</div>
 						</div>
 					</div>
 					<div class="col-md-3 col-sm-6  padd-lr0">
 						<div class="wheel-footer-item">
-							<h3>Useful Links</h3>
+							<h3>{% translate "Useful Links" %}</h3>
 							<ul>
-								<li><a href="" class="">About us</a></li>
-								<li><a href="" class="">Customer Service</a></li>
-								<li><a href="{% url 'contact' %}" class="">Contact Us</a></li>
-								<li><a href="" class="">Safety Recall</a></li>
-								<li><a href="" class="">Privacy policy</a></li>
-								<li><a href="" class="">Site Map</a></li>
-								<li><a href="" class="">Terms & condition</a></li>
+								<li><a href="" class="">{% translate "About us" %}</a></li>
+								<li><a href="" class="">{% translate "Customer Service" %}</a></li>
+								<li><a href="{% url 'contact' %}" class="">{% translate "Contact Us" %}</a></li>
+								<li><a href="" class="">{% translate "Privacy policy" %}</a></li>
+								<li><a href="" class="">{% translate "Terms & condition" %}</a></li>
 							</ul>
 						</div>
 					</div>
 					<div class="col-md-2 col-sm-6  padd-lr0">
 						<div class="wheel-footer-item ">
-							<h3>Vehicles</h3>
+							<h3>{% translate "Vehicles" %}</h3>
 							<ul>
-								<li><a href="" class="">Exotic Cars</a></li>
-								<li><a href="" class="">SUVs</a></li>
-								<li><a href="" class="">Trucks</a></li>
-								<li><a href="" class="">Mini Vans</a></li>
-								<li><a href="" class="">Moving Trucks</a></li>
-								<li><a href="" class="">Vans</a></li>
-								<li><a href="" class="">RVs</a></li>
+								<li><a href="" class="">{% translate "Luxury Cars" %}</a></li>
+								<li><a href="" class="">{% translate "SUVs" %}</a></li>
+								<li><a href="" class="">{% translate "Family Cars" %}</a></li>
+								<li><a href="" class="">{% translate "Economic Cars" %}</a></li>
+								<li><a href="" class="">{% translate "Vans" %}</a></li>
 							</ul>
 						</div>
 					</div>
 					<div class="col-md-4 col-sm-6 padd-lr0">
 						<div class="wheel-footer-gallery">
-							<h3>Photo Gallery</h3>
-							<div class="  clearfix">
+							<h3>{% translate "Photo Gallery" %}</h3>
+							<div class="clearfix">
 								<div class="wheel-footer-galery-item"><a href=""><img src="{% static 'images/i11.jpg' %}" alt=""></a></div>
 								<div class="wheel-footer-galery-item"><a href=""><img src="{% static 'images/i12.jpg' %}" alt=""></a></div>
 								<div class="wheel-footer-galery-item"><a href=""><img src="{% static 'images/i13.jpg' %}" alt=""></a></div>
@@ -280,14 +284,13 @@
 		<div class="wheel-footer-info wheel-bg6">
 			<div class="container">
 				<div class="row">
-					<div class="col-lg-8 col-sm-6  padd-lr0"><span>&#169; WHEEL 2016 | Designed with Love By bigpsfan</span></div>
+					<div class="col-lg-8 col-sm-6  padd-lr0"><span>&#169; {% now "Y" %} | {% translate "Tunisian Rent Car - All rights reserved" %}</span></div>
 					<div class="col-lg-4 col-sm-6 padd-lr0">
 						<ul>
-							<li><a href="">Home</a></li>
-							<li><a href=""> Pages</a></li>
-							<li><a href=""> Listings</a></li>
-							<li><a href=""> Reservation</a></li>
-							<li><a href="">Location</a></li>
+							<li><a href="{% url 'index' %}">{% translate "Home" %}</a></li>
+							<li><a href="{% url 'user_agencies' %}">{% translate "Agencies" %}</a></li>
+							<li><a href="{% url 'user_reservations' %}">{% translate "Reservations" %}</a></li>
+							<li><a href="{% url 'contact' %}">{% translate "Contact" %}</a></li>
 						</ul>
 					</div>
 				</div>
