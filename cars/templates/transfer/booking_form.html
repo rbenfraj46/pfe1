@@ -43,13 +43,13 @@
                     <div class="row">
                         <div class="col-md-4">
                             {% if vehicle.image %}
-                                <img src="{{ vehicle.image.url }}" alt="{{ vehicle.brand }} {{ vehicle.model }}" class="img-fluid rounded">
+                                <img src="{{ vehicle.image.url }}" alt="{{ vehicle.brand }} {{ vehicle.car_model }}" class="img-fluid rounded">
                             {% else %}
                                 <img src="{% static 'images/default-car.jpg' %}" alt="Default vehicle" class="img-fluid rounded">
                             {% endif %}
                         </div>
                         <div class="col-md-8">
-                            <h4>{{ vehicle.brand }} {{ vehicle.model }}</h4>
+                            <h4>{{ vehicle.brand.name }} {{ vehicle.car_model.name }}</h4>
                             <p class="text-muted">{{ vehicle.agence.agency_name }}</p>
                             
                             <div class="driver-info">
@@ -68,6 +68,9 @@
                 <form method="POST" action="{% url 'transfer_booking' vehicle.id %}">
                     {% csrf_token %}
                     
+                    <input type="hidden" name="pricing_type" value="{{ pricing_type }}">
+                    
+                    {% if pricing_type == 'distance' %}
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -83,9 +86,20 @@
                                 <input type="text" name="dropoff_address" class="form-control" value="{{ dropoff_address }}" readonly>
                                 <input type="hidden" name="dropoff_lat" value="{{ dropoff_lat }}">
                                 <input type="hidden" name="dropoff_lng" value="{{ dropoff_lng }}">
+                                <input type="hidden" name="distance" value="{{ distance }}">
                             </div>
                         </div>
                     </div>
+                    {% else %}
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label><i class="fas fa-clock"></i> {% translate "Duration" %}</label>
+                                <input type="number" name="hours" class="form-control" value="{{ hours }}" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
 
                     <div class="row mb-3">
                         <div class="col-md-6">
@@ -97,7 +111,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label><i class="fas fa-users"></i> {% translate "Number of Passengers" %}</label>
-                                <input type="number" name="passengers" class="form-control" value="{{ passengers }}" min="1" max="{{ vehicle.capacity }}" required>
+                                <input type="number" name="passengers" class="form-control" value="{{ passengers }}" min="1" max="{{ vehicle.max_passengers }}" required>
                             </div>
                         </div>
                     </div>
@@ -107,22 +121,34 @@
                         <textarea name="notes" class="form-control" rows="3" placeholder="{% translate 'Any special requirements or requests?' %}"></textarea>
                     </div>
 
-                    <input type="hidden" name="duration" value="{{ duration }}">
-
                     <!-- Informations sur le prix -->
                     <div class="price-info">
                         <h5>{% translate "Price Details" %}</h5>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <p>{% translate "Duration" %}: {{ duration }} {% translate "hours" %}</p>
-                                <p>{% translate "Rate per Hour" %}: {{ vehicle.hourly_rate }} TND</p>
+                        {% if pricing_type == 'distance' %}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p>{% translate "Distance" %}: {{ distance|floatformat:1 }} km</p>
+                                    <p>{% translate "Rate per km" %}: {{ vehicle.price_per_km }} TND</p>
+                                    <p>{% translate "Total by Distance" %}: {{ price_details.by_distance|floatformat:2 }} TND</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p>{% translate "Estimated Duration" %}: {{ price_details.duration|floatformat:1 }}h</p>
+                                    <p>{% translate "Rate per Hour" %}: {{ vehicle.price_per_hour }} TND</p>
+                                    <p>{% translate "Total by Time" %}: {{ price_details.by_hour|floatformat:2 }} TND</p>
+                                </div>
                             </div>
-                            <div class="col-md-6">
-                                <h4 class="text-end">
-                                    {% translate "Total Price" %}: {{ total_price|default:vehicle.hourly_rate|floatformat:2 }} TND
-                                </h4>
+                        {% else %}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p>{% translate "Duration" %}: {{ hours }} {% translate "hours" %}</p>
+                                    <p>{% translate "Rate per Hour" %}: {{ vehicle.price_per_hour }} TND</p>
+                                </div>
                             </div>
-                        </div>
+                        {% endif %}
+                        <hr>
+                        <h4 class="text-end">
+                            {% translate "Total Price" %}: {{ total_price|floatformat:2 }} TND
+                        </h4>
                     </div>
 
                     <div class="mt-4">
@@ -138,19 +164,15 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Calcul automatique du prix total
-    const durationInput = document.querySelector('input[name="duration"]');
-    const ratePerHour = {{ vehicle.hourly_rate }};
+    // Mise à jour dynamique du nombre de passagers maximum
+    const passengersInput = document.querySelector('input[name="passengers"]');
+    const maxPassengers = {{ vehicle.max_passengers }};
     
-    function updateTotalPrice() {
-        const duration = parseFloat(durationInput.value) || 0;
-        const total = duration * ratePerHour;
-        document.querySelector('.price-info h4').textContent = 
-            `{% translate "Total Price" %}: ${total.toFixed(2)} TND`;
-    }
-
-    // Mise à jour du prix lors du chargement
-    updateTotalPrice();
+    passengersInput.addEventListener('input', function() {
+        if (this.value > maxPassengers) {
+            this.value = maxPassengers;
+        }
+    });
 });
 </script>
 {% endblock %}

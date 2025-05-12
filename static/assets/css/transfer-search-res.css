@@ -1,0 +1,56 @@
+.transfer-results-container {
+    margin-top: 176px;
+    padding: 60px 0;
+    background: #f8f9fa;
+}
+
+.search-summary {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    margin-bottom: 30px;
+}
+
+@media (max-width: 991px) {
+    .transfer-results-container {
+        margin-top: 156px;
+        padding: 40px 15px;
+    }
+    
+    .search-summary {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .transfer-results-container {
+        margin-top: 146px;
+        padding: 30px 15px;
+    }
+    
+    .search-summary {
+        margin: 0 15px 20px;
+    }
+    
+    .vehicles-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        margin: 0 15px;
+    }
+}
+
+@media (max-width: 576px) {
+    .transfer-results-container {
+        margin-top: 136px;
+        padding: 20px 10px;
+    }
+    
+    .search-summary {
+        padding: 15px;
+    }
+    
+    .vehicles-grid {
+        grid-template-columns: 1fr;
+    }
+}

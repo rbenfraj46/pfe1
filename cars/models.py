@@ -172,6 +172,47 @@ class AgencyCar(models.Model):
             }
         return None
 
+    def calculate_transfer_price(self, distance=None, hours=None):
+        """Calculer le prix d'un transfert selon la distance ou la durée"""
+        if not self.for_transfer:
+            return None
+
+        total_price = 0
+        price_details = {}
+
+        if hours is not None:
+            # Tarification horaire
+            if self.price_per_hour:
+                total_price = float(self.price_per_hour) * float(hours)
+                price_details = {
+                    'by_hour': total_price,
+                    'hours': hours,
+                    'rate_per_hour': float(self.price_per_hour),
+                    'final_price': total_price
+                }
+        elif distance is not None:
+            # Tarification au kilomètre
+            if self.price_per_km:
+                price_by_distance = float(self.price_per_km) * float(distance)
+                # Estimation de la durée (1h par 50km en moyenne)
+                estimated_duration = max(1, float(distance) / 50)
+                price_by_hour = float(self.price_per_hour) * estimated_duration if self.price_per_hour else 0
+                
+                # Prendre le prix le plus élevé
+                total_price = max(price_by_distance, price_by_hour)
+                price_details = {
+                    'by_distance': price_by_distance,
+                    'by_hour': price_by_hour,
+                    'distance': distance,
+                    'duration': estimated_duration,
+                    'final_price': total_price
+                }
+
+        return {
+            'total_price': total_price,
+            'price_details': price_details
+        } if total_price > 0 else None
+
     def clean(self):
         super().clean()
         if self.with_driver:
@@ -180,6 +221,19 @@ class AgencyCar(models.Model):
             
             if self.driver_experience_years and self.driver_experience_years < 1:
                 raise ValidationError(_('Driver must have at least 1 year of experience'))
+
+        if self.for_transfer:
+            if not all([self.price_per_km, self.price_per_hour, self.max_passengers]):
+                raise ValidationError(_('Price per kilometer, price per hour and maximum passengers are required for transfer service'))
+            
+            if self.price_per_km and self.price_per_km <= 0:
+                raise ValidationError(_('Price per kilometer must be greater than zero'))
+            
+            if self.price_per_hour and self.price_per_hour <= 0:
+                raise ValidationError(_('Price per hour must be greater than zero'))
+            
+            if self.max_passengers and self.max_passengers < 1:
+                raise ValidationError(_('Maximum passengers must be at least 1'))
 
     def get_driver_info(self):
         """Retourner un dictionnaire avec les informations formatées du chauffeur"""
@@ -194,7 +248,7 @@ class AgencyCar(models.Model):
             'languages': self.driver_languages.split(',') if self.driver_languages else [],
             'experience_level': self.get_driver_experience_level()
         }
-    
+
     def get_driver_experience_level(self):
         """Retourner le niveau d'expérience du chauffeur basé sur ses années d'expérience"""
         if not self.with_driver or not self.driver_experience_years:
@@ -212,6 +266,19 @@ class AgencyCar(models.Model):
         if not self.with_driver or not self.driver_languages:
             return False
         return len(self.driver_languages.split(',')) > 1
+
+    def get_transfer_info(self):
+        """Retourner un dictionnaire avec les informations formatées du service de transfert"""
+        if not self.for_transfer:
+            return None
+
+        return {
+            'price_per_km': float(self.price_per_km) if self.price_per_km else None,
+            'price_per_hour': float(self.price_per_hour) if self.price_per_hour else None,
+            'max_passengers': self.max_passengers,
+            'max_luggage_pieces': self.max_luggage_pieces,
+            'max_luggage_weight': float(self.max_luggage_weight) if self.max_luggage_weight else None
+        }
         
     class Meta:
         db_table = "agency_car"

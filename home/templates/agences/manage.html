@@ -7,7 +7,6 @@
     <link rel="stylesheet" type="text/css" href="{% static 'assets/css/home.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'assets/css/manage.css' %}" />
     <script type="text/javascript" src="{% static 'assets/js/home.js' %}"></script>
-
 {% endblock headerContent %}
 
 {% block bodyContent %}
@@ -224,13 +223,20 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-6 mb-4">
+            <div class="card chart-card">
+                <div class="card-body">
+                    <h5 class="card-title text-center">{% translate "Monthly Revenue" %}</h5>
+                    <canvas id="monthlyRevenueChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 {% endblock bodyContent %}
 
-{% block headerJSContent %}
-{{ block.super }}
+{% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     // Pie Chart - Répartition des statuts
@@ -368,6 +374,55 @@
         }
     });
 
+    // Bar Chart - Revenus mensuels
+    const monthlyRevenueCtx = document.getElementById('monthlyRevenueChart').getContext('2d');
+    new Chart(monthlyRevenueCtx, {
+        type: 'line',
+        data: {
+            labels: {{ stats.monthly_labels|safe }},
+            datasets: [{
+                label: '{% translate "Revenue" %}',
+                data: {{ stats.monthly_revenue|safe }},
+                borderColor: 'rgba(23,162,184,0.85)',
+                backgroundColor: 'rgba(23,162,184,0.2)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#fff',
+                    titleColor: '#222',
+                    bodyColor: '#222',
+                    borderColor: '#17a2b8',
+                    borderWidth: 1,
+                    padding: 12,
+                    callbacks: {
+                        label: function(context) {
+                            return context.parsed.y + ' {% translate "TND" %}';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1, color: '#333', font: { size: 14 } },
+                    grid: { color: '#e3e9f7' }
+                },
+                x: {
+                    ticks: { color: '#333', font: { size: 13 } },
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+
+    // Auto approve toggle handler
     $('#autoApproveToggle').change(function() {
         const agencyId = $(this).data('agency-id');
         const isChecked = $(this).prop('checked');
@@ -384,16 +439,14 @@
                     toastr.success("{% translate 'Settings updated successfully' %}");
                 } else {
                     toastr.error(response.message || "{% translate 'An error occurred' %}");
-                    // Revert toggle if update failed
                     $('#autoApproveToggle').prop('checked', !isChecked);
                 }
             },
             error: function() {
                 toastr.error("{% translate 'Failed to update settings' %}");
-                // Revert toggle if update failed
                 $('#autoApproveToggle').prop('checked', !isChecked);
             }
         });
     });
 </script>
-{% endblock %}
+{% endblock scripts %}

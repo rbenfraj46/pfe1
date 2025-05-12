@@ -20,10 +20,10 @@
 
 /* Layout principal */
 .main-container {
-    margin-top: 190px;
-    background: var(--background-light);
-    min-height: 100vh;
-    padding: 40px 0;
+    margin-top: 176px;
+    padding: 20px 0;
+    min-height: calc(100vh - 176px);
+    background-color: var(--background-light);
 }
 
 /* Sidebar des filtres */
@@ -415,15 +415,16 @@
 }
 
 @media (max-width: 991px) {
+    .main-container {
+        margin-top: 156px;
+        padding: 15px;
+    }
+    
     .filters-section {
         position: relative;
         top: 0;
         margin-bottom: 30px;
         max-height: none;
-    }
-    
-    .main-container {
-        margin-top: 100px;
     }
     
     .sort-section {
@@ -435,9 +436,13 @@
     }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
     .main-container {
-        padding: 20px 0;
+        margin-top: 146px;
+    }
+    
+    .filters-section {
+        margin-bottom: 20px;
     }
     
     .car-img-wrapper {
@@ -475,17 +480,29 @@
     }
 }
 
-@media (max-width: 575px) {
+@media (max-width: 576px) {
+    .main-container {
+        margin-top: 136px;
+        padding: 10px;
+    }
+    
     .filters-section {
         margin: 0 15px 20px;
     }
     
     .sort-section {
         margin: 0 15px 20px;
+        flex-direction: column;
+    }
+    
+    .sort-select {
+        margin-top: 15px;
+        width: 100%;
     }
     
     .card-car {
         margin: 0 15px 20px;
+        margin-bottom: 15px;
     }
     
     .car-title {

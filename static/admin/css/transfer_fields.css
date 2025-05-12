@@ -1,0 +1,40 @@
+.transfer-info {
+    padding: 10px;
+    margin: 10px 0;
+    border-left: 4px solid #4CAF50;
+}
+
+.transfer-info.collapsed {
+    display: none;
+}
+
+.transfer-info .description {
+    color: #666;
+    font-style: italic;
+    margin-bottom: 15px;
+}
+
+.form-row.field-price_per_km input[type="number"],
+.form-row.field-price_per_hour input[type="number"] {
+    width: 120px;
+}
+
+.form-row.field-max_passengers input[type="number"],
+.form-row.field-max_luggage_pieces input[type="number"] {
+    width: 80px;
+}
+
+.form-row.field-max_luggage_weight input[type="number"] {
+    width: 100px;
+}
+
+/* Style spécifique pour les champs requis */
+.form-row.required label {
+    font-weight: bold;
+}
+
+.form-row.required label:after {
+    content: '*';
+    color: #ba2121;
+    margin-left: 3px;
+}

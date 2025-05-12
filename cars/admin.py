@@ -87,11 +87,12 @@ class CarAdmin(admin.ModelAdmin):
 
 @admin.register(AgencyCar)
 class AgencyCarAdmin(admin.ModelAdmin):
-    list_display = ('get_car_info', 'agence', 'price_per_day', 'is_active', 'available', 'with_driver', 'get_driver_info', 'get_car_image')
-    list_filter = ('is_active', 'available', 'with_driver', 'agence', 'brand', 'gear_type')
+    list_display = ('get_car_info', 'agence', 'price_per_day', 'is_active', 'available', 'with_driver', 'for_transfer', 'get_driver_info', 'get_transfer_info', 'get_car_image')
+    list_filter = ('is_active', 'available', 'with_driver', 'for_transfer', 'agence', 'brand', 'gear_type')
     search_fields = ('brand__name', 'car_model__name', 'agence__agency_name', 'driver_name', 'driver_phone')
     ordering = ('-created',)
     list_editable = ('is_active', 'available', 'price_per_day')
+    
     fieldsets = (
         (_('Basic Information'), {
             'fields': ('agence', 'brand', 'car_model', 'gear_type', 'image')
@@ -103,19 +104,37 @@ class AgencyCarAdmin(admin.ModelAdmin):
             'fields': ('with_driver', 'driver_name', 'driver_phone', 'driver_license_number', 'driver_experience_years', 'driver_languages'),
             'classes': ('driver-info',),
             'description': _('Configure driver information for cars with chauffeur service.')
+        }),
+        (_('Transfer Service'), {
+            'fields': ('for_transfer', 'price_per_km', 'price_per_hour', 'max_passengers', 'max_luggage_pieces', 'max_luggage_weight'),
+            'classes': ('transfer-info',),
+            'description': _('Configure transfer service information for this vehicle.')
         })
     )
-    
+
     def get_car_info(self, obj):
         return f"{obj.brand} {obj.car_model}" if obj.brand and obj.car_model else "-"
     get_car_info.short_description = _("Car")
-    
+
     def get_driver_info(self, obj):
         if obj.with_driver and obj.driver_name:
             return f"{obj.driver_name} ({obj.driver_experience_years} {_('years exp.')})"
         return "-"
     get_driver_info.short_description = _("Driver")
-    
+
+    def get_transfer_info(self, obj):
+        if obj.for_transfer:
+            info = []
+            if obj.price_per_km:
+                info.append(f"{obj.price_per_km} TND/km")
+            if obj.price_per_hour:
+                info.append(f"{obj.price_per_hour} TND/h")
+            if obj.max_passengers:
+                info.append(f"{obj.max_passengers} {_('passengers')}")
+            return " • ".join(info) if info else _("Configured")
+        return "-"
+    get_transfer_info.short_description = _("Transfer Service")
+
     def get_car_image(self, obj):
         if obj.image:
             return format_html('<img src="{}" style="max-height: 50px;" />', obj.image.url)
@@ -123,9 +142,15 @@ class AgencyCarAdmin(admin.ModelAdmin):
     get_car_image.short_description = _("Image")
 
     class Media:
-        js = ('admin/js/driver_fields.js',)
+        js = [
+            'admin/js/driver_fields.js',
+            'admin/js/transfer_fields.js'
+        ]
         css = {
-            'all': ('admin/css/driver_fields.css',)
+            'all': [
+                'admin/css/driver_fields.css',
+                'admin/css/transfer_fields.css'
+            ]
         }
 
 @admin.register(CarUnavailability)

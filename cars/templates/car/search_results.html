@@ -6,6 +6,116 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.6.3/nouislider.min.css">
 <link rel="stylesheet" href="{% static 'assets/css/car-search-res.css' %}" />
+<style>
+    .main-container {
+        margin-top: 180px;
+        padding-bottom: 40px;
+    }
+    .car-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease;
+        height: 100%;
+    }
+    .car-card:hover {
+        transform: translateY(-5px);
+    }
+    .car-img-wrapper {
+        height: 200px;
+        overflow: hidden;
+        position: relative;
+    }
+    .car-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .car-info {
+        padding: 20px;
+    }
+    .car-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #333;
+    }
+    .driver-info-badge {
+        display: inline-flex;
+        align-items: center;
+        background: #ff7043;
+        color: white;
+        padding: 8px 15px;
+        border-radius: 20px;
+        margin-bottom: 15px;
+        font-size: 0.9rem;
+    }
+    .driver-info-badge i {
+        margin-right: 8px;
+    }
+    .car-specs {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    .spec-item {
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+        color: #666;
+    }
+    .spec-item i {
+        margin-right: 8px;
+        color: #ff7043;
+    }
+    .car-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: auto;
+    }
+    .price-tag {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #333;
+    }
+    .price-tag small {
+        font-size: 0.8rem;
+        color: #666;
+    }
+    .rent-now-btn {
+        background: #ff7043;
+        color: white;
+        padding: 8px 20px;
+        border-radius: 25px;
+        text-decoration: none;
+        transition: background 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+    }
+    .rent-now-btn:hover {
+        background: #f4511e;
+        color: white;
+    }
+    .rent-now-btn i {
+        margin-right: 8px;
+    }
+    .experience-badge {
+        display: inline-block;
+        background: #e8f5e9;
+        color: #2e7d32;
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        margin-top: 10px;
+    }
+    .experience-badge i {
+        color: #2e7d32;
+        margin-right: 5px;
+    }
+</style>
 {% endblock %}
 
 {% block bodyContent %}
@@ -222,7 +332,7 @@
                     {% for car in cars %}
                     <div class="col-xl-6">
                         <a href="{% url 'car_detail' car.id %}" class="text-decoration-none">
-                            <div class="card card-car">
+                            <div class="card car-card">
                                 {% if comparison_enabled %}
                                 <div class="comparison-container position-absolute top-0 end-0 m-3 z-1">
                                     <div class="form-check">
@@ -250,6 +360,10 @@
                                     <div class="driver-info-badge">
                                         <i class="fas fa-user-tie"></i>
                                         <span>{% translate "With Professional Driver" %}</span>
+                                    </div>
+                                    <div class="experience-badge">
+                                        <i class="fas fa-star"></i>
+                                        {{ car.driver_experience_years }} {% translate "years experience" %}
                                     </div>
                                     {% endif %}
                                     

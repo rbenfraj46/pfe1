@@ -219,12 +219,28 @@ class UpdateCarView(LoginRequiredMixin, CarManagementMixin, View):
                 car.driver_license_number = request.POST.get('driver_license_number')
                 car.driver_experience_years = request.POST.get('driver_experience_years')
                 car.driver_languages = request.POST.get('driver_languages')
+                car.security_deposit = 0  # Pas de caution pour les voitures avec chauffeur
             else:
                 car.driver_name = None
                 car.driver_phone = None
                 car.driver_license_number = None
                 car.driver_experience_years = None
                 car.driver_languages = None
+            
+            # Gestion des informations de transfert
+            car.for_transfer = request.POST.get('for_transfer') == 'on'
+            if car.for_transfer:
+                car.price_per_km = request.POST.get('price_per_km')
+                car.price_per_hour = request.POST.get('price_per_hour')
+                car.max_passengers = request.POST.get('max_passengers')
+                car.max_luggage_pieces = request.POST.get('max_luggage_pieces')
+                car.max_luggage_weight = request.POST.get('max_luggage_weight')
+            else:
+                car.price_per_km = None
+                car.price_per_hour = None
+                car.max_passengers = None
+                car.max_luggage_pieces = None
+                car.max_luggage_weight = None
             
             if request.FILES.get('image'):
                 car.image = request.FILES.get('image')
@@ -373,24 +389,22 @@ class RegisterCarView(LoginRequiredMixin, CarManagementMixin, View):
                 car.driver_license_number = request.POST.get('driver_license_number')
                 car.driver_experience_years = request.POST.get('driver_experience_years')
                 car.driver_languages = request.POST.get('driver_languages')
+                car.security_deposit = 0  # Pas de caution pour les voitures avec chauffeur
+
+            # Gestion des informations de transfert
+            car.for_transfer = request.POST.get('for_transfer') == 'on'
+            if car.for_transfer:
+                car.price_per_km = request.POST.get('price_per_km')
+                car.price_per_hour = request.POST.get('price_per_hour')
+                car.max_passengers = request.POST.get('max_passengers')
+                car.max_luggage_pieces = request.POST.get('max_luggage_pieces')
+                car.max_luggage_weight = request.POST.get('max_luggage_weight')
             
             if request.FILES.get('image'):
                 car.image = request.FILES['image']
-                
+            
             car.save()
             
-            # Gestion des périodes d'indisponibilité
-            start_dates = request.POST.getlist('unavailability_periods[start][]')
-            end_dates = request.POST.getlist('unavailability_periods[end][]')
-            
-            for start_date, end_date in zip(start_dates, end_dates):
-                if start_date and end_date:
-                    CarUnavailability.objects.create(
-                        car=car,
-                        start_date=start_date,
-                        end_date=end_date
-                    )
-                    
             messages.success(request, _('Car added successfully'))
             return redirect('agency_cars_list', agency_id=agency_id)
             

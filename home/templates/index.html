@@ -5,6 +5,50 @@
 {% block headerContent %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 <link rel="stylesheet" href="{% static 'assets/css/car-search.css' %}" />
+<style>
+    .services-nav {
+        background: #f8f9fa;
+        padding: 20px 0;
+        margin-bottom: 30px;
+    }
+    .service-option {
+        text-align: center;
+        padding: 25px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    .service-option:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+    .service-option i {
+        font-size: 2.5rem;
+        color: #ff7043;
+        margin-bottom: 15px;
+    }
+    .service-option h3 {
+        margin-bottom: 15px;
+        color: #333;
+    }
+    .service-option p {
+        color: #666;
+        margin-bottom: 20px;
+    }
+    .service-option .btn {
+        background: linear-gradient(135deg, #ff7043, #f4511e);
+        border: none;
+        padding: 10px 25px;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+    }
+    .service-option .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(244,81,30,0.2);
+    }
+</style>
 {% endblock %}
 
 {% block bodyContent %}
@@ -14,6 +58,35 @@
             <h1 class="hero-title">{% translate "Find Your Perfect Ride" %}</h1>
             <p class="hero-subtitle">{% translate "Discover the freedom of exploring Tunisia with our premium car rental service" %}</p>
             <a href="#search-form" class="btn btn-primary btn-lg">{% translate "Rent Now" %}</a>
+        </div>
+    </div>
+</div>
+
+<div class="services-nav">
+    <div class="container">
+        <div class="row text-center mb-4">
+            <div class="col-12">
+                <h2>{% translate "Our Services" %}</h2>
+                <p class="lead">{% translate "Choose the service that best fits your needs" %}</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="service-option">
+                    <i class="fas fa-car"></i>
+                    <h3>{% translate "Car Rental" %}</h3>
+                    <p>{% translate "Rent a car and drive yourself. Choose from our wide range of vehicles for short or long-term rentals." %}</p>
+                    <a href="#search-form" class="btn btn-primary">{% translate "Rent a Car" %}</a>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="service-option">
+                    <i class="fas fa-car-side"></i>
+                    <h3>{% translate "Transfer Service" %}</h3>
+                    <p>{% translate "Book a professional driver for airport transfers, city tours, or any other travel needs. Fixed prices, no hidden fees." %}</p>
+                    <a href="{% url 'transfer_search' %}" class="btn btn-primary">{% translate "Book Transfer" %}</a>
+                </div>
+            </div>
         </div>
     </div>
 </div>
