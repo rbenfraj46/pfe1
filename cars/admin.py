@@ -13,7 +13,7 @@ import logging
 from cars.models import (
     Brand, GearType, CarModel, Transmission, 
     AgencyCar, CarUnavailability, CarModelRequest,
-    CarReservation, TransferVehicle, TransferBooking
+    CarReservation, TransferBooking
 )
 from cars.forms import CarModelAdminForm, BrandAdminForm
 
@@ -326,59 +326,44 @@ class CarReservationAdmin(admin.ModelAdmin):
             return self.readonly_fields + ('car', 'user', 'start_date', 'end_date')
         return self.readonly_fields
 
-@admin.register(TransferVehicle)
-class TransferVehicleAdmin(admin.ModelAdmin):
-    list_display = ('get_vehicle_info', 'agence', 'capacity', 'hourly_rate', 'driver_name', 'is_active', 'available')
-    list_filter = ('vehicle_type', 'is_active', 'available', 'agence')
-    search_fields = ('model', 'driver_name', 'driver_phone', 'agence__agency_name')
-    ordering = ('-created',)
-    list_editable = ('is_active', 'available', 'hourly_rate')
-    
-    fieldsets = (
-        (_('Vehicle Information'), {
-            'fields': (
-                'agence', 'vehicle_type', 'brand', 'model', 'capacity',
-                'hourly_rate', 'minimum_hours', 'image'
-            )
-        }),
-        (_('Driver Information'), {
-            'fields': (
-                'driver_name', 'driver_phone', 'driver_license_number',
-                'driver_experience_years', 'driver_languages'
-            )
-        }),
-        (_('Status'), {
-            'fields': ('is_active', 'available')
-        })
-    )
-    
-    def get_vehicle_info(self, obj):
-        return f"{obj.get_vehicle_type_display()} - {obj.brand} {obj.model}"
-    get_vehicle_info.short_description = _("Vehicle")
-
 @admin.register(TransferBooking)
 class TransferBookingAdmin(admin.ModelAdmin):
-    list_display = ('id', 'get_vehicle_info', 'user', 'pickup_date', 'status', 'total_price', 'created_at')
-    list_filter = ('status', 'vehicle__vehicle_type', 'vehicle__agence', 'created_at')
+    list_display = ('id', 'vehicle', 'user', 'pickup_date', 'pricing_type', 'total_price', 'status', 'payment_status')
+    list_filter = ('status', 'payment_status', 'pricing_type', 'vehicle__agence')
     search_fields = ('user__username', 'user__email', 'pickup_address', 'dropoff_address', 'notes')
-    ordering = ('-created_at',)
-    readonly_fields = ('created_at', 'updated_at', 'total_price')
+    readonly_fields = ('created_at', 'updated_at')
     
     fieldsets = (
-        (_('Booking Information'), {
-            'fields': ('vehicle', 'user', 'status', 'total_price')
+        (_('Basic Information'), {
+            'fields': ('vehicle', 'user', 'pickup_date', 'status')
         }),
-        (_('Journey Details'), {
+        (_('Locations'), {
             'fields': (
-                'pickup_location', 'dropoff_location', 'pickup_address', 'dropoff_address',
-                'pickup_date', 'estimated_duration', 'passengers_count'
+                'pickup_location', 'pickup_address',
+                'dropoff_location', 'dropoff_address'
             )
         }),
-        (_('Additional Information'), {
-            'fields': ('notes', 'created_at', 'updated_at')
+        (_('Booking Details'), {
+            'fields': (
+                'pricing_type', 'distance', 'duration_hours',
+                'passengers_count', 'luggage_pieces', 'luggage_weight',
+                'notes'
+            )
+        }),
+        (_('Payment Information'), {
+            'fields': (
+                'total_price', 'payment_status', 'amount_paid',
+                'last_payment_date'
+            )
+        }),
+        (_('Timestamps'), {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
         })
     )
-    
-    def get_vehicle_info(self, obj):
-        return f"{obj.vehicle.get_vehicle_type_display()} - {obj.vehicle.brand} {obj.vehicle.model}"
-    get_vehicle_info.short_description = _("Vehicle")
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:  # En mode édition
+            return self.readonly_fields + ('vehicle', 'user', 'pickup_date', 'pricing_type')
+        return self.readonly_fields
+

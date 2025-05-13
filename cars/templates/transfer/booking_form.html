@@ -1,176 +1,294 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% load static %}
+{% load cars_extras %}
 
 {% block headerContent %}
 <link rel="stylesheet" href="{% static 'assets/css/transfer-booking.css' %}" />
 <style>
     .booking-form {
         background: white;
+        border-radius: 15px;
         padding: 30px;
-        border-radius: 12px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+        margin-top: 120px;
     }
+
     .vehicle-info {
         background: #f8f9fa;
-        border-radius: 8px;
+        border-radius: 12px;
         padding: 20px;
-        margin-bottom: 30px;
+        margin-bottom: 25px;
     }
-    .driver-info {
-        border-left: 4px solid #ff7043;
-        padding-left: 15px;
-        margin: 15px 0;
-    }
-    .price-info {
-        background: #fff8f6;
+
+    .vehicle-info img {
+        max-width: 100%;
+        height: 200px;
+        object-fit: cover;
         border-radius: 8px;
+    }
+
+    .vehicle-details {
+        margin-top: 20px;
+    }
+
+    .location-input {
+        margin-bottom: 20px;
+    }
+
+    .location-input i {
+        color: #ff7043;
+    }
+
+    .price-details {
+        background: #fff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        margin-top: 20px;
+    }
+
+    .price-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .total-price {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #333;
+        margin-top: 15px;
+    }
+
+    .driver-info {
+        background: #e3f2fd;
+        border-radius: 12px;
         padding: 20px;
         margin-top: 20px;
+    }
+
+    .driver-info i {
+        color: #1565c0;
+        width: 24px;
     }
 </style>
 {% endblock %}
 
 {% block bodyContent %}
-<div class="container" style="margin-top: 120px; margin-bottom: 40px;">
-    <div class="row">
-        <div class="col-lg-8 mx-auto">
-            <div class="booking-form">
-                <h3 class="mb-4">{% translate "Transfer Booking" %}</h3>
-
-                <!-- Information sur le véhicule -->
-                <div class="vehicle-info">
-                    <div class="row">
-                        <div class="col-md-4">
-                            {% if vehicle.image %}
-                                <img src="{{ vehicle.image.url }}" alt="{{ vehicle.brand }} {{ vehicle.car_model }}" class="img-fluid rounded">
-                            {% else %}
-                                <img src="{% static 'images/default-car.jpg' %}" alt="Default vehicle" class="img-fluid rounded">
-                            {% endif %}
-                        </div>
-                        <div class="col-md-8">
-                            <h4>{{ vehicle.brand.name }} {{ vehicle.car_model.name }}</h4>
-                            <p class="text-muted">{{ vehicle.agence.agency_name }}</p>
-                            
-                            <div class="driver-info">
-                                <h5><i class="fas fa-user-tie"></i> {% translate "Your Driver" %}</h5>
-                                <p class="mb-1">{{ vehicle.driver_name }}</p>
-                                <p class="mb-1">{% translate "Experience" %}: {{ vehicle.driver_experience_years }} {% translate "years" %}</p>
-                                {% if vehicle.driver_languages %}
-                                    <p class="mb-0">{% translate "Languages" %}: {{ vehicle.driver_languages }}</p>
-                                {% endif %}
-                            </div>
-                        </div>
+<div class="container">
+    <div class="booking-form">
+        <h2>{% trans "Transfer Booking" %}</h2>
+        
+        <!-- Informations sur le véhicule -->
+        <div class="vehicle-info">
+            <div class="row">
+                <div class="col-md-4">
+                    {% if vehicle.image %}
+                        <img src="{{ vehicle.image.url }}" alt="{{ vehicle }}" class="img-fluid">
+                    {% endif %}
+                </div>
+                <div class="col-md-8">
+                    <h3>{{ vehicle.brand }} {{ vehicle.car_model }}</h3>
+                    <p>{{ vehicle.agence.agency_name }}</p>
+                    <div class="vehicle-details">
+                        <p><i class="fas fa-users"></i> {% trans "Maximum" %} {{ vehicle.max_passengers }} {% trans "passengers" %}</p>
+                        {% if vehicle.max_luggage_pieces %}
+                            <p><i class="fas fa-suitcase"></i> {% trans "Up to" %} {{ vehicle.max_luggage_pieces }} {% trans "luggage pieces" %}</p>
+                        {% endif %}
+                        {% if vehicle.max_luggage_weight %}
+                            <p><i class="fas fa-weight-hanging"></i> {% trans "Maximum" %} {{ vehicle.max_luggage_weight }}kg</p>
+                        {% endif %}
                     </div>
                 </div>
-
-                <!-- Formulaire de réservation -->
-                <form method="POST" action="{% url 'transfer_booking' vehicle.id %}">
-                    {% csrf_token %}
-                    
-                    <input type="hidden" name="pricing_type" value="{{ pricing_type }}">
-                    
-                    {% if pricing_type == 'distance' %}
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label><i class="fas fa-map-marker-alt text-danger"></i> {% translate "Pickup Location" %}</label>
-                                <input type="text" name="pickup_address" class="form-control" value="{{ pickup_address }}" readonly>
-                                <input type="hidden" name="pickup_lat" value="{{ pickup_lat }}">
-                                <input type="hidden" name="pickup_lng" value="{{ pickup_lng }}">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label><i class="fas fa-map-marker text-success"></i> {% translate "Drop-off Location" %}</label>
-                                <input type="text" name="dropoff_address" class="form-control" value="{{ dropoff_address }}" readonly>
-                                <input type="hidden" name="dropoff_lat" value="{{ dropoff_lat }}">
-                                <input type="hidden" name="dropoff_lng" value="{{ dropoff_lng }}">
-                                <input type="hidden" name="distance" value="{{ distance }}">
-                            </div>
-                        </div>
-                    </div>
-                    {% else %}
-                    <div class="row mb-3">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label><i class="fas fa-clock"></i> {% translate "Duration" %}</label>
-                                <input type="number" name="hours" class="form-control" value="{{ hours }}" readonly>
-                            </div>
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label><i class="fas fa-calendar-alt"></i> {% translate "Pickup Date & Time" %}</label>
-                                <input type="datetime-local" name="pickup_date" class="form-control" value="{{ pickup_date }}" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label><i class="fas fa-users"></i> {% translate "Number of Passengers" %}</label>
-                                <input type="number" name="passengers" class="form-control" value="{{ passengers }}" min="1" max="{{ vehicle.max_passengers }}" required>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label><i class="fas fa-comment"></i> {% translate "Special Requests or Notes" %}</label>
-                        <textarea name="notes" class="form-control" rows="3" placeholder="{% translate 'Any special requirements or requests?' %}"></textarea>
-                    </div>
-
-                    <!-- Informations sur le prix -->
-                    <div class="price-info">
-                        <h5>{% translate "Price Details" %}</h5>
-                        {% if pricing_type == 'distance' %}
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <p>{% translate "Distance" %}: {{ distance|floatformat:1 }} km</p>
-                                    <p>{% translate "Rate per km" %}: {{ vehicle.price_per_km }} TND</p>
-                                    <p>{% translate "Total by Distance" %}: {{ price_details.by_distance|floatformat:2 }} TND</p>
-                                </div>
-                                <div class="col-md-6">
-                                    <p>{% translate "Estimated Duration" %}: {{ price_details.duration|floatformat:1 }}h</p>
-                                    <p>{% translate "Rate per Hour" %}: {{ vehicle.price_per_hour }} TND</p>
-                                    <p>{% translate "Total by Time" %}: {{ price_details.by_hour|floatformat:2 }} TND</p>
-                                </div>
-                            </div>
-                        {% else %}
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <p>{% translate "Duration" %}: {{ hours }} {% translate "hours" %}</p>
-                                    <p>{% translate "Rate per Hour" %}: {{ vehicle.price_per_hour }} TND</p>
-                                </div>
-                            </div>
-                        {% endif %}
-                        <hr>
-                        <h4 class="text-end">
-                            {% translate "Total Price" %}: {{ total_price|floatformat:2 }} TND
-                        </h4>
-                    </div>
-
-                    <div class="mt-4">
-                        <button type="submit" class="btn btn-primary btn-lg w-100">
-                            <i class="fas fa-check-circle"></i> {% translate "Confirm Booking" %}
-                        </button>
-                    </div>
-                </form>
             </div>
         </div>
+
+        {% if vehicle.with_driver %}
+        <div class="driver-info">
+            <h4><i class="fas fa-user-tie"></i> {% trans "Professional Driver" %}</h4>
+            <div class="driver-details">
+                <p><i class="fas fa-history"></i> {% trans "Experience Level" %}: {{ vehicle.get_driver_experience_level }}</p>
+                {% if vehicle.driver_languages %}
+                    <p><i class="fas fa-language"></i> {% trans "Languages" %}: {{ vehicle.driver_languages }}</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <form method="post" id="bookingForm">
+            {% csrf_token %}
+            
+            <!-- Type de tarification et détails -->
+            <input type="hidden" name="pricing_type" value="{{ pricing_type }}">
+            {% if pricing_type == 'distance' %}
+                <input type="hidden" name="distance" value="{{ distance }}">
+            {% else %}
+                <input type="hidden" name="hours" value="{{ hours }}">
+            {% endif %}
+
+            <!-- Type de tarification -->
+            <div class="pricing-type-info mb-4">
+                <h4>{% trans "Pricing Type" %}</h4>
+                <div class="alert {% if pricing_type == 'hourly' %}alert-info{% else %}alert-primary{% endif %}">
+                    {% if pricing_type == 'hourly' %}
+                        <i class="fas fa-clock"></i> {% trans "Hourly Rate" %}: {{ vehicle.price_per_hour }} DT/{% trans "hour" %}
+                    {% else %}
+                        <i class="fas fa-route"></i> {% trans "Distance Rate" %}: {{ vehicle.price_per_km }} DT/{% trans "km" %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Détails du trajet -->
+            <div class="row mt-4">
+                {% if pricing_type == 'distance' %}
+                <!-- Champs pour tarification par distance -->
+                <div class="col-md-6">
+                    <div class="location-input">
+                        <label><i class="fas fa-map-marker-alt"></i> {% trans "Pickup Location" %}</label>
+                        <input type="text" class="form-control" name="pickup_address" value="{{ pickup_address }}" required readonly>
+                        <input type="hidden" name="pickup_lat" value="{{ pickup_lat }}">
+                        <input type="hidden" name="pickup_lng" value="{{ pickup_lng }}">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="location-input">
+                        <label><i class="fas fa-map-marker-alt"></i> {% trans "Drop-off Location" %}</label>
+                        <input type="text" class="form-control" name="dropoff_address" value="{{ dropoff_address }}" required readonly>
+                        <input type="hidden" name="dropoff_lat" value="{{ dropoff_lat }}">
+                        <input type="hidden" name="dropoff_lng" value="{{ dropoff_lng }}">
+                    </div>
+                </div>
+                {% else %}
+                <!-- Champs pour tarification horaire -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label><i class="fas fa-hourglass-half"></i> {% trans "Duration (Hours)" %}</label>
+                        <input type="number" class="form-control" name="duration_hours" value="{{ hours }}" min="1" step="0.5" required>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Champs communs -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label><i class="far fa-calendar-alt"></i> {% trans "Pickup Date and Time" %}</label>
+                        <input type="datetime-local" class="form-control" name="pickup_date" value="{{ pickup_date }}" required>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label><i class="fas fa-users"></i> {% trans "Passengers" %}</label>
+                        <input type="number" class="form-control" name="passengers" value="{{ passengers }}" min="1" max="{{ vehicle.max_passengers }}" required>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label><i class="fas fa-suitcase"></i> {% trans "Luggage Pieces" %}</label>
+                        <input type="number" class="form-control" name="luggage_pieces" value="{{ luggage_pieces|default:0 }}" min="0" {% if vehicle.max_luggage_pieces %}max="{{ vehicle.max_luggage_pieces }}"{% endif %}>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes additionnelles -->
+            <div class="form-group mt-3">
+                <label><i class="fas fa-comment"></i> {% trans "Additional Notes" %}</label>
+                <textarea class="form-control" name="notes" rows="3"></textarea>
+            </div>
+
+            <!-- Détails du prix -->
+            {% if price_info %}
+            <div class="price-details">
+                <h4>{% trans "Price Details" %}</h4>
+                {% if price_info.price_details.by_distance %}
+                    <div class="price-item">
+                        <span>{% trans "Distance Price" %}</span>
+                        <span>{{ price_info.price_details.by_distance|floatformat:2 }} DT</span>
+                    </div>
+                {% endif %}
+                {% if price_info.price_details.by_hour %}
+                    <div class="price-item">
+                        <span>{% trans "Time-based Price" %}</span>
+                        <span>{{ price_info.price_details.by_hour|floatformat:2 }} DT</span>
+                    </div>
+                {% endif %}
+                <div class="total-price">
+                    <div class="price-item">
+                        <span>{% trans "Total Price" %}</span>
+                        <span>{{ price_info.total_price|floatformat:2 }} DT</span>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    {% trans "Confirm Booking" %}
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Mise à jour dynamique du nombre de passagers maximum
-    const passengersInput = document.querySelector('input[name="passengers"]');
-    const maxPassengers = {{ vehicle.max_passengers }};
-    
-    passengersInput.addEventListener('input', function() {
-        if (this.value > maxPassengers) {
-            this.value = maxPassengers;
+    var form = document.getElementById('bookingForm');
+    var pricingType = document.querySelector('input[name="pricing_type"]').value;
+
+    form.addEventListener('submit', function(e) {
+        var isValid = true;
+        var errorMessage = '';
+
+        var pickupDate = new Date(this.elements['pickup_date'].value);
+        var now = new Date();
+        var pricingType = "{{ pricing_type }}";
+        
+        // Validation de la date uniquement pour la tarification par distance
+        if (pricingType === 'distance' && pickupDate <= now) {
+            isValid = false;
+            errorMessage = "{% trans 'Pickup date must be in the future for distance-based transfers' %}";
+        }
+
+        // Validation des passagers
+        var passengers = parseInt(this.elements['passengers'].value);
+        var maxPassengers = parseInt("{{ vehicle.max_passengers }}");
+        
+        if (passengers > maxPassengers) {
+            isValid = false;
+            errorMessage = "{% trans 'Number of passengers cannot exceed' %} " + maxPassengers;
+        }
+
+        // Validation des bagages
+        var luggagePieces = parseInt(this.elements['luggage_pieces'].value);
+        var maxLuggagePieces = parseInt("{{ vehicle.max_luggage_pieces|default:0 }}");
+        
+        if (maxLuggagePieces > 0 && luggagePieces > maxLuggagePieces) {
+            isValid = false;
+            errorMessage = "{% trans 'Number of luggage pieces cannot exceed' %} " + maxLuggagePieces;
+        }
+
+        // Validation spécifique au type de tarification
+        if (pricingType === 'hourly') {
+            var hours = parseFloat(this.elements['duration_hours'].value);
+            if (hours <= 0) {
+                isValid = false;
+                errorMessage = "{% trans 'Duration must be greater than zero' %}";
+            }
+        } else {
+            // Validation des champs de distance
+            if (!this.elements['pickup_lat'].value || !this.elements['dropoff_lat'].value) {
+                isValid = false;
+                errorMessage = "{% trans 'Pickup and drop-off locations are required' %}";
+            }
+        }
+
+        if (!isValid) {
+            e.preventDefault();
+            alert(errorMessage);
         }
     });
 });

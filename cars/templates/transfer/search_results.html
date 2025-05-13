@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% load static %}
+{% load cars_extras %}
 
 {% block headerContent %}
 <link rel="stylesheet" href="{% static 'assets/css/transfer-search-res.css' %}" />
@@ -338,7 +339,7 @@
                         <div class="specs-grid">
                             <div class="spec-item">
                                 <i class="fas fa-users"></i>
-                                <span>{{ vehicle.max_passengers }} {% translate "seats" %}</span>
+                                <span>{{ vehicle.capacity }} {% translate "seats" %}</span>
                             </div>
                             <div class="spec-item">
                                 <i class="fas fa-suitcase"></i>

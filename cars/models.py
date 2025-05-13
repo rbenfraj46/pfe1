@@ -236,14 +236,11 @@ class AgencyCar(models.Model):
                 raise ValidationError(_('Maximum passengers must be at least 1'))
 
     def get_driver_info(self):
-        """Retourner un dictionnaire avec les informations formatées du chauffeur"""
+        """Retourner un dictionnaire avec les informations professionnelles du chauffeur"""
         if not self.with_driver:
             return None
             
         return {
-            'name': self.driver_name,
-            'phone': self.driver_phone,
-            'license': self.driver_license_number,
             'experience_years': self.driver_experience_years,
             'languages': self.driver_languages.split(',') if self.driver_languages else [],
             'experience_level': self.get_driver_experience_level()
@@ -567,77 +564,161 @@ class CarReservation(models.Model):
         }
         return new_status in valid_transitions.get(self.status, [])
 
-
-class TransferVehicle(models.Model):
-    VEHICLE_TYPES = (
-        ('car', _('Car')),
-        ('van', _('Van')),
-        ('minibus', _('Minibus')),
-        ('bus', _('Bus')),
-    )
-
-    agence = models.ForeignKey('home.Agences', on_delete=models.SET_NULL, null=True)
-    vehicle_type = models.CharField(max_length=20, choices=VEHICLE_TYPES)
-    brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True)
-    model = models.CharField(max_length=255)
-    capacity = models.IntegerField(verbose_name=_("Passenger Capacity"))
-    hourly_rate = models.DecimalField(max_digits=10, decimal_places=2, verbose_name=_("Hourly Rate"))
-    minimum_hours = models.IntegerField(default=1, verbose_name=_("Minimum Rental Hours"))
-    with_driver = models.BooleanField(default=True, verbose_name=_("With Driver"))
-    
-    # Driver Information
-    driver_name = models.CharField(max_length=255, verbose_name=_("Driver Name"))
-    driver_phone = models.CharField(max_length=20, verbose_name=_("Driver Phone"))
-    driver_license_number = models.CharField(max_length=50, verbose_name=_("Driver License Number"))
-    driver_experience_years = models.IntegerField(verbose_name=_("Driver Experience (Years)"))
-    driver_languages = models.CharField(max_length=255, verbose_name=_("Driver Languages"))
-
-    image = models.ImageField(upload_to='transfers', null=True, blank=True)
-    is_active = models.BooleanField(default=True)
-    available = models.BooleanField(default=True)
-    created = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.get_vehicle_type_display()} - {self.brand} {self.model}"
-
-    class Meta:
-        db_table = "transfer_vehicle"
-        verbose_name = _("Transfer Vehicle")
-        verbose_name_plural = _("Transfer Vehicles")
-
 class TransferBooking(models.Model):
     STATUS_CHOICES = (
         ('pending', _('Pending')),
-        ('confirmed', _('Confirmed')), 
-        ('ongoing', _('Ongoing')),
+        ('confirmed', _('Confirmed')),
+        ('in_progress', _('In Progress')),
         ('completed', _('Completed')),
         ('cancelled', _('Cancelled')),
     )
 
-    vehicle = models.ForeignKey(TransferVehicle, on_delete=models.CASCADE)
+    PAYMENT_STATUS_CHOICES = (
+        ('unpaid', _('Unpaid')),
+        ('partial', _('Partially Paid')),
+        ('paid', _('Paid')),
+        ('refunded', _('Refunded')),
+    )
+
+    PRICING_TYPE_CHOICES = (
+        ('distance', _('By Distance')),
+        ('hourly', _('By Hour')),
+    )
+
+    vehicle = models.ForeignKey(AgencyCar, on_delete=models.CASCADE, related_name='transfer_bookings')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    pickup_location = gis_models.PointField(verbose_name=_("Pickup Location"))
-    dropoff_location = gis_models.PointField(verbose_name=_("Drop-off Location"))
-    pickup_address = models.CharField(max_length=255, verbose_name=_("Pickup Address"))
-    dropoff_address = models.CharField(max_length=255, verbose_name=_("Drop-off Address"))
+    
+    # Informations de base
     pickup_date = models.DateTimeField(verbose_name=_("Pickup Date and Time"))
-    estimated_duration = models.IntegerField(verbose_name=_("Estimated Duration (hours)"))
-    passengers_count = models.IntegerField(verbose_name=_("Number of Passengers"))
+    pickup_location = gis_models.PointField(verbose_name=_("Pickup Location"), null=True, blank=True)
+    pickup_address = models.CharField(max_length=255, verbose_name=_("Pickup Address"), null=True, blank=True)
+    dropoff_location = gis_models.PointField(verbose_name=_("Dropoff Location"), null=True, blank=True)
+    dropoff_address = models.CharField(max_length=255, verbose_name=_("Dropoff Address"), null=True, blank=True)
+    
+    # Détails de la réservation
+    pricing_type = models.CharField(max_length=20, choices=PRICING_TYPE_CHOICES, default='distance')
+    distance = models.FloatField(verbose_name=_("Distance (km)"), null=True, blank=True)
+    duration_hours = models.FloatField(verbose_name=_("Duration (hours)"), null=True, blank=True)
+    passengers_count = models.PositiveIntegerField(verbose_name=_("Number of Passengers"))
+    luggage_pieces = models.PositiveIntegerField(verbose_name=_("Number of Luggage Pieces"), default=0)
+    luggage_weight = models.DecimalField(
+        max_digits=5, 
+        decimal_places=2, 
+        verbose_name=_("Total Luggage Weight (kg)"),
+        null=True, 
+        blank=True
+    )
+    
+    # Informations de prix et paiement
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_status = models.CharField(
+        max_length=20, 
+        choices=PAYMENT_STATUS_CHOICES, 
+        default='unpaid'
+    )
+    amount_paid = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0
+    )
+    last_payment_date = models.DateTimeField(null=True, blank=True)
+    
+    # Statut et dates
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     notes = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def save(self, *args, **kwargs):
-        if not self.total_price:
-            self.total_price = self.vehicle.hourly_rate * self.estimated_duration
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"Transfer {self.id} - {self.pickup_date}"
-
     class Meta:
-        db_table = "transfer_booking"
+        db_table = 'transfer_booking'
         verbose_name = _("Transfer Booking")
         verbose_name_plural = _("Transfer Bookings")
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.vehicle} ({self.pickup_date})"
+
+    def clean(self):
+        super().clean()
+        
+        # Validation des passagers
+        if self.passengers_count > self.vehicle.max_passengers:
+            raise ValidationError(_('Number of passengers exceeds vehicle capacity'))
+        
+        # Validation des bagages
+        if self.vehicle.max_luggage_pieces and self.luggage_pieces > self.vehicle.max_luggage_pieces:
+            raise ValidationError(_('Number of luggage pieces exceeds vehicle capacity'))
+            
+        if self.vehicle.max_luggage_weight and self.luggage_weight > self.vehicle.max_luggage_weight:
+            raise ValidationError(_('Total luggage weight exceeds vehicle capacity'))
+            
+        # Validation de la date uniquement pour la tarification par distance
+        if self.pricing_type == 'distance' and self.pickup_date and self.pickup_date < timezone.now():
+            raise ValidationError(_('Pickup date must be in the future for distance-based transfers'))
+        
+        # Validation du prix selon le type de tarification
+        if self.pricing_type == 'distance':
+            if not self.distance:
+                raise ValidationError(_('Distance is required for distance-based pricing'))
+            if not self.pickup_location or not self.dropoff_location:
+                raise ValidationError(_('Pickup and drop-off locations are required for distance-based pricing'))
+        elif self.pricing_type == 'hourly':
+            if not self.duration_hours:
+                raise ValidationError(_('Duration is required for hourly pricing'))
+            if self.duration_hours <= 0:
+                raise ValidationError(_('Duration must be greater than zero'))
+
+    def save(self, *args, **kwargs):
+        if not self.total_price or self.total_price <= 0:
+            # Calculer le prix selon le type de tarification
+            if self.pricing_type == 'hourly':
+                price_info = self.vehicle.calculate_transfer_price(hours=self.duration_hours)
+            else:
+                price_info = self.vehicle.calculate_transfer_price(distance=self.distance)
+            
+            if price_info:
+                self.total_price = Decimal(str(price_info['total_price']))
+        
+        # Store old status if this is an update
+        old_status = None
+        if self.pk:
+            old_obj = TransferBooking.objects.get(pk=self.pk)
+            old_status = old_obj.status
+
+        self.clean()
+        super().save(*args, **kwargs)
+
+        # Send notifications if status has changed
+        if old_status and old_status != self.status:
+            try:
+                from home.mail_util import send_transfer_notification
+                send_transfer_notification(self, self.status)
+            except Exception as e:
+                logger.error(f"Failed to send transfer notification email: {str(e)}")
+
+    def update_payment_status(self, amount_paid):
+        """Mettre à jour le statut de paiement"""
+        self.amount_paid = amount_paid
+        self.last_payment_date = timezone.now()
+        
+        if amount_paid >= self.total_price:
+            self.payment_status = 'paid'
+            if self.status == 'confirmed':
+                self.status = 'in_progress'
+        elif amount_paid > 0:
+            self.payment_status = 'partial'
+        else:
+            self.payment_status = 'unpaid'
+        
+        self.save()
+
+    def can_transition_to(self, new_status):
+        """Vérifier si la transition de statut est valide"""
+        valid_transitions = {
+            'pending': ['confirmed', 'cancelled'],
+            'confirmed': ['in_progress', 'cancelled'],
+            'in_progress': ['completed', 'cancelled'],
+            'completed': [],
+            'cancelled': []
+        }
+        return new_status in valid_transitions.get(self.status, [])

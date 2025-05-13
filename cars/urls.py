@@ -24,12 +24,10 @@ from .views.search import (
 )
 # Import des vues de transfert
 from .views.transfer import (
-    TransferVehicleListView,
-    TransferVehicleCreateView,
-    TransferBookingListView,
     TransferSearchView,
     TransferSearchResultsView,
-    TransferBookingView
+    TransferBookingView,
+    TransferBookingDetailView
 )
 
 urlpatterns = [
@@ -67,10 +65,8 @@ urlpatterns = [
     path('api/calculate-rental-total/', CalculateRentalTotalView.as_view(), name='calculate_rental_total'),
     
     # URLs pour la gestion des transferts
-    path('transfers/agency/<int:agency_id>/vehicles/', TransferVehicleListView.as_view(), name='agency_transfer_vehicles'),
-    path('transfers/agency/<int:agency_id>/vehicles/add/', TransferVehicleCreateView.as_view(), name='add_transfer_vehicle'),
     path('transfers/search/', TransferSearchView.as_view(), name='transfer_search'),
     path('transfers/search/results/', TransferSearchResultsView.as_view(), name='transfer_search_results'),
-    path('transfers/book/<int:vehicle_id>/', TransferBookingView.as_view(), name='transfer_booking'),
-    path('transfers/my-bookings/', TransferBookingListView.as_view(), name='my_transfer_bookings'),
+    path('transfers/booking/<int:vehicle_id>/', TransferBookingView.as_view(), name='transfer_booking'),
+    path('transfers/booking/<int:booking_id>/detail/', TransferBookingDetailView.as_view(), name='transfer_booking_details'),
 ]
