@@ -27,7 +27,9 @@ from .views.transfer import (
     TransferSearchView,
     TransferSearchResultsView,
     TransferBookingView,
-    TransferBookingDetailView
+    TransferBookingDetailView,
+    UserTransferBookingsView,
+    TransferBookingCancelView
 )
 
 urlpatterns = [
@@ -69,4 +71,7 @@ urlpatterns = [
     path('transfers/search/results/', TransferSearchResultsView.as_view(), name='transfer_search_results'),
     path('transfers/booking/<int:vehicle_id>/', TransferBookingView.as_view(), name='transfer_booking'),
     path('transfers/booking/<int:booking_id>/detail/', TransferBookingDetailView.as_view(), name='transfer_booking_details'),
+    path('transfers/bookings/', UserTransferBookingsView.as_view(), name='user_transfer_bookings'),
+    path('transfers/bookings/<int:booking_id>/', TransferBookingDetailView.as_view(), name='transfer_booking_detail'),
+    path('transfers/bookings/<int:booking_id>/cancel/', TransferBookingCancelView.as_view(), name='transfer_booking_cancel'),
 ]

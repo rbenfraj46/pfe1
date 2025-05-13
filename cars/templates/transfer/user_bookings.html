@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% translate "My Transfer Bookings" %} - {{ block.super }}{% endblock %}
+
+{% block bodyContent %}
+<div class="wheel-content">
+    <div class="container" style="margin-top: 180px; margin-bottom: 40px;">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="wheel-header text-center">
+                    <h3>{% translate "My Transfer Bookings" %}</h3>
+                </div>
+                
+                <!-- Statistiques des réservations -->
+                <div class="reservation-stats mb-4">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="stats-box bg-warning">
+                                <h4>{% translate "Pending" %}</h4>
+                                <span class="stats-number">{{ pending_count }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-box bg-success">
+                                <h4>{% translate "Confirmed" %}</h4>
+                                <span class="stats-number">{{ confirmed_count }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-box bg-info">
+                                <h4>{% translate "Completed" %}</h4>
+                                <span class="stats-number">{{ completed_count }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-box bg-secondary">
+                                <h4>{% translate "Cancelled" %}</h4>
+                                <span class="stats-number">{{ cancelled_count }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if bookings %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>{% translate "Vehicle" %}</th>
+                                    <th>{% translate "Agency" %}</th>
+                                    <th>{% translate "Date" %}</th>
+                                    <th>{% translate "Type" %}</th>
+                                    <th>{% translate "Total Price" %}</th>
+                                    <th>{% translate "Status" %}</th>
+                                    <th>{% translate "Actions" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for booking in bookings %}
+                                <tr>
+                                    <td>
+                                        <div class="car-info">
+                                            {% if booking.vehicle.image %}
+                                                <img src="{{ booking.vehicle.image.url }}" alt="{{ booking.vehicle }}" class="car-thumb">
+                                            {% endif %}
+                                            <span>{{ booking.vehicle.brand }} {{ booking.vehicle.car_model }}</span>
+                                        </div>
+                                    </td>
+                                    <td>{{ booking.vehicle.agence.agency_name }}</td>
+                                    <td>{{ booking.pickup_date }}</td>
+                                    <td>{{ booking.get_pricing_type_display }}</td>
+                                    <td>{{ booking.total_price }} {{ devise.unit }}</td>
+                                    <td>
+                                        <span class="badge {% if booking.status == 'confirmed' %}bg-success{% elif booking.status == 'pending' %}bg-warning{% elif booking.status == 'cancelled' %}bg-secondary{% else %}bg-info{% endif %}">
+                                            {% translate booking.status|title %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if booking.status == 'pending' %}
+                                            <button class="btn btn-sm btn-danger cancel-booking" data-booking-id="{{ booking.id }}">
+                                                {% translate "Cancel" %}
+                                            </button>
+                                        {% endif %}
+                                        <a href="{% url 'transfer_booking_detail' booking_id=booking.id %}" class="btn btn-sm btn-info">
+                                            {% translate "Details" %}
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if is_paginated %}
+                    <nav aria-label="{% translate 'Booking navigation' %}">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">{% translate "Previous" %}</a>
+                                </li>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">{% translate "Next" %}</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                {% else %}
+                    <div class="alert alert-info">
+                        {% translate "You don't have any transfer bookings yet." %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock bodyContent %}
+
+{% block headerJSContent %}
+<style>
+.stats-box {
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    color: white;
+}
+
+.stats-number {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.car-thumb {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    margin-right: 10px;
+}
+
+.car-info {
+    display: flex;
+    align-items: center;
+}
+</style>
+
+<script>
+$(document).ready(function() {
+    $('.cancel-booking').click(function() {
+        const bookingId = $(this).data('booking-id');
+        
+        if (confirm("{% translate 'Are you sure you want to cancel this booking?' %}")) {
+            $.post(`{% url 'transfer_booking_cancel' booking_id=0 %}`.replace('0', bookingId), {
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            })
+            .done(function(response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert(response.message || "{% translate 'Failed to cancel booking. Please try again.' %}");
+                }
+            })
+            .fail(function(xhr) {
+                alert(xhr.responseJSON?.message || "{% translate 'Failed to cancel booking. Please try again.' %}");
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

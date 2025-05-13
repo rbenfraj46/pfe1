@@ -4,7 +4,7 @@ services:
   web:
     build: .
     container_name: my-django-app
-    command: /bin/bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    command: /bin/bash -c "while ! nc -z postgresql 5432; do sleep 1; done && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/app  
     ports:

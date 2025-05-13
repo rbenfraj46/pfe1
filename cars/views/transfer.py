@@ -355,3 +355,53 @@ class TransferBookingDetailView(LoginRequiredMixin, View):
         }
         
         return render(request, self.template_name, context)
+
+class UserTransferBookingsView(LoginRequiredMixin, ListView):
+    template_name = 'transfer/user_bookings.html'
+    context_object_name = 'bookings'
+    paginate_by = 10
+
+    def get_queryset(self):
+        return TransferBooking.objects.filter(
+            user=self.request.user
+        ).select_related(
+            'vehicle__brand',
+            'vehicle__car_model',
+            'vehicle__agence'
+        ).order_by('-created_at')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user_bookings = TransferBooking.objects.filter(user=self.request.user)
+        
+        # Ajouter les statistiques
+        context['pending_count'] = user_bookings.filter(status='pending').count()
+        context['confirmed_count'] = user_bookings.filter(status='confirmed').count()
+        context['completed_count'] = user_bookings.filter(status='completed').count()
+        context['cancelled_count'] = user_bookings.filter(status='cancelled').count()
+        
+        return context
+
+class TransferBookingCancelView(LoginRequiredMixin, View):
+    def post(self, request, booking_id):
+        try:
+            booking = get_object_or_404(TransferBooking, id=booking_id, user=request.user)
+            
+            if booking.status != 'pending':
+                return JsonResponse({
+                    'success': False,
+                    'message': _('Only pending bookings can be cancelled')
+                }, status=400)
+            
+            booking.status = 'cancelled'
+            booking.save()
+            
+            messages.success(request, _('Your transfer booking has been cancelled'))
+            return JsonResponse({'success': True})
+            
+        except Exception as e:
+            logger.error(f'Error cancelling transfer booking: {str(e)}')
+            return JsonResponse({
+                'success': False,
+                'message': _('An error occurred while cancelling your booking')
+            }, status=500)

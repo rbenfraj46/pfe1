@@ -649,8 +649,9 @@ class TransferBooking(models.Model):
         if self.vehicle.max_luggage_pieces and self.luggage_pieces > self.vehicle.max_luggage_pieces:
             raise ValidationError(_('Number of luggage pieces exceeds vehicle capacity'))
             
-        if self.vehicle.max_luggage_weight and self.luggage_weight > self.vehicle.max_luggage_weight:
-            raise ValidationError(_('Total luggage weight exceeds vehicle capacity'))
+        if self.vehicle.max_luggage_weight is not None and self.luggage_weight is not None:
+            if float(self.luggage_weight) > float(self.vehicle.max_luggage_weight):
+                raise ValidationError(_('Total luggage weight exceeds vehicle capacity'))
             
         # Validation de la date uniquement pour la tarification par distance
         if self.pricing_type == 'distance' and self.pickup_date and self.pickup_date < timezone.now():
