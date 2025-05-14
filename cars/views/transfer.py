@@ -405,3 +405,118 @@ class TransferBookingCancelView(LoginRequiredMixin, View):
                 'success': False,
                 'message': _('An error occurred while cancelling your booking')
             }, status=500)
+
+from django.utils import timezone
+
+class TransferStatusUpdateView(LoginRequiredMixin, View):
+    """Vue pour mettre à jour le statut des transferts.
+    Seuls les statuts 'confirmed' et 'cancelled' sont autorisés pour les réservations en statut 'pending'.
+    """
+    def post(self, request, booking_id):
+        try:
+            # Vérification de l'authentification
+            if not request.user.is_authenticated:
+                return JsonResponse({
+                    'success': False, 
+                    'message': _('Authentication required')
+                }, status=401)
+            
+            # Récupération et validation de la réservation
+            booking = get_object_or_404(
+                TransferBooking.objects.select_related('vehicle__agence'),
+                id=booking_id
+            )
+            
+            # Vérification des permissions
+            if not (booking.vehicle.agence.creator == request.user or 
+                    has_agency_permission(request.user, booking.vehicle.agence.id, 'edit')):
+                return JsonResponse({
+                    'success': False,
+                    'message': _('You do not have permission to update this booking')
+                }, status=403)
+
+            # Validation des données reçues
+            requested_status = request.POST.get('status')
+            reason = request.POST.get('reason')
+
+            if not requested_status or not reason:
+                return JsonResponse({
+                    'success': False,
+                    'message': _('Status and reason are required')
+                }, status=400)
+
+            # Vérification des transitions de statut autorisées
+            allowed_transitions = {
+                'pending': ['confirmed', 'cancelled']
+            }
+            
+            if requested_status not in allowed_transitions.get(booking.status, []):
+                return JsonResponse({
+                    'success': False,
+                    'message': _('Invalid status transition from {current} to {requested}').format(
+                        current=booking.get_status_display(),
+                        requested=requested_status
+                    )
+                }, status=400)
+
+            # Mise à jour du statut
+            booking.status = requested_status
+            booking.notes = f"{timezone.now().strftime('%Y-%m-%d %H:%M:%S')} - {reason}"
+            booking.save()
+
+            # Envoi des notifications
+            try:
+                from home.mail_util import send_transfer_notification
+                send_transfer_notification(booking, requested_status, reason)
+            except Exception as e:
+                logger.warning(f"Failed to send notification email: {str(e)}")
+
+            return JsonResponse({
+                'success': True, 
+                'status': booking.status,
+                'message': _('Status updated successfully')
+            })
+
+        except Exception as e:
+            logger.error(f"Error updating transfer status: {str(e)}", exc_info=True)
+            return JsonResponse({
+                'success': False,
+                'message': _('An error occurred while updating the status')
+            }, status=500)
+
+class AgencyTransfersView(LoginRequiredMixin, ListView):
+    template_name = 'transfer/agency_transfers.html'
+    context_object_name = 'transfers'
+    paginate_by = 10
+
+    def dispatch(self, request, *args, **kwargs):
+        self.agency = get_object_or_404(Agences, id=kwargs.get('agency_id'))
+        if not (self.agency.creator == request.user or 
+                has_agency_permission(request.user, self.agency.id, 'view')):
+            raise PermissionDenied
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return TransferBooking.objects.filter(
+            vehicle__agence=self.agency
+        ).select_related(
+            'vehicle__brand',
+            'vehicle__car_model',
+            'vehicle__agence',
+            'user'
+        ).order_by('-created_at')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        agency_bookings = TransferBooking.objects.filter(vehicle__agence=self.agency)
+        
+        # Statistiques des réservations
+        context['stats'] = {
+            'pending_count': agency_bookings.filter(status='pending').count(),
+            'confirmed_count': agency_bookings.filter(status='confirmed').count(),
+            'in_progress_count': agency_bookings.filter(status='in_progress').count(),
+            'completed_count': agency_bookings.filter(status='completed').count(),
+            'cancelled_count': agency_bookings.filter(status='cancelled').count(),
+        }
+        
+        return context

@@ -29,7 +29,9 @@ from .views.transfer import (
     TransferBookingView,
     TransferBookingDetailView,
     UserTransferBookingsView,
-    TransferBookingCancelView
+    TransferBookingCancelView,
+    TransferStatusUpdateView,
+    AgencyTransfersView
 )
 
 urlpatterns = [
@@ -74,4 +76,6 @@ urlpatterns = [
     path('transfers/bookings/', UserTransferBookingsView.as_view(), name='user_transfer_bookings'),
     path('transfers/bookings/<int:booking_id>/', TransferBookingDetailView.as_view(), name='transfer_booking_detail'),
     path('transfers/bookings/<int:booking_id>/cancel/', TransferBookingCancelView.as_view(), name='transfer_booking_cancel'),
+    path('agency/<int:agency_id>/transfers/', AgencyTransfersView.as_view(), name='agency_transfers'),
+    path('transfer/status-update/<int:booking_id>/', TransferStatusUpdateView.as_view(), name='transfer_status_update'),
 ]

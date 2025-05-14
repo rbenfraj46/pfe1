@@ -166,9 +166,6 @@
 										<a href="#">{% translate "Rentals" %}</a>
 										<ul class="sub-menu dl-submenu">
 											<li class="menu-item">
-												<a href="{% url 'user_reservations' %}">{% translate "Car Rentals" %}</a>
-											</li>
-											<li class="menu-item">
 												<a href="{% url 'transfer_search' %}">{% translate "Transfer Services" %}</a>
 											</li>
 											{% if user.is_authenticated %}
@@ -176,6 +173,16 @@
 												<a href="{% url 'user_transfer_bookings' %}">{% translate "My Transfer Bookings" %}</a>
 											</li>
 											{% endif %}
+											{% if user.is_authenticated %}
+                                        <li class="menu-item">
+                                            <a href="{% url 'user_reservations' %}">{% translate "My Car Rentals" %}</a>
+                                        </li>
+                                        {% if user_agencies %}
+                                        <li class="menu-item">
+                                            <a href="{% url 'agency_transfers' agency_id=user_agencies.first.id %}">{% translate "Manage Transfers" %}</a>
+                                        </li>
+                                        {% endif %}
+                                        {% endif %}
 										</ul>
 									</li>
 									<li class="menu-item menu-item-has-children">

@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block bodyContent %}
+<div class="container" style="margin-top: 180px; margin-bottom: 40px;">
+    <h2>{% translate "Agency Transfers" %}</h2>
+    <div class="row mb-3">
+    </div>
+
+    <!-- Statistiques rapides -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="row g-3">
+                <div class="col-md">
+                    <div class="card text-white bg-warning">
+                        <div class="card-body">
+                            <h6 class="card-title">{% translate "Pending" %}</h6>
+                            <h2 class="card-text">{{ stats.pending_count }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="card text-white bg-success">
+                        <div class="card-body">
+                            <h6 class="card-title">{% translate "Confirmed" %}</h6>
+                            <h2 class="card-text">{{ stats.confirmed_count }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="card text-white bg-info">
+                        <div class="card-body">
+                            <h6 class="card-title">{% translate "In Progress" %}</h6>
+                            <h2 class="card-text">{{ stats.in_progress_count }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="card text-white bg-secondary">
+                        <div class="card-body">
+                            <h6 class="card-title">{% translate "Completed" %}</h6>
+                            <h2 class="card-text">{{ stats.completed_count }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="card text-white bg-danger">
+                        <div class="card-body">
+                            <h6 class="card-title">{% translate "Cancelled" %}</h6>
+                            <h2 class="card-text">{{ stats.cancelled_count }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>{% translate "Vehicle" %}</th>
+                <th>{% translate "Client" %}</th>
+                <th>{% translate "Pickup Date" %}</th>
+                <th>{% translate "Type" %}</th>
+                <th>{% translate "Duration/Distance" %}</th>
+                <th>{% translate "Total Price" %}</th>
+                <th>{% translate "Status" %}</th>
+                <th>{% translate "Actions" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in transfers %}
+            <tr>
+                <td>
+                    <div class="d-flex align-items-center">
+                        {% if booking.vehicle.image %}
+                            <img src="{{ booking.vehicle.image.url }}" alt="{{ booking.vehicle }}" class="me-2" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                        {% endif %}
+                        <span>{{ booking.vehicle.brand }} {{ booking.vehicle.car_model }}</span>
+                    </div>
+                </td>
+                <td>{{ booking.user.get_full_name|default:booking.user.username }}</td>
+                <td>{{ booking.pickup_date|date:"d/m/Y H:i" }}</td>
+                <td>
+                    <span class="badge {% if booking.pricing_type == 'distance' %}bg-info{% else %}bg-primary{% endif %}">
+                        {{ booking.get_pricing_type_display }}
+                    </span>
+                </td>
+                <td>
+                    {% if booking.pricing_type == 'distance' %}
+                        {{ booking.distance }} km
+                    {% else %}
+                        {{ booking.duration_hours }} {% translate "hours" %}
+                    {% endif %}
+                </td>
+                <td>{{ booking.total_price }} TND</td>
+                <td>
+                    <span class="badge {% if booking.status == 'pending' %}bg-warning
+                                     {% elif booking.status == 'confirmed' %}bg-success
+                                     {% elif booking.status == 'in_progress' %}bg-info
+                                     {% elif booking.status == 'completed' %}bg-secondary
+                                     {% else %}bg-danger{% endif %}"></span>
+                        {% translate booking.status|title %}
+                    </span>
+                </td>
+                <td>
+                    {% if booking.status == 'pending' %}
+                        <button class="btn btn-sm btn-primary update-status" 
+                                data-booking-id="{{ booking.id }}"
+                                data-current-status="{{ booking.status }}"
+                                data-bs-toggle="modal"
+                                data-bs-target="#statusUpdateModal">
+                            <i class="fas fa-edit"></i> {% translate "Update" %}
+                        </button>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if paginator.num_pages > 1 %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="First">
+                        <span aria-hidden="true">&laquo;&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+
+            {% for i in paginator.page_range %}
+                {% if page_obj.number == i %}
+                    <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                {% elif i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ i }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ i }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ paginator.num_pages }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Last">
+                        <span aria-hidden="true">&raquo;&raquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    <div class="text-center mt-2">
+        <small class="text-muted">
+            {% translate "Showing" %} {{ page_obj.start_index }}-{{ page_obj.end_index }} {% translate "of" %} {{ paginator.count }} {% translate "entries" %}
+        </small>
+    </div>
+</div>
+
+<!-- Modal pour la mise à jour du statut -->
+<div class="modal fade" id="statusUpdateModal" tabindex="-1" aria-labelledby="statusUpdateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="statusUpdateModalLabel">{% translate "Update Transfer Status" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="statusUpdateForm">
+                    <div class="mb-3">
+                        <label for="newStatus" class="form-label">{% translate "New Status" %}</label>
+                        <select class="form-select" id="newStatus" name="status" required>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="statusReason" class="form-label">{% translate "Reason" %}</label>
+                        <textarea class="form-control" id="statusReason" name="reason" rows="3" required></textarea>
+                        <div class="form-text">{% translate "Please provide a reason for this status change." %}</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% translate "Cancel" %}</button>
+                <button type="button" class="btn btn-primary" id="updateStatusBtn">{% translate "Update" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentBookingId;
+
+function exportToExcel() {
+    toastr.info("{% translate 'Export functionality coming soon...' %}");
+}
+
+$(document).ready(function() {
+    // Gestionnaire d'événements pour le bouton de mise à jour
+    $('.update-status').click(function() {
+        currentBookingId = $(this).data('booking-id');
+        const currentStatus = $(this).data('current-status');
+        const statusSelect = $('#newStatus');
+        statusSelect.empty();
+
+        // Options de statut autorisées selon le statut actuel
+        if (currentStatus === 'pending') {
+            statusSelect.append(`
+                <option value="confirmed">{% translate "Confirmed" %}</option>
+                <option value="cancelled">{% translate "Cancelled" %}</option>
+            `);
+        }
+    });
+
+    // Mise à jour du statut
+    $('#updateStatusBtn').click(function() {
+        const submitButton = $(this);
+        const form = $('#statusUpdateForm');
+        
+        submitButton.prop('disabled', true);
+        submitButton.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> {% translate "Updating..." %}');
+
+        $.ajax({
+            url: `/transfer/status-update/${currentBookingId}/`,
+            method: 'POST',
+            data: {
+                status: $('#newStatus').val(),
+                reason: $('#statusReason').val(),
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    toastr.success('{% translate "Status updated successfully" %}');
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    toastr.error(response.message || '{% translate "An error occurred" %}');
+                }
+            },
+            error: function(xhr) {
+                toastr.error(xhr.responseJSON?.message || '{% translate "An error occurred" %}');
+            },
+            complete: function() {
+                submitButton.prop('disabled', false);
+                submitButton.text('{% translate "Update" %}');
+                $('#statusUpdateModal').modal('hide');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
