@@ -1,0 +1,31 @@
+{% extends "email/base.html" %}
+{% load i18n %}
+{% block content %}
+<h2>{% translate "Transfer Booking Cancelled" %}</h2>
+
+<p>{% translate "Dear" %} {{ booking.user.get_full_name }},</p>
+
+<p>{% translate "We regret to inform you that your transfer booking has been cancelled." %}</p>
+
+<div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0;">
+    <h3 style="color: #333; margin-top: 0;">{% translate "Cancelled Booking Details" %}</h3>
+    <p><strong>{% translate "Booking Reference" %}:</strong> {{ booking.reference }}</p>
+    <p><strong>{% translate "Vehicle" %}:</strong> {{ booking.vehicle.brand.name }} {{ booking.vehicle.car_model.name }}</p>
+    <p><strong>{% translate "Date" %}:</strong> {{ booking.pickup_date }}</p>
+    
+    {% if booking.notes %}
+    <p><strong>{% translate "Cancellation Reason" %}:</strong> {{ booking.notes }}</p>
+    {% endif %}
+</div>
+
+<p>{% translate "If you still need a transfer service, you can make a new booking by clicking the button below:" %}</p>
+
+<div style="text-align: center; margin: 25px 0;">
+    <a href="{{ protocol }}://{{ domain }}{% url 'transfer_search' %}" 
+       style="background-color: #ff7043; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px;">
+        {% translate "Book New Transfer" %}
+    </a>
+</div>
+
+<p>{% translate "We apologize for any inconvenience caused. If you have any questions, please don't hesitate to contact us." %}</p>
+{% endblock %}

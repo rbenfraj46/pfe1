@@ -95,6 +95,38 @@
             color: #4CAF50;
             margin-bottom: 1rem;
         }
+
+        .promotion-section {
+            border-left: 4px solid #ff4081 !important;
+            margin: 20px 0;
+        }
+
+        .promotion-section h4 {
+            color: #ff4081;
+        }
+
+        .promotion-section h4 i {
+            margin-right: 10px;
+        }
+
+        .promotion-section .form-check-input:checked {
+            background-color: #ff4081;
+            border-color: #ff4081;
+        }
+
+        .promotion-section .input-group-text {
+            background-color: #ff4081;
+            color: white;
+            border-color: #ff4081;
+        }
+
+        .promotion-section .alert {
+            border-left: 4px solid #17a2b8;
+        }
+
+        .promotion-section .alert i {
+            margin-right: 8px;
+        }
     </style>
 {% endblock headerContent %}
 
@@ -396,6 +428,74 @@
                         </div>
                     </div>
 
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="promotion-section p-4 bg-light rounded">
+                                <h4 class="mb-3">
+                                    <i class="fas fa-tag"></i> {% translate "Promotion" %}
+                                </h4>
+                                
+                                <div class="form-check form-switch mb-3">
+                                    <input type="checkbox" id="has_promotion" name="has_promotion" 
+                                           class="form-check-input" 
+                                           {% if car.get_current_promotion %}checked{% endif %}>
+                                    <label class="form-check-label" for="has_promotion">
+                                        {% translate "Enable Promotion" %}
+                                    </label>
+                                </div>
+                                
+                                <div id="promotion-details" class="{% if not car.get_current_promotion %}d-none{% endif %}">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="promotion_percentage" class="form-label">
+                                                    {% translate "Discount Percentage" %}
+                                                </label>
+                                                <div class="input-group">
+                                                    <input type="number" id="promotion_percentage" 
+                                                           name="promotion_percentage" 
+                                                           class="form-control" min="1" max="99"
+                                                           value="{{ car.get_current_promotion.percentage|default:'' }}"
+                                                           required>
+                                                    <span class="input-group-text">%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="promotion_start_date" class="form-label">
+                                                    {% translate "Start Date" %}
+                                                </label>
+                                                <input type="date" id="promotion_start_date" 
+                                                       name="promotion_start_date" 
+                                                       class="form-control"
+                                                       value="{{ car.get_current_promotion.start_date|date:'Y-m-d'|default:'' }}"
+                                                       required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="promotion_end_date" class="form-label">
+                                                    {% translate "End Date" %}
+                                                </label>
+                                                <input type="date" id="promotion_end_date" 
+                                                       name="promotion_end_date" 
+                                                       class="form-control"
+                                                       value="{{ car.get_current_promotion.end_date|date:'Y-m-d'|default:'' }}"
+                                                       required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="alert alert-info mt-3">
+                                        <i class="fas fa-info-circle"></i>
+                                        {% translate "The promotion will automatically apply to all bookings during this period." %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="d-grid mt-4">
                         <button type="submit" class="btn btn-primary btn-lg">{% translate "Submit" %}</button>
                     </div>
@@ -500,6 +600,33 @@
                 field.value = '';
             });
         }
+    });
+
+    document.getElementById('has_promotion').addEventListener('change', function() {
+        const promotionDetails = document.getElementById('promotion-details');
+        const promotionFields = promotionDetails.querySelectorAll('input');
+        
+        promotionDetails.classList.toggle('d-none', !this.checked);
+        promotionFields.forEach(field => {
+            field.required = this.checked;
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const startDateInput = document.getElementById('promotion_start_date');
+        const endDateInput = document.getElementById('promotion_end_date');
+        
+        // Set minimum dates
+        const today = new Date().toISOString().split('T')[0];
+        startDateInput.min = today;
+        endDateInput.min = today;
+        
+        startDateInput.addEventListener('change', function() {
+            endDateInput.min = this.value;
+            if (endDateInput.value && endDateInput.value < this.value) {
+                endDateInput.value = this.value;
+            }
+        });
     });
 </script>
 {% endblock bodyContent %}

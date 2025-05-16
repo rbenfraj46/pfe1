@@ -97,6 +97,101 @@ def send_mail_verification_agency(request, agence):
 
 def send_car_rental_notification(reservation, notification_type, **kwargs):
     current_site = kwargs.get('request') and get_current_site(kwargs['request']) or None
+
+def send_transfer_notification(booking, notification_type, **kwargs):
+    """
+    Send notification emails for transfer bookings
+    notification_type can be: 'new', 'confirmed', 'cancelled', 'completed'
+    """
+    current_site = kwargs.get('request') and get_current_site(kwargs['request']) or None
+    
+    subject_map = {
+        'new': _('New Transfer Booking Confirmation'),
+        'confirmed': _('Your Transfer Booking has been Confirmed'),
+        'cancelled': _('Transfer Booking Cancellation'),
+        'completed': _('Transfer Service Completed'),
+        'agency_completed': _('Transfer Service Completed - Agency Notification'),
+    }
+    
+    template_map = {
+        'new_user': 'transfer/email/booking_pending_user.html',
+        'new_agency': 'transfer/email/booking_pending_agency.html',
+        'confirmed': 'transfer/email/booking_confirmed.html',
+        'cancelled': 'transfer/email/booking_cancelled.html',
+        'completed': 'transfer/email/service_completed.html',
+        'agency_completed': 'transfer/email/agency_completed.html',
+    }
+    
+    subject = subject_map.get(notification_type, _('Transfer Booking Update'))
+    
+    # Ensure dates are timezone aware
+    from django.utils import timezone
+    if booking.pickup_date and timezone.is_naive(booking.pickup_date):
+        booking.pickup_date = timezone.make_aware(booking.pickup_date)
+    
+    # Add static support for email templates
+    from django.contrib.staticfiles import finders
+    from django.templatetags.static import static
+    
+    # Render HTML version
+    html_message = render_to_string(template_map.get(notification_type), {
+        'booking': booking,
+        'domain': current_site.domain if current_site else 'tuncar.com',
+        'site_name': 'TunCar',
+        'protocol': kwargs.get('request').scheme if kwargs.get('request') else 'https',
+        'static': static,
+    })
+    
+    # Create the email message
+    email = EmailMultiAlternatives(
+        subject=subject,
+        body='Please enable HTML to view this email',
+        from_email=settings.NO_REPLY_EMAIL_ADRESS,
+        to=[booking.user.email]
+    )
+    
+    def send_email(recipient, is_agency=False, template_override=None):
+        # Créer un contexte spécifique pour le destinataire
+        context = {
+            'booking': booking,
+            'domain': current_site.domain if current_site else 'tuncar.com',
+            'site_name': 'TunCar',
+            'protocol': kwargs.get('request').scheme if kwargs.get('request') else 'https',
+            'static': static,
+            'is_agency': is_agency
+        }
+        
+        # Rendre le template avec le contexte spécifique
+        email_html = render_to_string(template_map.get(notification_type), context)
+        
+        # Créer et envoyer l'email
+        msg = EmailMultiAlternatives(
+            subject=subject,
+            body='Please enable HTML to view this email',
+            from_email=settings.NO_REPLY_EMAIL_ADRESS,
+            to=[recipient]
+        )
+        msg.attach_alternative(email_html, "text/html")
+        msg.send()
+
+    # Envoyer les emails selon le type de notification
+    if notification_type == 'new':
+        # Envoyer email au client avec template spécifique client
+        send_email(booking.user.email, is_agency=False, template_override='new_user')
+        # Envoyer email à l'agence avec template spécifique agence
+        send_email(booking.vehicle.agency.email, is_agency=True, template_override='new_agency')
+        # Si un admin est configuré, lui envoyer aussi la notification
+        admin_email = getattr(settings, 'TRANSFER_ADMIN_EMAIL', None)
+        if admin_email:
+            send_email(admin_email, is_agency=True, template_override='new_agency')
+    elif notification_type == 'agency_completed':
+        send_email(booking.vehicle.agency.email, is_agency=True)
+    else:
+        send_email(booking.user.email, is_agency=False)
+    
+    # Attach HTML version
+    email.attach_alternative(html_message, "text/html")
+    email.send()
     domain = current_site and current_site.domain or 'localhost:8000'
     scheme = kwargs.get('request') and kwargs['request'].scheme or 'http'
     

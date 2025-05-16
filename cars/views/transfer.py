@@ -320,7 +320,19 @@ class TransferBookingView(LoginRequiredMixin, View):
 
             booking.save()
             
-            messages.success(request, _('Your transfer booking has been confirmed'))
+            # Envoyer notification email
+            try:
+                from home.mail_util import send_transfer_notification
+                send_transfer_notification(
+                    booking=booking,
+                    notification_type='new',
+                    request=request
+                )
+                messages.success(request, _('Your transfer booking has been confirmed and notification emails have been sent.'))
+            except Exception as e:
+                logger.error(f"Failed to send notification email: {str(e)}", exc_info=True)
+                messages.warning(request, _('Your booking was created but we could not send notification emails.'))
+            
             return redirect('transfer_booking_detail', booking_id=booking.id)
 
         except ValidationError as e:
@@ -467,7 +479,12 @@ class TransferStatusUpdateView(LoginRequiredMixin, View):
             # Envoi des notifications
             try:
                 from home.mail_util import send_transfer_notification
-                send_transfer_notification(booking, requested_status, reason)
+                send_transfer_notification(booking, requested_status, request=request)
+                
+                # Si le statut est completed, envoi d'une notification supplémentaire à l'agence
+                if requested_status == 'completed':
+                    send_transfer_notification(booking, 'agency_completed', request=request)
+                
             except Exception as e:
                 logger.warning(f"Failed to send notification email: {str(e)}")
 

@@ -1,0 +1,54 @@
+{% extends "email/base.html" %}
+{% load i18n %}
+{% block content %}
+<h2>{% translate "New Transfer Booking" %}</h2>
+
+<div class="info-box">
+    <h3>{% translate "Booking Details" %}</h3>
+    <p><strong>{% translate "Booking Reference" %}:</strong> {{ booking.reference }}</p>
+    <p><strong>{% translate "Vehicle" %}:</strong> {{ booking.vehicle.brand.name }} {{ booking.vehicle.car_model.name }}</p>
+    <p><strong>{% translate "Client" %}:</strong> {{ booking.user.get_full_name }}</p>
+    <p><strong>{% translate "Date" %}:</strong> {{ booking.pickup_date }}</p>
+    <p><strong>{% translate "Number of Passengers" %}:</strong> {{ booking.passengers_count }}</p>
+    
+    {% if booking.pricing_type == 'distance' %}
+    <p><strong>{% translate "From" %}:</strong> {{ booking.pickup_address }}</p>
+    <p><strong>{% translate "To" %}:</strong> {{ booking.dropoff_address }}</p>
+    <p><strong>{% translate "Distance" %}:</strong> {{ booking.distance }} km</p>
+    {% else %}
+    <p><strong>{% translate "Duration" %}:</strong> {{ booking.duration_hours }} {% translate "hours" %}</p>
+    {% endif %}
+    
+    {% if booking.luggage_pieces %}
+    <p><strong>{% translate "Luggage Pieces" %}:</strong> {{ booking.luggage_pieces }}</p>
+    {% endif %}
+    
+    {% if booking.luggage_weight %}
+    <p><strong>{% translate "Luggage Weight" %}:</strong> {{ booking.luggage_weight }} kg</p>
+    {% endif %}
+    
+    <p><strong>{% translate "Total Price" %}:</strong> {{ booking.total_price }} TND</p>
+</div>
+
+{% if is_agency %}
+<p>{% translate "A new transfer booking has been received. Please review the details and confirm or decline the booking." %}</p>
+
+<div style="text-align: center; margin: 25px 0;">
+    <a href="{{ protocol }}://{{ domain }}{% url 'agency_transfers' booking.vehicle.agency.id %}" 
+       style="background-color: #ff7043; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px;">
+        {% translate "Review Booking" %}
+    </a>
+</div>
+{% else %}
+<p>{% translate "Thank you for your booking. The agency will review your request and confirm it shortly." %}</p>
+
+<div style="text-align: center; margin: 25px 0;">
+    <a href="{{ protocol }}://{{ domain }}{% url 'transfer_booking_detail' booking.id %}" 
+       style="background-color: #ff7043; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px;">
+        {% translate "View Booking Details" %}
+    </a>
+</div>
+
+<p>{% translate "You will receive a confirmation email once the agency has reviewed your booking." %}</p>
+{% endif %}
+{% endblock %}

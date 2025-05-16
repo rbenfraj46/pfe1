@@ -361,6 +361,122 @@
             grid-template-columns: 1fr;
         }
     }
+
+    .price-info {
+        position: relative;
+        margin: 20px 0;
+    }
+
+    .promotion-tag {
+        display: inline-flex;
+        align-items: center;
+        background: linear-gradient(45deg, #ff4081, #ff1744);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        box-shadow: 0 4px 8px rgba(255, 23, 68, 0.3);
+        animation: pulse 2s infinite;
+    }
+
+    .promotion-tag i {
+        margin-right: 8px;
+    }
+
+    .price-badge {
+        display: flex;
+        flex-direction: column;
+        background: rgba(255,255,255,0.15);
+        padding: 15px 25px;
+        border-radius: 25px;
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255,255,255,0.3);
+    }
+
+    .original-price {
+        text-decoration: line-through;
+        opacity: 0.7;
+        font-size: 0.9em;
+    }
+
+    .discounted-price {
+        font-size: 1.6em;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .per-day {
+        font-size: 0.9em;
+        opacity: 0.9;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            box-shadow: 0 4px 8px rgba(255, 23, 68, 0.3);
+        }
+        50% {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(255, 23, 68, 0.4);
+        }
+        100% {
+            transform: scale(1);
+            box-shadow: 0 4px 8px rgba(255, 23, 68, 0.3);
+        }
+    }
+
+    .promotion-detail {
+        background: rgba(255, 23, 68, 0.1);
+        border-radius: 8px;
+        padding: 12px 15px;
+    }
+
+    .price-details {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+    }
+
+    .original-price {
+        text-decoration: line-through;
+        color: #999;
+        font-size: 0.9em;
+    }
+
+    .discounted-price {
+        color: #ff1744;
+        font-weight: bold;
+    }
+
+    .text-success {
+        color: #4caf50;
+    }
+
+    .summary-item.promotion-detail {
+        background: rgba(255, 23, 68, 0.1);
+        border-radius: 8px;
+        padding: 12px 15px;
+        margin: 10px 0;
+    }
+
+    .summary-item.text-success {
+        color: #4caf50;
+        font-weight: bold;
+    }
+
+    .summary-item.text-success i {
+        margin-right: 8px;
+    }
+
+    #dateError {
+        background-color: #ffebee;
+        color: #c62828;
+        padding: 10px 15px;
+        border-radius: 8px;
+        margin: 10px 0;
+        display: none;
+    }
 </style>
 {% endblock %}
 
@@ -371,7 +487,23 @@
             <div class="car-preview">
                 <div class="car-info-container">
                     <div class="car-title">{{ car.brand.name }} {{ car.car_model.name }}</div>
-                    <div class="price-badge">{{ car.price_per_day }} TND / {% translate "day" %}</div>
+                    <div class="price-info">
+                        {% if car.get_current_promotion %}
+                            <div class="promotion-tag">
+                                <i class="fas fa-tag"></i>
+                                {% translate "Save" %} {{ car.get_current_promotion.percentage }}%
+                            </div>
+                            <div class="price-badge">
+                                <span class="original-price">{{ car.price_per_day }} TND</span>
+                                <span class="discounted-price">{{ car.get_final_price }} TND</span>
+                                <span class="per-day">/ {% translate "day" %}</span>
+                            </div>
+                        {% else %}
+                            <div class="price-badge">
+                                {{ car.price_per_day }} TND / {% translate "day" %}
+                            </div>
+                        {% endif %}
+                    </div>
                     <div class="agency-info">
                         <img src="{{ car.agence.logo.url|default:'default-agency-logo.png' }}" class="agency-logo" alt="Agency logo">
                         <div>
@@ -462,25 +594,40 @@
                     </div>
 
                     <div class="summary-section">
-                        <div class="form-section-title">
-                            <i class="fas fa-receipt"></i>
-                            {% translate "Summary" %}
+                        <h4 class="mb-4">{% translate "Rental Summary" %}</h4>
+                        
+                        <div class="summary-item">
+                            <span>{% translate "Duration" %}</span>
+                            <span id="numberOfDays">-</span>
                         </div>
+                        
+                        {% if car.get_current_promotion %}
+                        <div class="summary-item promotion-detail">
+                            <span>{% translate "Price per day" %}</span>
+                            <div class="price-details">
+                                <span class="original-price">{{ car.price_per_day }} TND</span>
+                                <span class="discounted-price">{{ car.get_final_price }} TND</span>
+                            </div>
+                        </div>
+                        <div class="summary-item text-success">
+                            <span>{% translate "Promotion savings" %}</span>
+                            <span id="promotionSavings">-</span>
+                        </div>
+                        {% else %}
                         <div class="summary-item">
                             <span>{% translate "Price per day" %}</span>
                             <span>{{ car.price_per_day }} TND</span>
                         </div>
+                        {% endif %}
+                        
                         <div class="summary-item">
-                            <span>{% translate "Number of Days" %}</span>
-                            <span id="numberOfDays">-</span>
-                        </div>
-                        <div class="summary-item">
-                            <span>{% translate "Security deposit" %}</span>
+                            <span>{% translate "Security Deposit" %}</span>
                             <span>{{ car.security_deposit }} TND</span>
                         </div>
+                        
                         <div class="summary-total">
                             <div class="summary-item">
-                                <span>{% translate "Total" %}</span>
+                                <span>{% translate "Total Price" %}</span>
                                 <span id="totalPrice">-</span>
                             </div>
                         </div>
@@ -506,78 +653,89 @@
         const dateError = document.getElementById('dateError');
         const numberOfDaysElement = document.getElementById('numberOfDays');
         const totalPriceElement = document.getElementById('totalPrice');
+        const promotionSavingsElement = document.getElementById('promotionSavings');
         const minRentalDays = {{ car.minimum_rental_days }};
 
         function calculateTotal() {
             if (!startDateInput.value || !endDateInput.value) {
-                numberOfDaysElement.textContent = '-';
-                totalPriceElement.textContent = '-';
+                resetDisplayValues();
                 return;
             }
 
             const start = new Date(startDateInput.value);
             const end = new Date(endDateInput.value);
-
-            // Vérification basique côté client
+            
             if (end <= start) {
-                dateError.textContent = "{% translate 'End date must be after start date' %}";
-                dateError.style.display = 'block';
-                numberOfDaysElement.textContent = '-';
-                totalPriceElement.textContent = '-';
+                showError("{% translate 'End date must be after start date' %}");
                 return;
             }
 
             const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
             
             if (days < minRentalDays) {
-                dateError.textContent = `{% translate 'Minimum rental period is' %} ${minRentalDays} {% translate 'days' %}`;
-                dateError.style.display = 'block';
-                numberOfDaysElement.textContent = '-';
-                totalPriceElement.textContent = '-';
+                showError(`{% translate 'Minimum rental period is' %} ${minRentalDays} {% translate 'days' %}`);
                 return;
             }
 
             // Appel AJAX pour calculer le total
-            fetch(`{% url 'calculate_rental_total' %}?car_id={{ car.id }}&start_date=${startDateInput.value}&end_date=${endDateInput.value}`)
+            fetch(`/fr/calculate_rental_total/?car_id={{ car.id }}&start_date=${startDateInput.value}&end_date=${endDateInput.value}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        numberOfDaysElement.textContent = data.days;
-                        totalPriceElement.textContent = `${data.total_price} TND`;
+                        updateDisplayValues(data);
                         dateError.style.display = 'none';
+                        submitBtn.disabled = false;
                     } else {
-                        dateError.textContent = data.error || "{% translate 'Error calculating total' %}";
-                        dateError.style.display = 'block';
-                        numberOfDaysElement.textContent = '-';
-                        totalPriceElement.textContent = '-';
+                        showError(data.message);
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    dateError.textContent = "{% translate 'Error calculating total' %}";
-                    dateError.style.display = 'block';
-                    numberOfDaysElement.textContent = '-';
-                    totalPriceElement.textContent = '-';
+                    showError("{% translate 'An error occurred while calculating the price' %}");
                 });
         }
+
+        function resetDisplayValues() {
+            numberOfDaysElement.textContent = '-';
+            totalPriceElement.textContent = '-';
+            if (promotionSavingsElement) {
+                promotionSavingsElement.textContent = '-';
+            }
+            submitBtn.disabled = true;
+        }
+
+        function showError(message) {
+            dateError.textContent = message;
+            dateError.style.display = 'block';
+            resetDisplayValues();
+            submitBtn.disabled = true;
+        }
+
+        function updateDisplayValues(data) {
+            numberOfDaysElement.textContent = `${data.days} {% translate 'days' %}`;
+            totalPriceElement.textContent = `${data.total_price} TND`;
+            
+            if (promotionSavingsElement && data.promotion) {
+                const savings = data.promotion.savings;
+                if (savings > 0) {
+                    promotionSavingsElement.textContent = `${savings.toFixed(2)} TND`;
+                    promotionSavingsElement.parentElement.style.display = 'flex';
+                } else {
+                    promotionSavingsElement.parentElement.style.display = 'none';
+                }
+            }
+        }
+
+        // Gestionnaires d'événements pour les dates
+        startDateInput.addEventListener('change', calculateTotal);
+        endDateInput.addEventListener('change', calculateTotal);
 
         // Initialisation
         const today = new Date().toISOString().split('T')[0];
         startDateInput.min = today;
         endDateInput.min = today;
 
-        // Gestionnaires d'événements
-        startDateInput.addEventListener('change', function() {
-            endDateInput.min = this.value;
-            if (endDateInput.value && endDateInput.value < this.value) {
-                endDateInput.value = this.value;
-            }
-            calculateTotal();
-        });
-
-        endDateInput.addEventListener('change', calculateTotal);
-
-        // Calcul initial si des dates sont déjà définies
+        // Si les dates sont déjà définies, calculer le total
         if (startDateInput.value && endDateInput.value) {
             calculateTotal();
         }

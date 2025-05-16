@@ -1,0 +1,74 @@
+{% extends "transfer/email/base_transfer.html" %}
+{% load i18n %}
+{% block content %}
+<h2>{% translate "Transfer Booking Confirmation" %}</h2>
+
+<p>{% translate "Dear" %} {{ booking.user.get_full_name }},</p>
+
+<p>{% translate "Your transfer booking request has been received and is pending confirmation from our agency." %}</p>
+
+<div class="booking-details">
+    <h3>{% translate "Booking Details" %}</h3>
+    <div class="status-badge status-pending">{% translate "Awaiting Confirmation" %}</div>
+    
+    <p><strong>{% translate "Booking Reference" %}:</strong> {{ booking.reference }}</p>
+    <p><strong>{% translate "Vehicle" %}:</strong> {{ booking.vehicle.brand.name }} {{ booking.vehicle.car_model.name }}</p>
+    <p><strong>{% translate "Agency" %}:</strong> {{ booking.vehicle.agency.name }}</p>
+    <p><strong>{% translate "Date" %}:</strong> {{ booking.pickup_date }}</p>
+    <p><strong>{% translate "Number of Passengers" %}:</strong> {{ booking.passengers_count }}</p>
+    
+    {% if booking.pricing_type == 'distance' %}
+    <p><strong>{% translate "From" %}:</strong> {{ booking.pickup_address }}</p>
+    <p><strong>{% translate "To" %}:</strong> {{ booking.dropoff_address }}</p>
+    <p><strong>{% translate "Distance" %}:</strong> {{ booking.distance }} km</p>
+    {% else %}
+    <p><strong>{% translate "Duration" %}:</strong> {{ booking.duration_hours }} {% translate "hours" %}</p>
+    {% endif %}
+    
+    {% if booking.pricing_type == 'distance' %}
+    <div class="price-details">
+        <div class="price-item">
+            <span>{% translate "Distance Rate" %}:</span>
+            <span>{{ booking.vehicle.price_per_km }} TND/km</span>
+        </div>
+        <div class="price-item">
+            <span>{% translate "Total Distance" %}:</span>
+            <span>{{ booking.distance }} km</span>
+        </div>
+        <div class="total-price">
+            {{ booking.total_price }} TND
+        </div>
+    </div>
+    {% else %}
+    <div class="price-details">
+        <div class="price-item">
+            <span>{% translate "Hourly Rate" %}:</span>
+            <span>{{ booking.vehicle.price_per_hour }} TND/h</span>
+        </div>
+        <div class="price-item">
+            <span>{% translate "Total Hours" %}:</span>
+            <span>{{ booking.duration_hours }} h</span>
+        </div>
+        <div class="total-price">
+            {{ booking.total_price }} TND
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div class="note">
+    {% translate "What happens next?" %}</p>
+<ul>
+    <li>{% translate "The agency will review your booking request" %}</li>
+    <li>{% translate "You will receive another email once the agency confirms or declines your booking" %}</li>
+    <li>{% translate "Upon confirmation, you will receive the driver's details and contact information" %}</li>
+</ul>
+
+<div style="text-align: center; margin: 25px 0;">
+    <a href="{{ protocol }}://{{ domain }}{% url 'transfer_booking_detail' booking.id %}" class="button">
+        {% translate "View Booking Details" %}
+    </a>
+</div>
+
+<p>{% translate "You can check your booking status at any time by visiting our website." %}</p>
+{% endblock %}

@@ -66,6 +66,15 @@ class RegisterView(LoginRequiredMixin, IndexView):
     def post(self, request, *args, **kwargs):
         form = AgencesForm(request.POST, request.FILES)
         if form.is_valid():
+            # Vérifier si la localisation est fournie
+            lat = request.POST.get('lat')
+            lon = request.POST.get('lon')
+            if not lat or not lon:
+                messages.error(request, _('Please select your agency location on the map'))
+                return render(request, 'agences/create.html', 
+                            {'form_reg': form, 'action_name': _('Register')}, 
+                            status=400)
+
             agence = form.save(commit=False)
             agence.creator = self.request.user
             agence.logo = request.FILES.get('logo')

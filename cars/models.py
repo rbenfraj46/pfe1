@@ -5,7 +5,7 @@ from django.utils import timezone
 from datetime import datetime
 from django.conf import settings
 from django.contrib.gis.db import models as gis_models
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 import logging
 
 logger = logging.getLogger(__name__)
@@ -161,14 +161,26 @@ class AgencyCar(models.Model):
             # Vérification du nombre minimum de jours
             if days < self.minimum_rental_days:
                 return None
+            
+            # Récupérer la promotion active si elle existe
+            promotion = self.get_current_promotion()
+            price_per_day = self.get_final_price()
+            original_price = float(self.price_per_day)
+            discounted_price = float(price_per_day)
                 
-            total = self.price_per_day * days
+            total = price_per_day * days
+            
             return {
                 'days': days,
-                'price_per_day': float(self.price_per_day),
+                'price_per_day': original_price,
+                'discounted_price_per_day': discounted_price,
                 'security_deposit': float(self.security_deposit),
                 'total_price': float(total),
-                'minimum_rental_days': self.minimum_rental_days
+                'minimum_rental_days': self.minimum_rental_days,
+                'promotion': {
+                    'percentage': promotion.percentage if promotion else None,
+                    'savings': (original_price - discounted_price) * days if promotion else 0
+                }
             }
         return None
 
@@ -276,6 +288,20 @@ class AgencyCar(models.Model):
             'max_luggage_pieces': self.max_luggage_pieces,
             'max_luggage_weight': float(self.max_luggage_weight) if self.max_luggage_weight else None
         }
+
+    def get_current_promotion(self):
+        today = timezone.now().date()
+        return self.promotions.filter(
+            is_active=True,
+            start_date__lte=today,
+            end_date__gte=today
+        ).first()
+
+    def get_final_price(self):
+        promotion = self.get_current_promotion()
+        if promotion:
+            return promotion.get_discounted_price()
+        return self.price_per_day
         
     class Meta:
         db_table = "agency_car"
@@ -723,3 +749,57 @@ class TransferBooking(models.Model):
             'cancelled': []
         }
         return new_status in valid_transitions.get(self.status, [])
+
+class CarPromotion(models.Model):
+    car = models.ForeignKey(AgencyCar, on_delete=models.CASCADE, related_name='promotions')
+    percentage = models.IntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(99)],
+        verbose_name=_("Discount Percentage")
+    )
+    start_date = models.DateField(verbose_name=_("Start Date"))
+    end_date = models.DateField(verbose_name=_("End Date"))
+    is_active = models.BooleanField(default=True, verbose_name=_("Is Active"))
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Car Promotion")
+        verbose_name_plural = _("Car Promotions")
+        ordering = ['-created_at']
+
+    def clean(self):
+        if self.start_date and self.end_date and self.start_date > self.end_date:
+            raise ValidationError(_("End date must be later than start date"))
+
+        # Check for overlapping promotions for the same car
+        overlapping = CarPromotion.objects.filter(
+            car=self.car,
+            start_date__lte=self.end_date,
+            end_date__gte=self.start_date,
+            is_active=True
+        )
+        if self.pk:
+            overlapping = overlapping.exclude(pk=self.pk)
+        if overlapping.exists():
+            raise ValidationError(_("There is already an active promotion for this car during this period"))
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.car} - {self.percentage}% ({self.start_date} to {self.end_date})"
+
+    def is_valid_now(self):
+        today = timezone.now().date()
+        return (
+            self.is_active and 
+            self.start_date <= today <= self.end_date
+        )
+
+    def get_discounted_price(self):
+        from decimal import Decimal
+        if not self.is_valid_now():
+            return self.car.price_per_day
+        discount = (Decimal(str(self.percentage)) / Decimal('100')) * self.car.price_per_day
+        return self.car.price_per_day - discount

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+{% load static %}
+{% load i18n %}
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .email-container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #ff7043;
+        }
+        .logo {
+            max-width: 200px;
+            height: auto;
+        }
+        .booking-details {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin: 20px 0;
+            border-left: 4px solid #ff7043;
+        }
+        .booking-details p {
+            margin: 8px 0;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 0.9em;
+            margin: 10px 0;
+        }
+        .status-pending { background-color: #fff3e0; color: #e65100; }
+        .status-confirmed { background-color: #e3f2fd; color: #1565c0; }
+        .status-cancelled { background-color: #ffebee; color: #b71c1c; }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #ff7043;
+            color: white !important;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-weight: 600;
+            text-align: center;
+        }
+        .button:hover {
+            background-color: #f4511e;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+            font-size: 0.9em;
+            color: #666;
+        }
+        .note {
+            background-color: #e8eaf6;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-style: italic;
+        }
+        .contact-info {
+            background-color: #fff8e1;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .price-details {
+            margin: 15px 0;
+            border-top: 1px dashed #ddd;
+            padding-top: 15px;
+        }
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+        .total-price {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #ff7043;
+            margin-top: 10px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <img src="{{ protocol }}://{{ domain }}{% static 'images/logo.png' %}" alt="TunCar" class="logo">
+        </div>
+
+        {% block content %}{% endblock %}
+
+        <div class="footer">
+            <p>© {% now "Y" %} TunCar. {% translate "All rights reserved." %}</p>
+            <p>{% translate "This is an automated message, please do not reply." %}</p>
+            <p>
+                {% translate "Need help?" %} 
+                <a href="{{ protocol }}://{{ domain }}{% url 'contact' %}" style="color: #ff7043;">{% translate "Contact us" %}</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

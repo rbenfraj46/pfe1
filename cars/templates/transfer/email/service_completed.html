@@ -1,0 +1,36 @@
+{% extends "email/base.html" %}
+{% load i18n %}
+{% block content %}
+<h2>{% translate "Transfer Service Completed" %}</h2>
+
+<p>{% translate "Dear" %} {{ booking.user.get_full_name }},</p>
+
+<p>{% translate "Your transfer service has been completed. Thank you for choosing our service!" %}</p>
+
+<div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0;">
+    <h3 style="color: #333; margin-top: 0;">{% translate "Service Details" %}</h3>
+    <p><strong>{% translate "Booking Reference" %}:</strong> {{ booking.reference }}</p>
+    <p><strong>{% translate "Vehicle" %}:</strong> {{ booking.vehicle.brand.name }} {{ booking.vehicle.car_model.name }}</p>
+    <p><strong>{% translate "Agency" %}:</strong> {{ booking.vehicle.agency.name }}</p>
+    <p><strong>{% translate "Date" %}:</strong> {{ booking.pickup_date }}</p>
+    {% if booking.pricing_type == 'distance' %}
+        <p><strong>{% translate "From" %}:</strong> {{ booking.pickup_address }}</p>
+        <p><strong>{% translate "To" %}:</strong> {{ booking.dropoff_address }}</p>
+        <p><strong>{% translate "Distance" %}:</strong> {{ booking.distance }} km</p>
+    {% else %}
+        <p><strong>{% translate "Duration" %}:</strong> {{ booking.duration_hours }} {% translate "hours" %}</p>
+    {% endif %}
+    <p><strong>{% translate "Total Price" %}:</strong> {{ booking.total_price }} TND</p>
+</div>
+
+<p>{% translate "We hope you had a pleasant journey. If you would like to book another transfer, click the button below:" %}</p>
+
+<div style="text-align: center; margin: 25px 0;">
+    <a href="{{ protocol }}://{{ domain }}{% url 'transfer_search' %}" 
+       style="background-color: #ff7043; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px;">
+        {% translate "Book New Transfer" %}
+    </a>
+</div>
+
+<p>{% translate "Thank you for choosing our service. We look forward to serving you again!" %}</p>
+{% endblock %}

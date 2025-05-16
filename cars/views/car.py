@@ -23,7 +23,8 @@ from cars.models import (
     CarModel, 
     GearType,
     CarModelRequest,
-    CarReservation
+    CarReservation,
+    CarPromotion
 )
 from home.models import Agences
 from home.views.agences import has_agency_permission
@@ -260,6 +261,30 @@ class UpdateCarView(LoginRequiredMixin, CarManagementMixin, View):
                         end_date=end_date
                     )
                     
+            # Handle promotion
+            has_promotion = request.POST.get('has_promotion') == 'on'
+            if has_promotion:
+                promotion_data = {
+                    'percentage': int(request.POST.get('promotion_percentage')),
+                    'start_date': request.POST.get('promotion_start_date'),
+                    'end_date': request.POST.get('promotion_end_date'),
+                }
+                
+                # Deactivate any existing promotions
+                car.promotions.filter(is_active=True).update(is_active=False)
+                
+                # Create new promotion
+                CarPromotion.objects.create(
+                    car=car,
+                    percentage=promotion_data['percentage'],
+                    start_date=promotion_data['start_date'],
+                    end_date=promotion_data['end_date'],
+                    is_active=True
+                )
+            else:
+                # Deactivate all promotions if checkbox is unchecked
+                car.promotions.filter(is_active=True).update(is_active=False)
+
             messages.success(request, _('Car updated successfully'))
             return redirect('agency_cars_list', agency_id=car.agence.id)
             
@@ -405,6 +430,24 @@ class RegisterCarView(LoginRequiredMixin, CarManagementMixin, View):
             
             car.save()
             
+            # Gestion des promotions
+            has_promotion = request.POST.get('has_promotion') == 'on'
+            if has_promotion:
+                promotion_data = {
+                    'percentage': int(request.POST.get('promotion_percentage')),
+                    'start_date': request.POST.get('promotion_start_date'),
+                    'end_date': request.POST.get('promotion_end_date'),
+                }
+                
+                # Création de la promotion
+                CarPromotion.objects.create(
+                    car=car,
+                    percentage=promotion_data['percentage'],
+                    start_date=promotion_data['start_date'],
+                    end_date=promotion_data['end_date'],
+                    is_active=True
+                )
+            
             messages.success(request, _('Car added successfully'))
             return redirect('agency_cars_list', agency_id=agency_id)
             
@@ -529,30 +572,44 @@ class CalculateRentalTotalView(View):
             car_id = request.GET.get('car_id')
             start_date = request.GET.get('start_date')
             end_date = request.GET.get('end_date')
-            
+
             if not all([car_id, start_date, end_date]):
                 return JsonResponse({
                     'success': False,
-                    'error': _('Missing required parameters')
+                    'message': _('Missing required parameters')
                 })
-                
+
             car = get_object_or_404(AgencyCar, id=car_id)
-            total_info = car.calculate_total_price(start_date, end_date)
-            
-            if total_info:
-                return JsonResponse({
-                    'success': True,
-                    'days': total_info['days'],
-                    'total_price': total_info['total_price']
-                })
-            else:
+            price_info = car.calculate_total_price(start_date, end_date)
+
+            if not price_info:
                 return JsonResponse({
                     'success': False,
-                    'error': _('Invalid dates') 
+                    'message': _('Invalid date range or minimum rental period not met')
                 })
-            
-        except Exception as e:
+
+            promotion = car.get_current_promotion()
+            response_data = {
+                'success': True,
+                'days': price_info['days'],
+                'price_per_day': price_info['price_per_day'],
+                'discounted_price_per_day': price_info['discounted_price_per_day'],
+                'security_deposit': price_info['security_deposit'],
+                'total_price': price_info['total_price'],
+                'minimum_rental_days': price_info['minimum_rental_days'],
+                'promotion': price_info['promotion']
+            }
+
+            return JsonResponse(response_data)
+
+        except AgencyCar.DoesNotExist:
             return JsonResponse({
                 'success': False,
-                'error': str(e)
+                'message': _('Car not found')
+            })
+        except Exception as e:
+            logger.error(f"Error calculating rental total: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'message': _('An error occurred while calculating the total')
             })

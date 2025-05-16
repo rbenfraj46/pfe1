@@ -18,6 +18,18 @@
 	<script>
 		var lon = {{ lon }};
 		var lat = {{ lat }};
+		
+		function validateForm() {
+			var geoLat = document.getElementById('geolat').value;
+			var geoLong = document.getElementById('geolong').value;
+			
+			if (!geoLat || !geoLong) {
+				document.getElementById('location-error').style.display = 'block';
+				return false;
+			}
+			document.getElementById('location-error').style.display = 'none';
+			return true;
+		}
 		var latlng = L.latLng(lat, lon);
 		var map, marker=null;
 
@@ -103,12 +115,16 @@
 </div>
 <!-- /////////////////////////////////// -->
 <div class="container">
-<form id="form_registration" action="{% url 'agences_register' %}" method="post" enctype="multipart/form-data">
+<form id="form_registration" action="{% url 'agences_register' %}" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
 	<div class="row">
 		<div class="col-md-6 padd-lr0">
 			<div class="wheel-billing">
 				<div class="wheel-header marg-lg-t140 marg-lg-b50 marg-sm-t100">
 					<h5>Register your agency</h5>
+				</div>
+				
+				<div id="location-error" class="alert alert-danger" style="display:none;">
+					{% translate 'Please select your agency location on the map' %}
 				</div>
 
 					{% csrf_token %}

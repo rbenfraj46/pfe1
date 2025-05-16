@@ -9,8 +9,10 @@ from django.contrib.gis.db.models.functions import Distance
 from django.utils.translation import gettext as _
 import logging
 from django.http import JsonResponse
+from django.utils import timezone
+from django.db import models
 
-from cars.models import AgencyCar, Brand, GearType
+from cars.models import AgencyCar, Brand, GearType, CarPromotion
 from home.models import Agences
 
 logger = logging.getLogger(__name__)
@@ -42,8 +44,24 @@ class CarSearchMixin:
             available=True,
             agence__is_active=True,
             for_transfer=False
+        ).prefetch_related(
+            'promotions'
+        ).select_related(
+            'brand', 'car_model', 'gear_type', 'agence'
         )
         
+        today = timezone.now().date()
+        base_query = base_query.annotate(
+            current_promotion=models.Subquery(
+                CarPromotion.objects.filter(
+                    car=models.OuterRef('pk'),
+                    is_active=True,
+                    start_date__lte=today,
+                    end_date__gte=today
+                ).values('percentage')[:1]
+            )
+        )
+
         # Exclure les voitures marquées uniquement pour le transfert des résultats de location
         if not search_params.get('include_transfer', False):
             base_query = base_query.exclude(for_transfer=True, price_per_day__isnull=True)
@@ -70,9 +88,7 @@ class CarSearchMixin:
             base_query = base_query.exclude(id__in=unavailable.values('id'))
         if filters:
             base_query = self.apply_filters(base_query, filters)
-        return base_query.select_related(
-            'brand', 'car_model', 'gear_type', 'agence'
-        )
+        return base_query
 
     def apply_filters(self, queryset, filters):
         if filters.get('brand'):

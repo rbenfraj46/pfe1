@@ -115,6 +115,72 @@
         color: #2e7d32;
         margin-right: 5px;
     }
+    .promotion-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: linear-gradient(45deg, #ff4081, #ff1744);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: bold;
+        box-shadow: 0 4px 8px rgba(255, 23, 68, 0.3);
+        display: flex;
+        align-items: center;
+        animation: pulse 2s infinite;
+        z-index: 2;
+    }
+
+    .promotion-badge i {
+        margin-right: 6px;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            box-shadow: 0 4px 8px rgba(255, 23, 68, 0.3);
+        }
+        50% {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(255, 23, 68, 0.4);
+        }
+        100% {
+            transform: scale(1);
+            box-shadow: 0 4px 8px rgba(255, 23, 68, 0.3);
+        }
+    }
+
+    .price-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        margin: 15px 0;
+    }
+
+    .original-price {
+        text-decoration: line-through;
+        color: #999;
+        font-size: 0.9em;
+    }
+
+    .discounted-price {
+        color: #ff1744;
+        font-weight: bold;
+        font-size: 1.2em;
+    }
+
+    .price {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .per-day {
+        color: #666;
+        font-size: 0.8em;
+        margin-top: 2px;
+    }
 </style>
 {% endblock %}
 
@@ -348,9 +414,18 @@
                                 {% endif %}
                                 
                                 <div class="car-img-wrapper">
-                                    <img src="{{ car.image.url|default:'default-car.jpg' }}" 
-                                         class="car-img" 
-                                         alt="{{ car.brand.name }} {{ car.car_model.name }}">
+                                    {% if car.image %}
+                                        <img src="{{ car.image.url }}" alt="{{ car }}" class="car-img">
+                                    {% else %}
+                                        <img src="{% static 'images/default-car.jpg' %}" alt="{{ car }}" class="car-img">
+                                    {% endif %}
+                                    
+                                    {% if car.get_current_promotion %}
+                                        <div class="promotion-badge">
+                                            <i class="fas fa-tag"></i>
+                                            -{{ car.get_current_promotion.percentage }}%
+                                        </div>
+                                    {% endif %}
                                 </div>
                                 
                                 <div class="car-info">
@@ -387,9 +462,14 @@
                                     </div>
                                     
                                     <div class="car-actions">
-                                        <div class="price-tag">
-                                            {{ car.price_per_day }}
-                                            <small>TND/{% translate "day" %}</small>
+                                        <div class="price-info">
+                                            {% if car.get_current_promotion %}
+                                                <span class="original-price">{{ car.price_per_day }} TND</span>
+                                                <span class="discounted-price">{{ car.get_final_price }} TND</span>
+                                            {% else %}
+                                                <span class="price">{{ car.price_per_day }} TND</span>
+                                            {% endif %}
+                                            <small class="per-day">{% translate "per day" %}</small>
                                         </div>
                                         <a href="{% url 'rental_request' car.id %}" class="rent-now-btn">
                                             <i class="fas fa-key"></i>
